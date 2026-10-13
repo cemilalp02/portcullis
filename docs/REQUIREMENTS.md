@@ -5,7 +5,7 @@
 | Status   | **Approved** — Phase 0 gate passed (2026-10-13) |
 | Owner    | Cemil Alp ([@cemilalp02](https://github.com/cemilalp02)) |
 | Module   | `github.com/cemilalp02/bekci` |
-| Related  | [`THREAT_MODEL.md`](THREAT_MODEL.md) · [`ROADMAP.md`](ROADMAP.md) |
+| Related  | [`THREAT_MODEL.md`](THREAT_MODEL.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`ROADMAP.md`](ROADMAP.md) |
 
 > *Bekçi* (Turkish: "night watchman") inspects what an AI coding agent is about to read
 > **before** the agent reads it.
@@ -199,8 +199,11 @@ while still showing P1 the full inventory (US-03).
   config and baseline.
 - **FR-43** Suppression is only possible through a **baseline file** keyed by finding
   fingerprint, each entry with a mandatory reason. **No inline "ignore" comments** in scanned files — ever.
-- **FR-44** In pull-request context the GitHub Action MUST read config, baseline and
-  `context.lock` from the **base commit**, and report any change to them in the PR as a finding.
+- **FR-44** In pull-request context the GitHub Action MUST read config and baseline from the
+  **base commit** (supplied via `--base-snapshot`, see ADR-0006). The tree is verified against
+  the PR's own `context.lock` (so a context change without a lock update fails), and any
+  change to config, baseline or lock relative to the base is reported (`medium`) so
+  reviewers see exactly which files are being re-approved.
 
 ### 6.8 Context lock
 
