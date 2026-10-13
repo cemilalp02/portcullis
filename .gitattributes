@@ -1,0 +1,5 @@
+# Normalise line endings in the repository; keep LF in the working tree on every OS.
+* text=auto eol=lf
+
+# Test fixtures must stay byte-exact (CRLF, BOMs and invisible characters are part of the tests).
+testdata/** -text
