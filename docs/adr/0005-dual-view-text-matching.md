@@ -5,7 +5,7 @@
 
 ## Context
 Pattern rules on raw text are trivially evaded: zero-width characters inside a word
-(`ig​nore`), full-width letters (`ｉｇｎｏｒｅ`), mixed case. Conversely, invisible-character
+(`ig\u200Bnore`), full-width letters (`ｉｇｎｏｒｅ`), mixed case. Conversely, invisible-character
 rules need the untouched text.
 
 ## Decision

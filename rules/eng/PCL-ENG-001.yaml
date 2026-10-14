@@ -1,0 +1,18 @@
+schema: 1
+id: PCL-ENG-001
+title: Target file too large to analyse
+severity: high
+confidence: high
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  An agent context file is larger than the analysis limit. Padding a file with megabytes of
+  filler is a known way to push a payload past scanners, so the file is reported instead of
+  being skipped silently.
+remediation: >
+  Inspect the file manually. Legitimate instruction and configuration files are small; raise
+  --max-file-size only after review.
+message: "Target file exceeds the size limit ({name}) and was not analysed"
+match:
+  builtin: engine

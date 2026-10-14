@@ -1,0 +1,17 @@
+schema: 1
+id: PCL-ENG-007
+title: Portcullis configuration inside the scanned tree is ignored
+severity: info
+confidence: high
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  The repository contains a Portcullis configuration or baseline file. In untrusted mode such
+  files are ignored, because a malicious repository must not be able to configure or silence
+  its own scanner.
+remediation: >
+  Nothing to do when scanning third-party code. Use --trusted only for your own repositories.
+message: "In-tree Portcullis file ignored in untrusted mode"
+match:
+  builtin: engine

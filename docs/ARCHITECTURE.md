@@ -57,21 +57,21 @@ All packages live under `internal/` — Portcullis exposes a CLI, not a Go API, 
 |---|---|---|
 | `cmd/portcullis` | `main`: wires CLI, maps errors to exit codes | — |
 | `internal/cli` | Sub-command parsing (stdlib `flag`), help text | `Command` |
-| `internal/config` | Resolve settings from flags + out-of-tree config (+ in-tree / base snapshot in trusted mode) | `Settings`, `Mode` |
+| `internal/config` *(Phase 5)* | Resolve settings from flags + out-of-tree config (+ in-tree / base snapshot in trusted mode) | `Settings`, `Mode` |
 | `internal/target` | Embedded target definitions, case-insensitive path matcher | `Def`, `Family`, `Matcher` |
 | `internal/discover` | Directory walk, skip policy, symlink policy, size checks | `Candidate`, `Event` |
 | `internal/source` | Read bytes, detect BOM / UTF-16, decode, build line index | `Document`, `Encoding` |
 | `internal/textview` | Normalised view with offset map back to raw text | `View`, `OffsetMap` |
 | `internal/jsonc` | JSONC parser with byte positions and duplicate-key detection | `Node`, `ParseError`, `DupKey` |
 | `internal/extract` | Config → facts: Claude hooks, VS Code tasks, dev-container commands, npm scripts, MCP servers, skill metadata | `ExecPoint`, `MCPServer`, `Skill` |
-| `internal/rules` | Rule YAML schema, strict loading, validation, regex compilation | `Rule`, `Set`, `Matcher` |
+| `internal/ruleset` | Rule YAML schema, strict loading, validation, regex compilation | `Rule`, `Compiled`, `Set` |
 | `internal/engine` | Evaluate rules on a document + facts; built-in checks registry; caps; fingerprints | `Engine`, `Builtin` |
 | `internal/finding` | Finding model, severity / confidence enums, ordering | `Finding`, `Severity` |
-| `internal/baseline` | Load baseline, match by fingerprint | `Baseline` |
-| `internal/lock` | Read / write / verify `context.lock` | `File`, `Diff` |
+| `internal/baseline` *(Phase 5)* | Load baseline, match by fingerprint | `Baseline` |
+| `internal/lock` *(Phase 5)* | Read / write / verify `context.lock` | `File`, `Diff` |
 | `internal/report` | `text`, `json`, `sarif` writers | `Writer` |
 | `internal/escape` | Safe, truncated excerpts for any output channel | `Excerpt()` |
-| `rules/` (embedded) | Default rule set `*.yaml` + `targets.yaml` + `ruleset.version` | — |
+| `rules` (root package) | Embeds `targets.yaml` and `<category>/<RULE-ID>.yaml`; exports `FS` and the rule-set `Version` | `FS`, `Version` |
 
 Dependency direction is strictly downward in the table; `finding` and `escape` are leaves.
 No package below `cli` writes to stdout/stderr.
@@ -121,8 +121,18 @@ type Finding struct {
   never opened — this is what keeps 100k-file repos under 10 s.
 - `node_modules/`, `vendor/` (+ user `--exclude`) are not descended for *scanning*, but a
   cheap name-only pass counts targets inside them ⇒ `PCL-ENG-008` (info).
-- Symlinks: resolved with `filepath.EvalSymlinks`; outside root ⇒ `PCL-ENG-005`, not read.
-- Size: `Lstat` before reading; above the hard limit ⇒ `PCL-ENG-001` (`high`), not read.
+- Links are never followed. `filepath.EvalSymlinks` does **not** resolve Windows junctions (verified
+  on Windows 11 / Go 1.27), so `discover.RealPath` resolves symlinks and junctions component by
+  component with `os.Lstat` + `os.Readlink`. A target link leaving the root ⇒ `PCL-ENG-005`; a
+  directory link leaving it ⇒ `PCL-ENG-011`; a broken or looping link ⇒ `PCL-ENG-012`. A target
+  link inside the root is read at its resolved path.
+- All reads go through `os.Root` (Go ≥ 1.24), so a path changed between discovery and reading
+  still cannot escape the root.
+- Size: checked from the directory entry and again while reading (`io.LimitReader`); above the
+  hard limit ⇒ `PCL-ENG-001` (`high`), not analysed. The limit is capped at 1 GiB because the
+  normalised view stores offsets as `int32`.
+- Target patterns all start with `**/`: an editor or agent opened on a subfolder treats it as the
+  project root, so `apps/web/.vscode/tasks.json` is as dangerous as `.vscode/tasks.json`.
 
 ### 5.2 Decoding (`source`)
 
@@ -136,7 +146,9 @@ Built segment by segment with `golang.org/x/text/unicode/norm` iteration:
 
 1. drop code points in the *invisible set* (Cf category, Tag block, variation selectors, bidi controls);
 2. NFKC-normalise the segment (full-width → ASCII, ligatures → letters);
-3. case-fold (`golang.org/x/text/cases.Fold`);
+3. case-fold (`golang.org/x/text/cases.Fold`), then lower-case and NFKC again — fuzzing showed full
+   case folding is not idempotent for Cherokee and can leave combining marks out of canonical order
+   after a Turkish dotted İ;
 4. collapse runs of horizontal whitespace to one space (newlines kept, so line units still work).
 
 For every output byte the map stores the raw byte offset of the segment it came from, so a

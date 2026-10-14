@@ -1,0 +1,16 @@
+schema: 1
+id: PCL-ENG-012
+title: Link could not be resolved
+severity: medium
+confidence: medium
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A symbolic link or junction could not be resolved (broken, looping or unreadable). Its
+  target was not analysed.
+remediation: >
+  Remove or repair the link.
+message: "Link could not be resolved: {name}"
+match:
+  builtin: engine

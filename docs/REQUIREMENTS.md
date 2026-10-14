@@ -80,6 +80,9 @@ the approved state so that silent changes are caught.
 
 v0.1 recognises **13 target types** in two families. File-name matching **MUST** be
 case-insensitive, because agents on Windows and macOS read `claude.md` as `CLAUDE.md`.
+Every path matches **at any depth** (`apps/web/.vscode/tasks.json` counts like
+`.vscode/tasks.json`), because an agent or editor opened on a subfolder treats that folder
+as the project root.
 
 ### 5.1 Instruction files (natural-language text read by the agent)
 
@@ -137,7 +140,7 @@ definition and fixtures.
   1. **raw** — exact text, used for invisible-character and encoding rules;
   2. **normalised** — Unicode NFKC, invisible/format characters removed, case-folded,
      whitespace runs collapsed — used for pattern rules.
-  This defeats `ig​nore previous instructions`, full-width `ｉｇｎｏｒｅ`, and similar tricks.
+  This defeats `ig\u200Bnore previous instructions`, full-width `ｉｇｎｏｒｅ`, and similar tricks.
 - **FR-11** Line/column in findings MUST always refer to the **raw** file.
 
 ### 6.3 Detectors

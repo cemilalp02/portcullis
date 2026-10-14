@@ -81,7 +81,7 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 |---|---|---|
 | S1 | Malicious input crashes or hangs the scanner (fail-open in CI) | Fuzzing; size limits; any incomplete analysis ⇒ exit `2`, never "clean" (FR-09, FR-32) |
 | S2 | Regex denial of service | RE2 linear-time engine only (FR-22) |
-| S3 | Symlink / path traversal outside the repo | Not followed; reported (FR-03) |
+| S3 | Symlink / junction / path traversal outside the repo | Links never followed; resolved component by component (junctions included, which `EvalSymlinks` misses) and reported; all reads through `os.Root` (FR-03) |
 | S4 | Terminal / log injection via file names or excerpts | All echoed content escaped (FR-34) |
 | S5 | In-repo config or baseline silences findings | Ignored in untrusted mode (FR-40) |
 | S6 | Inline "ignore" comments inside scanned files | Not supported by design (FR-43) |
@@ -96,6 +96,8 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S15 | Portcullis executes scanned content | Never: no exec, no templating, no network (NFR-01, NFR-02) |
 | S16 | Compromised Portcullis release, dependency or Action | Minimal deps, Dependabot, `govulncheck`, cosign-signed releases, SLSA provenance, SHA-pinned actions, OpenSSF Scorecard |
 | S17 | Malicious samples in Portcullis's own corpus harm contributors | Corpus is defanged: no working payloads, reserved domains only |
+| S18 | Unstable normalisation (same text normalises differently on a second pass) lets a pattern match only sometimes | Fuzz-tested idempotency; two real cases (Cherokee folding, dotted İ + combining mark) found and fixed |
+| S19 | Hidden characters in Portcullis's own sources or docs (Trojan Source) | Repository hygiene test fails on any format/bidi/Tag/filler character outside `testdata/` |
 
 ## 8. Review cadence
 

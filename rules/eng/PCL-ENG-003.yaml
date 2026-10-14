@@ -1,0 +1,16 @@
+schema: 1
+id: PCL-ENG-003
+title: Duplicate key in configuration
+severity: high
+confidence: high
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  The same key appears twice in one JSON object. Parsers disagree on which value wins, which
+  lets an attacker show reviewers one value while a tool uses the other (parser differential).
+remediation: >
+  Remove the duplicate key and review which value is intended.
+message: "Key \"{name}\" appears more than once in the same object"
+match:
+  builtin: engine

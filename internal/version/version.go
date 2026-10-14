@@ -4,6 +4,8 @@ package version
 import (
 	"runtime"
 	"runtime/debug"
+
+	"github.com/cemilalp02/portcullis/rules"
 )
 
 // Release builds inject these with:
@@ -19,10 +21,6 @@ var (
 	commit  string
 	date    string
 )
-
-// Ruleset is the version of the embedded default rule set. It moves to the
-// rules package once rules are embedded (Phase 3).
-const Ruleset = "unreleased"
 
 // Info describes the running binary.
 type Info struct {
@@ -40,7 +38,7 @@ func Get() Info {
 		Commit:    commit,
 		Date:      date,
 		GoVersion: runtime.Version(),
-		Ruleset:   Ruleset,
+		Ruleset:   rules.Version,
 	}
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		fillFromBuildInfo(&info, bi)

@@ -27,6 +27,8 @@ type command struct {
 
 func commands() []command {
 	return []command{
+		{name: "scan", summary: "Scan a directory for malicious agent context", run: runScan},
+		{name: "rules", summary: "List detection rules or show one rule", run: runRules},
 		{name: "version", summary: "Print version and build information", run: runVersion},
 	}
 }

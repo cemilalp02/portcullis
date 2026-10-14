@@ -1,0 +1,17 @@
+schema: 1
+id: PCL-ENG-008
+title: Agent context files inside skipped directories
+severity: info
+confidence: medium
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  Directories such as node_modules or vendor are skipped, but they contain agent context files
+  (for example skills or MCP configurations shipped by packages). Those files were not
+  analysed.
+remediation: >
+  Scan the dependency directory separately if agents in this project read it.
+message: "{count} agent context files inside this skipped directory were not analysed"
+match:
+  builtin: engine
