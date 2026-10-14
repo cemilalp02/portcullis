@@ -1,11 +1,11 @@
-// Command bekci scans AI agent context files for malicious instructions and
+// Command portcullis scans AI agent context files for malicious instructions and
 // risky auto-execution before an agent reads them.
 package main
 
 import (
 	"os"
 
-	"github.com/cemilalp02/bekci/internal/cli"
+	"github.com/cemilalp02/portcullis/internal/cli"
 )
 
 func main() {

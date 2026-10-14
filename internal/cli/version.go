@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cemilalp02/bekci/internal/version"
+	"github.com/cemilalp02/portcullis/internal/version"
 )
 
 func runVersion(args []string, stdout, stderr io.Writer) int {
@@ -21,24 +21,24 @@ func runVersion(args []string, stdout, stderr io.Writer) int {
 		return ExitError
 	}
 	if fs.NArg() > 0 {
-		fmt.Fprintf(stderr, "bekci version: unexpected argument %q\n", fs.Arg(0))
+		fmt.Fprintf(stderr, "portcullis version: unexpected argument %q\n", fs.Arg(0))
 		return ExitError
 	}
 
 	info := version.Get()
 	switch *format {
 	case "text":
-		fmt.Fprintf(stdout, "bekci %s\n  commit:  %s\n  built:   %s\n  go:      %s\n  ruleset: %s\n",
+		fmt.Fprintf(stdout, "portcullis %s\n  commit:  %s\n  built:   %s\n  go:      %s\n  ruleset: %s\n",
 			info.Version, info.Commit, info.Date, info.GoVersion, info.Ruleset)
 	case "json":
 		enc := json.NewEncoder(stdout)
 		enc.SetIndent("", "  ")
 		if err := enc.Encode(info); err != nil {
-			fmt.Fprintf(stderr, "bekci version: %v\n", err)
+			fmt.Fprintf(stderr, "portcullis version: %v\n", err)
 			return ExitError
 		}
 	default:
-		fmt.Fprintf(stderr, "bekci version: unknown format %q (want text or json)\n", *format)
+		fmt.Fprintf(stderr, "portcullis version: unknown format %q (want text or json)\n", *format)
 		return ExitError
 	}
 	return ExitOK

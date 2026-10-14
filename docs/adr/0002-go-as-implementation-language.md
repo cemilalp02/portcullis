@@ -4,11 +4,11 @@
 - Date: 2026-10-13
 
 ## Context
-Bekçi runs in CI on every push and on developer machines before opening a repository.
+Portcullis runs in CI on every push and on developer machines before opening a repository.
 It must start instantly, ship as one file, cross-compile, and parse hostile input safely.
 
 ## Decision
-Implement Bekçi in Go (latest stable; `go.mod` declares the minimum supported version).
+Implement Portcullis in Go (latest stable; `go.mod` declares the minimum supported version).
 
 ## Consequences
 - Single static binary for 6 OS/arch targets via `goreleaser`; trivial install in CI.

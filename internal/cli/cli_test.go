@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cemilalp02/bekci/internal/version"
+	"github.com/cemilalp02/portcullis/internal/version"
 )
 
 func run(args ...string) (code int, stdout, stderr string) {
@@ -27,7 +27,7 @@ func TestRun(t *testing.T) {
 		{name: "help", args: []string{"help"}, wantCode: ExitOK, wantStdout: "version"},
 		{name: "--help", args: []string{"--help"}, wantCode: ExitOK, wantStdout: "Usage:"},
 		{name: "unknown command", args: []string{"frobnicate"}, wantCode: ExitError, wantStderr: `unknown command "frobnicate"`},
-		{name: "version text", args: []string{"version"}, wantCode: ExitOK, wantStdout: "bekci "},
+		{name: "version text", args: []string{"version"}, wantCode: ExitOK, wantStdout: "portcullis "},
 		{name: "--version alias", args: []string{"--version"}, wantCode: ExitOK, wantStdout: "ruleset:"},
 		{name: "version bad format", args: []string{"version", "--format", "xml"}, wantCode: ExitError, wantStderr: `unknown format "xml"`},
 		{name: "version unexpected arg", args: []string{"version", "extra"}, wantCode: ExitError, wantStderr: `unexpected argument "extra"`},

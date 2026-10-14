@@ -1,5 +1,5 @@
 name: Missed detection / new technique
-description: Malicious or risky content that Bekçi does not flag.
+description: Malicious or risky content that Portcullis does not flag.
 labels: [missed-detection, rules, triage]
 body:
   - type: markdown

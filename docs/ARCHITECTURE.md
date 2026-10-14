@@ -1,4 +1,4 @@
-# Bekçi — Architecture (v0.1)
+# Portcullis — Architecture (v0.1)
 
 | Field   | Value |
 |---------|-------|
@@ -10,7 +10,7 @@
 ## 1. Design principles
 
 1. **Scanned content is data, never control.** Nothing inside the scan root can execute,
-   configure, suppress or slow down Bekçi beyond linear cost (ADR-0006, D-01).
+   configure, suppress or slow down Portcullis beyond linear cost (ADR-0006, D-01).
 2. **Fail closed.** Every target is either fully analysed or produces a finding /
    non-zero exit. There is no code path that skips a target silently.
 3. **Rules are data, the engine is small.** Detection knowledge lives in YAML; Go code
@@ -51,11 +51,11 @@ the `lock` package instead of the engine (`lock` also runs a scan first, FR-54).
 
 ## 3. Packages
 
-All packages live under `internal/` — Bekçi exposes a CLI, not a Go API, in v0.1.
+All packages live under `internal/` — Portcullis exposes a CLI, not a Go API, in v0.1.
 
 | Package | Responsibility | Key types |
 |---|---|---|
-| `cmd/bekci` | `main`: wires CLI, maps errors to exit codes | — |
+| `cmd/portcullis` | `main`: wires CLI, maps errors to exit codes | — |
 | `internal/cli` | Sub-command parsing (stdlib `flag`), help text | `Command` |
 | `internal/config` | Resolve settings from flags + out-of-tree config (+ in-tree / base snapshot in trusted mode) | `Settings`, `Mode` |
 | `internal/target` | Embedded target definitions, case-insensitive path matcher | `Def`, `Family`, `Matcher` |
@@ -120,14 +120,14 @@ type Finding struct {
 - Each path is matched case-insensitively against `targets.yaml` (FR §5). Non-targets are
   never opened — this is what keeps 100k-file repos under 10 s.
 - `node_modules/`, `vendor/` (+ user `--exclude`) are not descended for *scanning*, but a
-  cheap name-only pass counts targets inside them ⇒ `BEK-ENG-008` (info).
-- Symlinks: resolved with `filepath.EvalSymlinks`; outside root ⇒ `BEK-ENG-005`, not read.
-- Size: `Lstat` before reading; above the hard limit ⇒ `BEK-ENG-001` (`high`), not read.
+  cheap name-only pass counts targets inside them ⇒ `PCL-ENG-008` (info).
+- Symlinks: resolved with `filepath.EvalSymlinks`; outside root ⇒ `PCL-ENG-005`, not read.
+- Size: `Lstat` before reading; above the hard limit ⇒ `PCL-ENG-001` (`high`), not read.
 
 ### 5.2 Decoding (`source`)
 
 BOM sniffing → UTF-8 / UTF-16LE / UTF-16BE. No BOM: validate UTF-8; if invalid, decode
-with replacement and emit `BEK-ENG-004`. UTF-16 also emits `BEK-ENG-004` (`medium`).
+with replacement and emit `PCL-ENG-004`. UTF-16 also emits `PCL-ENG-004` (`medium`).
 A `LineIndex` (sorted line-start offsets) gives O(log n) offset → line/column.
 
 ### 5.3 Normalised view (`textview`) — ADR-0005
@@ -147,7 +147,7 @@ match in the normalised view is reported at the correct raw line/column (FR-11).
 Hand-written recursive-descent parser (~400 lines): comments (`//`, `/* */`), trailing
 commas, byte spans on every node, **duplicate keys recorded** (FR-08), depth limit 256,
 errors carry offsets. Fuzzed and differential-tested against `encoding/json` on plain JSON.
-On parse failure the document still goes through text rules (FR-07, `BEK-ENG-002`).
+On parse failure the document still goes through text rules (FR-07, `PCL-ENG-002`).
 
 ### 5.5 Extraction (`extract`)
 
@@ -176,37 +176,37 @@ Rules are compiled once (RE2). Per document:
 - **`builtin: <name>`** — named Go check (registry), e.g. `skill_capability_mismatch`,
   `mcp_shell_launcher`. Built-ins are listed with YAML metadata like any other rule.
 
-Caps: ≤ 50 findings per file (then one `BEK-ENG-010` summary), ≤ 5 per rule per file.
+Caps: ≤ 50 findings per file (then one `PCL-ENG-010` summary), ≤ 5 per rule per file.
 
 ### 5.7 Collection, exit code
 
 Findings from all workers are merged, baseline-filtered (trusted mode only), sorted by
 (severity desc, path, line, column, rule ID). Exit code: `2` if any analysis was
-incomplete (`BEK-ENG-006` read error, internal error), else `1` if any finding ≥ threshold, else `0`.
+incomplete (`PCL-ENG-006` read error, internal error), else `1` if any finding ≥ threshold, else `0`.
 
 ## 6. Trust model in code
 
 ```
 Settings sources, in order (later wins):
   built-in defaults
-  user config dir  (%APPDATA%\bekci\config.yaml, $XDG_CONFIG_HOME/bekci/config.yaml)
+  user config dir  (%APPDATA%\portcullis\config.yaml, $XDG_CONFIG_HOME/portcullis/config.yaml)
   --config <file>                                   (must resolve outside scan root, else error)
-  [trusted only] <root>/.bekci.yaml  OR  <base-snapshot>/.bekci.yaml when --base-snapshot is set
+  [trusted only] <root>/.portcullis.yaml  OR  <base-snapshot>/.portcullis.yaml when --base-snapshot is set
   CLI flags
 ```
 
-Untrusted mode never opens `.bekci.yaml`, `.bekci-baseline.yaml` or rule directories inside
-the root; it only notes their presence (`BEK-ENG-007`, info). `--base-snapshot <dir>` is how
-the GitHub Action supplies base-commit copies; Bekçi itself **never runs git** or any other
+Untrusted mode never opens `.portcullis.yaml`, `.portcullis-baseline.yaml` or rule directories inside
+the root; it only notes their presence (`PCL-ENG-007`, info). `--base-snapshot <dir>` is how
+the GitHub Action supplies base-commit copies; Portcullis itself **never runs git** or any other
 process (ADR-0006). If the tree's copy of a protected file differs from the snapshot ⇒
-`BEK-ENG-009` (`medium`) so reviewers see that the PR touches Bekçi's own controls.
+`PCL-ENG-009` (`medium`) so reviewers see that the PR touches Portcullis's own controls.
 
 ## 7. Fingerprints
 
 `hex(sha256(ruleID ‖ 0x00 ‖ path ‖ 0x00 ‖ normalisedMatchText ‖ 0x00 ‖ k))[:32]`, where
 `k` is the occurrence index of that same text in the file. Stable across line shifts
 (unlike line numbers), unique per occurrence. Emitted to SARIF as
-`partialFingerprints["bekci/v1"]`.
+`partialFingerprints["portcullis/v1"]`.
 
 ## 8. Concurrency and performance
 
@@ -220,11 +220,11 @@ process (ADR-0006). If the tree's copy of a protected file differs from the snap
 ```
 on: pull_request
 1. actions/checkout (fetch-depth: 0)                         [SHA-pinned]
-2. install bekci release binary, verify checksum (+ cosign in v0.1 release)
-3. for f in .bekci.yaml .bekci-baseline.yaml context.lock:
-       git show $BASE_SHA:$f > $RUNNER_TEMP/bekci-base/$f   (if it exists)
-4. bekci scan   --trusted --base-snapshot $RUNNER_TEMP/bekci-base --format sarif --output bekci.sarif
-5. bekci verify (tree vs PR's own context.lock; lock diff vs base reported as BEK-ENG-009)
+2. install portcullis release binary, verify checksum (+ cosign in v0.1 release)
+3. for f in .portcullis.yaml .portcullis-baseline.yaml context.lock:
+       git show $BASE_SHA:$f > $RUNNER_TEMP/portcullis-base/$f   (if it exists)
+4. portcullis scan   --trusted --base-snapshot $RUNNER_TEMP/portcullis-base --format sarif --output portcullis.sarif
+5. portcullis verify (tree vs PR's own context.lock; lock diff vs base reported as PCL-ENG-009)
 6. github/codeql-action/upload-sarif                          [SHA-pinned, runs even on failure]
 7. job result = worst exit code of 4 and 5
 permissions: contents: read, security-events: write
@@ -245,7 +245,7 @@ file without updating `context.lock` (verify fails), and any lock update is high
 | FR-13, FR-20–FR-23 | `rules`, `rules/` embedded set |
 | D1–D3 | YAML rules (`scope: text`) |
 | D4 | `extract` + YAML rules (`scope: exec`) + built-ins |
-| FR-30–FR-34 | `report`, `escape`, `cmd/bekci` |
+| FR-30–FR-34 | `report`, `escape`, `cmd/portcullis` |
 | FR-40–FR-44 | `config`, `baseline`, Action (`--base-snapshot`) |
 | FR-50–FR-54 | `lock` |
 | FR-60, FR-61 | `action.yml`, `.pre-commit-hooks.yaml` |

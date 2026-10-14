@@ -1,6 +1,6 @@
 # Security Policy
 
-Bekçi is a security tool; a flaw in it can give users false confidence. We take reports seriously.
+Portcullis is a security tool; a flaw in it can give users false confidence. We take reports seriously.
 
 ## Supported versions
 
@@ -9,18 +9,18 @@ Until v1.0, only the **latest release** receives security fixes.
 ## Reporting a vulnerability
 
 **Do not open a public issue.** Use GitHub's private vulnerability reporting:
-[Report a vulnerability](https://github.com/cemilalp02/bekci/security/advisories/new).
+[Report a vulnerability](https://github.com/cemilalp02/portcullis/security/advisories/new).
 
-Please include the Bekçi version (`bekci version`), your OS, a minimal **defanged**
+Please include the Portcullis version (`portcullis version`), your OS, a minimal **defanged**
 reproduction and the impact you observed.
 
 ## What counts as a vulnerability
 
 Report privately:
 
-- Bekçi executes, evaluates or fetches anything based on scanned content.
-- Scanned content changes Bekçi's behaviour in untrusted mode (config, suppression, rules).
-- A crafted input crashes or hangs Bekçi, or makes it report **clean / exit 0** while
+- Portcullis executes, evaluates or fetches anything based on scanned content.
+- Scanned content changes Portcullis's behaviour in untrusted mode (config, suppression, rules).
+- A crafted input crashes or hangs Portcullis, or makes it report **clean / exit 0** while
   analysis was incomplete (fail-open).
 - Path traversal, symlink / junction escape, or terminal-escape injection through output.
 - Problems in our release artefacts, signatures or GitHub Action.

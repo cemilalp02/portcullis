@@ -22,9 +22,9 @@ linters:
           files: ["$all", "!$test"]
           deny:
             - pkg: os/exec
-              desc: "ADR-0006: bekci never starts processes"
+              desc: "ADR-0006: portcullis never starts processes"
             - pkg: net
-              desc: "ADR-0006: bekci never opens network connections"
+              desc: "ADR-0006: portcullis never opens network connections"
             - pkg: plugin
               desc: "ADR-0006: no dynamically loaded code"
         adr-0007-dependencies:
@@ -57,4 +57,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/cemilalp02/bekci
+        - github.com/cemilalp02/portcullis

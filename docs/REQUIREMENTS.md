@@ -1,14 +1,14 @@
-# Bekçi — Requirements Specification (v0.1)
+# Portcullis — Requirements Specification (v0.1)
 
 | Field    | Value |
 |----------|-------|
 | Status   | **Approved** — Phase 0 gate passed (2026-10-13) |
 | Owner    | Cemil Alp ([@cemilalp02](https://github.com/cemilalp02)) |
-| Module   | `github.com/cemilalp02/bekci` |
+| Module   | `github.com/cemilalp02/portcullis` |
 | Related  | [`THREAT_MODEL.md`](THREAT_MODEL.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`ROADMAP.md`](ROADMAP.md) |
 
-> *Bekçi* (Turkish: "night watchman") inspects what an AI coding agent is about to read
-> **before** the agent reads it.
+> A *portcullis* is the iron grille dropped in front of a castle gate: nothing passes until it
+> has been inspected. Portcullis does the same for what an AI coding agent is about to read.
 
 Requirement keywords **MUST**, **SHOULD**, **MAY** follow RFC 2119.
 
@@ -42,12 +42,12 @@ the approved state so that silent changes are caught.
 - **G3** Fit existing workflows: CLI, GitHub Action, pre-commit, SARIF / GitHub Code Scanning.
 - **G4** Pin approved context files (`context.lock`) so any later change fails CI until re-approved.
 - **G5** Make rules easy to contribute (declarative YAML, fixture-driven tests).
-- **G6** **Fail closed**: anything Bekçi cannot fully analyse is reported, never silently treated as clean.
+- **G6** **Fail closed**: anything Portcullis cannot fully analyse is reported, never silently treated as clean.
 
 ### 2.2 Non-goals (v0.1)
 
 - Runtime enforcement of agent tool calls (that is *Project 2 — Köken*).
-- Guaranteed detection of novel or paraphrased prompt injection. Bekçi is a **pattern and
+- Guaranteed detection of novel or paraphrased prompt injection. Portcullis is a **pattern and
   structure** scanner, not a semantic classifier (see `THREAT_MODEL.md` §6).
 - Automatically fixing or rewriting files.
 - General SAST or secret scanning (use gitleaks / trufflehog).
@@ -56,24 +56,24 @@ the approved state so that silent changes are caught.
 
 | Persona | Need | Primary interface |
 |---|---|---|
-| **P1 — Developer** opening a third-party repo with an AI agent | "Is it safe to let my agent read this?" | `bekci scan` |
+| **P1 — Developer** opening a third-party repo with an AI agent | "Is it safe to let my agent read this?" | `portcullis scan` |
 | **P2 — Maintainer** of a repo that ships agent context files | "Did a PR silently add a hook or a hidden instruction?" | GitHub Action, `context.lock` |
 | **P3 — Security / platform engineer** | Org-wide visibility in standard formats | SARIF, JSON |
-| **P4 — Skill / MCP author** | "Is my skill clean before I publish it?" | `bekci scan`, pre-commit |
+| **P4 — Skill / MCP author** | "Is my skill clean before I publish it?" | `portcullis scan`, pre-commit |
 
 ## 4. User stories
 
 | ID | Story | Acceptance criteria |
 |---|---|---|
-| US-01 | As P1, I scan a cloned repo and see findings ordered by severity with file, line and a fix hint. | `bekci scan <dir>` prints findings; exit code `1` when any finding ≥ threshold. |
-| US-02 | As P1, I scan a repo I do **not** trust, and the repo cannot hide its own findings. | In untrusted mode (default) nothing inside the scanned tree can change Bekçi's behaviour. |
+| US-01 | As P1, I scan a cloned repo and see findings ordered by severity with file, line and a fix hint. | `portcullis scan <dir>` prints findings; exit code `1` when any finding ≥ threshold. |
+| US-02 | As P1, I scan a repo I do **not** trust, and the repo cannot hide its own findings. | In untrusted mode (default) nothing inside the scanned tree can change Portcullis's behaviour. |
 | US-03 | As P1, I immediately see everything that would **run automatically** if I open this repo. | Text output always ends with an *auto-execution inventory* (hooks, tasks, lifecycle commands, MCP servers). |
-| US-04 | As P2, I add Bekçi to CI in one step and see results in GitHub's Security tab. | Action uploads SARIF; findings appear in Code Scanning. |
-| US-05 | As P2, a PR cannot weaken Bekçi by editing Bekçi's own config. | In PR context, config/baseline are read from the base commit; edits to them are reported. |
-| US-06 | As P2, I approve the current context files and get a failing build if any of them changes. | `bekci lock` writes `context.lock`; `bekci verify` fails on added / modified / removed targets. |
+| US-04 | As P2, I add Portcullis to CI in one step and see results in GitHub's Security tab. | Action uploads SARIF; findings appear in Code Scanning. |
+| US-05 | As P2, a PR cannot weaken Portcullis by editing Portcullis's own config. | In PR context, config/baseline are read from the base commit; edits to them are reported. |
+| US-06 | As P2, I approve the current context files and get a failing build if any of them changes. | `portcullis lock` writes `context.lock`; `portcullis verify` fails on added / modified / removed targets. |
 | US-07 | As P3, I consume results in machine-readable form. | `--format json` / `--format sarif` output validates against its schema in tests. |
 | US-08 | As P4, I block my own commits that introduce risky content. | A `.pre-commit-hooks.yaml` definition is provided. |
-| US-09 | As any user, I understand why something was flagged. | `bekci rules list` / `bekci rules show <id>`: description, severity, OWASP mapping, remediation, references. |
+| US-09 | As any user, I understand why something was flagged. | `portcullis rules list` / `portcullis rules show <id>`: description, severity, OWASP mapping, remediation, references. |
 | US-10 | As a contributor, I add a rule with YAML and fixtures only. | No Go code needed; `make test` runs its positive and negative fixtures automatically. |
 
 ## 5. Scanned surface
@@ -111,7 +111,7 @@ definition and fixtures.
 
 ### 6.1 Discovery and input handling
 
-- **FR-01** Bekçi MUST walk the scan root recursively and classify files against §5.
+- **FR-01** Portcullis MUST walk the scan root recursively and classify files against §5.
 - **FR-02** `.git/` MUST be skipped. `node_modules/` and `vendor/` are skipped by default
   but **target files inside them are still reported in a summary count** (packages there
   can ship skills / MCP configs).
@@ -125,7 +125,7 @@ definition and fixtures.
   byte sequences MUST NOT crash the scanner and are reported.
 - **FR-06** Structured configs MUST be parsed as **JSONC** (comments and trailing commas),
   matching how VS Code and dev-container tooling read them.
-- **FR-07** If a config cannot be parsed, Bekçi MUST still run text-level rules over it and
+- **FR-07** If a config cannot be parsed, Portcullis MUST still run text-level rules over it and
   report `high` *"unparseable config"* — never skip it.
 - **FR-08** **Duplicate JSON keys** MUST be reported (`high`): different consumers resolve
   them differently, which enables "parser differential" smuggling.
@@ -191,10 +191,10 @@ while still showing P1 the full inventory (US-03).
 
 ### 6.7 Trust modes, configuration and suppression
 
-- **FR-40** **Untrusted mode (default):** nothing inside the scan root can influence Bekçi —
-  in-repo `.bekci.yaml`, baselines and rule directories are ignored (their presence is reported as `info`).
+- **FR-40** **Untrusted mode (default):** nothing inside the scan root can influence Portcullis —
+  in-repo `.portcullis.yaml`, baselines and rule directories are ignored (their presence is reported as `info`).
 - **FR-41** Configuration from **outside** the scan root is always allowed:
-  `--config <file>` or the user config directory (`$XDG_CONFIG_HOME/bekci`, `%APPDATA%\bekci`).
+  `--config <file>` or the user config directory (`$XDG_CONFIG_HOME/portcullis`, `%APPDATA%\portcullis`).
 - **FR-42** **Trusted mode** (`--trusted`, for a maintainer's own repository) honours in-repo
   config and baseline.
 - **FR-43** Suppression is only possible through a **baseline file** keyed by finding
@@ -207,23 +207,23 @@ while still showing P1 the full inventory (US-03).
 
 ### 6.8 Context lock
 
-- **FR-50** `bekci lock` writes `context.lock`: every discovered target with its SHA-256,
+- **FR-50** `portcullis lock` writes `context.lock`: every discovered target with its SHA-256,
   plus lock-format version and rule-set version.
 - **FR-51** Hashes are computed over content with **CRLF normalised to LF**, so the same
   commit verifies identically on Windows (`core.autocrlf`) and Linux.
 - **FR-52** Paths are stored relative, with forward slashes, sorted — diff-friendly.
-- **FR-53** `bekci verify` exits `1` on any added, modified or removed target and lists each.
-- **FR-54** `bekci lock` refuses to lock while findings ≥ threshold exist, unless `--force` is given (which is recorded in the lock).
+- **FR-53** `portcullis verify` exits `1` on any added, modified or removed target and lists each.
+- **FR-54** `portcullis lock` refuses to lock while findings ≥ threshold exist, unless `--force` is given (which is recorded in the lock).
 
 ### 6.9 Command-line interface
 
 ```
-bekci scan    [path] [--format text|json|sarif] [--output file] [--fail-on sev]
+portcullis scan    [path] [--format text|json|sarif] [--output file] [--fail-on sev]
                      [--trusted] [--config file] [--baseline file]
-bekci lock    [path] [--force]
-bekci verify  [path]
-bekci rules   list | show <rule-id>
-bekci version
+portcullis lock    [path] [--force]
+portcullis verify  [path]
+portcullis rules   list | show <rule-id>
+portcullis version
 ```
 
 ### 6.10 Integrations
@@ -261,7 +261,7 @@ bekci version
 
 - Optional local LLM judge via Ollama (detector D5).
 - Propagation log (recording writes to context files during an agent session).
-- `bekci open <repo>` (clone → scan → open editor if clean).
+- `portcullis open <repo>` (clone → scan → open editor if clean).
 - Sigstore signing / verification of individual skills.
 - Install hooks of other ecosystems (pip, cargo `build.rs`, Gradle, …).
 - Confusable / mixed-script identifier detection beyond NFKC.
