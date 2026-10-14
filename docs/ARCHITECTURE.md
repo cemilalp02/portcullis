@@ -262,3 +262,4 @@ file without updating `context.lock` (verify fails), and any lock update is high
 | R2 | JSONC parser disagrees with VS Code on edge cases | Differential tests vs `encoding/json`; corpus of real-world `tasks.json` / `devcontainer.json` |
 | R3 | D2 phrase rules noisy on legitimate docs that *discuss* prompt injection | `none` exclusions, confidence levels, early FP sampling in Phase 4 rather than waiting for Phase 6 |
 | R4 | Skill mismatch heuristic too vague | Ships as `medium` / `low` confidence in v0.1; precision measured before promotion |
+| R5 | Windows junctions / mount points escape the root like symlinks (cf. GO-2026-6604, fixed in Go 1.27.2) | `discover` treats every reparse point (symlink, junction, `ModeIrregular`) as a link and applies FR-03; Windows-only tests in CI; `go.mod` requires a patched toolchain (≥ 1.26.9) |
