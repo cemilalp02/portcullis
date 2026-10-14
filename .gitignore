@@ -1,0 +1,17 @@
+# Build output
+/bin/
+/dist/
+
+# Test and coverage artefacts
+coverage.out
+*.test
+*.prof
+/testdata/fuzz-cache/
+
+# Editors and OS
+/.idea/
+/.vscode/
+!/.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
