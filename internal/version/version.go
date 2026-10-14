@@ -1,4 +1,4 @@
-// Package version reports build metadata for the bekci binary.
+// Package version reports build metadata for the portcullis binary.
 package version
 
 import (
@@ -8,9 +8,9 @@ import (
 
 // Release builds inject these with:
 //
-//	-ldflags "-X github.com/cemilalp02/bekci/internal/version.version=v0.1.0
-//	          -X github.com/cemilalp02/bekci/internal/version.commit=<sha>
-//	          -X github.com/cemilalp02/bekci/internal/version.date=<RFC 3339>"
+//	-ldflags "-X github.com/cemilalp02/portcullis/internal/version.version=v0.1.0
+//	          -X github.com/cemilalp02/portcullis/internal/version.commit=<sha>
+//	          -X github.com/cemilalp02/portcullis/internal/version.date=<RFC 3339>"
 //
 // When they are empty, Get falls back to the Go build information, which is
 // populated for `go install` and for builds inside a VCS checkout.

@@ -1,17 +1,17 @@
 name: Bug report
-description: Bekçi crashed, errored or behaved differently from the documentation.
+description: Portcullis crashed, errored or behaved differently from the documentation.
 labels: [bug, triage]
 body:
   - type: markdown
     attributes:
       value: |
-        If the bug could let malicious content bypass or control Bekçi, **stop** and report it
+        If the bug could let malicious content bypass or control Portcullis, **stop** and report it
         privately instead: see SECURITY.md.
   - type: input
     id: version
     attributes:
-      label: Bekçi version
-      description: Output of `bekci version`
+      label: Portcullis version
+      description: Output of `portcullis version`
     validations:
       required: true
   - type: dropdown

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/cemilalp02/bekci/security/advisories/new
-    about: Vulnerabilities in Bekçi itself must be reported privately (see SECURITY.md).
+    url: https://github.com/cemilalp02/portcullis/security/advisories/new
+    about: Vulnerabilities in Portcullis itself must be reported privately (see SECURITY.md).

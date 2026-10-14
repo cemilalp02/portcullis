@@ -1,6 +1,6 @@
-# Contributing to Bekçi
+# Contributing to Portcullis
 
-Thanks for helping! The fastest way to make Bekçi better is a **well-tested rule** or a
+Thanks for helping! The fastest way to make Portcullis better is a **well-tested rule** or a
 **false-positive / missed-detection report** with a minimal, defanged example.
 
 ## Ground rules
@@ -17,7 +17,7 @@ Thanks for helping! The fastest way to make Bekçi better is a **well-tested rul
 Requirements: Go ≥ 1.26.9, git. Optional: GNU make, [golangci-lint v2](https://golangci-lint.run/).
 
 ```bash
-go build ./cmd/bekci     # build
+go build ./cmd/portcullis     # build
 go test ./...            # unit tests
 make check               # everything CI runs: tidy, lint, test, govulncheck, actionlint
 ```
@@ -32,7 +32,7 @@ plain `go` invocations.
 3. Write the test first (for rules: the fixtures), then the change.
 4. Run `make check` locally.
 5. Commit with [Conventional Commits](https://www.conventionalcommits.org/):
-   `feat(engine): …`, `fix(jsonc): …`, `rule: add BEK-EXE-007 …`, `docs: …`.
+   `feat(engine): …`, `fix(jsonc): …`, `rule: add PCL-EXE-007 …`, `docs: …`.
 6. Open a PR using the template. CI must be green; one maintainer approval is required.
 
 Significant design changes need an ADR (`docs/adr/0000-template.md`).

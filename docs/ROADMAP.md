@@ -1,4 +1,4 @@
-# Bekçi — Roadmap to v0.1
+# Portcullis — Roadmap to v0.1
 
 Each phase ends with a **gate**: measurable exit criteria that must be met before the next
 phase starts. Skipping gates is how security tools end up noisy and unused.
@@ -7,7 +7,7 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 |---|---|---|---|---|
 | **0** | Requirements | `REQUIREMENTS.md`, `THREAT_MODEL.md`, `ROADMAP.md` | Scope, metrics and threat model approved | ✅ Done (2026-10-13) |
 | **1** | Architecture & design | `ARCHITECTURE.md`, `RULE_SCHEMA.md`, `CLI.md`, `FILE_FORMATS.md`, ADR-0001…0008, validation spike | Every FR maps to a component; no open design questions | ✅ Done (2026-10-13) |
-| **2** | Repository skeleton | Go module, layout, Makefile, `golangci-lint`, CI (lint/test/coverage/vuln), Apache-2.0, `SECURITY.md`, `CONTRIBUTING.md`, templates, Dependabot | Empty project green in CI; `bekci version` works | ✅ Done (2026-10-14) — local checks green; GitHub CI runs on first push |
+| **2** | Repository skeleton | Go module, layout, Makefile, `golangci-lint`, CI (lint/test/coverage/vuln), Apache-2.0, `SECURITY.md`, `CONTRIBUTING.md`, templates, Dependabot | Empty project green in CI; `portcullis version` works | ✅ Done (2026-10-14) — local checks green; GitHub CI runs on first push |
 | **3** | Core engine | Discovery, decoding, JSONC parsing, normaliser, rule engine, text/JSON output | One rule works end-to-end; coverage ≥ 80% | ⏳ Next |
 | **4** | Detectors & rules | D1–D4, ≥ 30 rules with fixtures, defanged known-attack corpus | 100% recall on `corpus/known` | |
 | **5** | Lock & integrations | `lock` / `verify`, SARIF, GitHub Action, pre-commit hook | Poisoned demo repo fails the Action; alert visible in Code Scanning | |

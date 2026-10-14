@@ -4,7 +4,7 @@
 - Date: 2026-10-13
 
 ## Context
-Bekçi is a security tool; users and contributors need to understand *why* it behaves as it
+Portcullis is a security tool; users and contributors need to understand *why* it behaves as it
 does, especially where safety was traded against convenience.
 
 ## Decision

@@ -1,19 +1,19 @@
 name: False positive
-description: Bekçi flagged legitimate content.
+description: Portcullis flagged legitimate content.
 labels: [false-positive, rules, triage]
 body:
   - type: input
     id: rule
     attributes:
       label: Rule ID
-      placeholder: BEK-EXE-001
+      placeholder: PCL-EXE-001
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Bekçi version
-      description: Output of `bekci version`
+      label: Portcullis version
+      description: Output of `portcullis version`
     validations:
       required: true
   - type: input

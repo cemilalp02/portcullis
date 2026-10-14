@@ -1,12 +1,12 @@
-# Bekçi — Rule Schema (schema version 1)
+# Portcullis — Rule Schema (schema version 1)
 
 Rules are YAML files under `rules/<category>/`. One rule per file, file name = rule ID
-(`rules/uni/BEK-UNI-001.yaml`). Files are decoded **strictly**: unknown fields, wrong types
+(`rules/uni/PCL-UNI-001.yaml`). Files are decoded **strictly**: unknown fields, wrong types
 or missing required fields are load errors (exit `2`) — a typo must never silently disable a rule.
 
 ## 1. Rule IDs
 
-`BEK-<CAT>-<NNN>`. IDs are permanent: a retired rule's ID is never reused.
+`PCL-<CAT>-<NNN>`. IDs are permanent: a retired rule's ID is never reused.
 
 | CAT | Detector | Covers |
 |---|---|---|
@@ -24,7 +24,7 @@ or missing required fields are load errors (exit `2`) — a typo must never sile
 | Field | Type | Req. | Description |
 |---|---|---|---|
 | `schema` | int | ✔ | Always `1` for this version |
-| `id` | string | ✔ | `BEK-<CAT>-<NNN>`, must equal file name |
+| `id` | string | ✔ | `PCL-<CAT>-<NNN>`, must equal file name |
 | `title` | string | ✔ | ≤ 80 chars, sentence case |
 | `severity` | enum | ✔ | `info` `low` `medium` `high` `critical` (see REQUIREMENTS §6.4) |
 | `confidence` | enum | ✔ | `low` `medium` `high` — how often a match is truly malicious |
@@ -86,7 +86,7 @@ All fixture content must be **defanged**: domains under `example.invalid`, IPs f
 
 ```yaml
 schema: 1
-id: BEK-UNI-001
+id: PCL-UNI-001
 title: Unicode Tag characters (invisible ASCII smuggling)
 severity: critical
 confidence: high
@@ -115,7 +115,7 @@ tests:
 
 ```yaml
 schema: 1
-id: BEK-EXE-001
+id: PCL-EXE-001
 title: Download piped to a shell in an auto-executed command
 severity: critical
 confidence: high

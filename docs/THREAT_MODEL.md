@@ -1,20 +1,20 @@
-# Bekçi — Threat Model (v0.1)
+# Portcullis — Threat Model (v0.1)
 
 | Field   | Value |
 |---------|-------|
 | Status  | **Approved** for Phase 0; re-reviewed at every phase gate |
-| Scope   | Bekçi v0.1 (`scan`, `lock`, `verify`, GitHub Action, pre-commit hook) |
+| Scope   | Portcullis v0.1 (`scan`, `lock`, `verify`, GitHub Action, pre-commit hook) |
 | Related | [`REQUIREMENTS.md`](REQUIREMENTS.md) |
 
-This document states plainly **what Bekçi protects against, what it does not, and how
-Bekçi itself could be attacked.** A security tool that over-promises is itself a risk.
+This document states plainly **what Portcullis protects against, what it does not, and how
+Portcullis itself could be attacked.** A security tool that over-promises is itself a risk.
 
 ---
 
 ## 1. System overview
 
 ```
- untrusted repository ──TB1──► [ Bekçi: discover → decode → normalise → detect → report ] ──TB2──► human / CI
+ untrusted repository ──TB1──► [ Portcullis: discover → decode → normalise → detect → report ] ──TB2──► human / CI
          ▲                                     ▲                                               │
          │                                    TB3 (config: only from outside the tree,         │ approve
          │                                         or base commit in PR mode)                  ▼
@@ -29,14 +29,14 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 | Credentials (SSH, cloud, AI provider tokens, `~/.claude`, MCP configs) | Primary target of observed 2026 campaigns |
 | CI/CD secrets and runners | Poisoned context reaches CI through agent-authored PRs |
 | Integrity of approved context files | Silent change after approval ("rug pull") |
-| Trust in Bekçi's verdict | A false "clean" is worse than no scan |
+| Trust in Portcullis's verdict | A false "clean" is worse than no scan |
 
 ## 3. Trust boundaries
 
-- **TB1 — Repository content → Bekçi.** Every scanned byte, file name, path and symlink is attacker-controlled.
-- **TB2 — Bekçi output → human / CI.** Output must not be able to deceive or attack its consumer.
-- **TB3 — Configuration → Bekçi behaviour.** Configuration inside an untrusted tree is attacker-controlled.
-- **TB4 — Bekçi release → user machine.** The binary, rule set and Action are part of the user's supply chain.
+- **TB1 — Repository content → Portcullis.** Every scanned byte, file name, path and symlink is attacker-controlled.
+- **TB2 — Portcullis output → human / CI.** Output must not be able to deceive or attack its consumer.
+- **TB3 — Configuration → Portcullis behaviour.** Configuration inside an untrusted tree is attacker-controlled.
+- **TB4 — Portcullis release → user machine.** The binary, rule set and Action are part of the user's supply chain.
 
 ## 4. Attacker model
 
@@ -45,9 +45,9 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 | **A1 — Malicious repo / skill author** | Full control over repository content | Make the victim's agent run commands or leak data |
 | **A2 — Malicious contributor** | Opens PRs against a legitimate repository | Smuggle a hook / hidden instruction past review |
 | **A3 — Compromised upstream** (package, skill registry) | Changes content after approval | Rug pull |
-| **A4 — Scanner-aware attacker** | Knows Bekçi's rules (they are public) | Evade detection or attack Bekçi itself |
+| **A4 — Scanner-aware attacker** | Knows Portcullis's rules (they are public) | Evade detection or attack Portcullis itself |
 
-## 5. Threats Bekçi addresses
+## 5. Threats Portcullis addresses
 
 | ID | Threat | OWASP | Control |
 |---|---|---|---|
@@ -64,7 +64,7 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 ## 6. Known limitations (explicitly NOT guaranteed)
 
 - **L1 — Semantic / paraphrased injection.** A malicious instruction in ordinary, polite
-  language without known markers may not be detected. Bekçi reduces risk; it does not
+  language without known markers may not be detected. Portcullis reduces risk; it does not
   eliminate it. Runtime authority control (*Project 2 — Köken*) is the structural answer.
 - **L2 — Novel obfuscation.** Encodings, languages or tricks not yet covered by rules.
   Held-out recall (REQUIREMENTS §8) is published so this gap is measured, not hidden.
@@ -75,7 +75,7 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 - **L6 — Indirection.** A benign-looking hook that runs a local script (`./scripts/setup.sh`)
   is reported as `medium`, but the script's own content is not deeply analysed in v0.1.
 
-## 7. Threats against Bekçi itself
+## 7. Threats against Portcullis itself
 
 | ID | Threat | Mitigation |
 |---|---|---|
@@ -85,7 +85,7 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 | S4 | Terminal / log injection via file names or excerpts | All echoed content escaped (FR-34) |
 | S5 | In-repo config or baseline silences findings | Ignored in untrusted mode (FR-40) |
 | S6 | Inline "ignore" comments inside scanned files | Not supported by design (FR-43) |
-| S7 | PR edits Bekçi config / baseline / lock to weaken its own review | PR mode reads them from the base commit and reports the change (FR-44) |
+| S7 | PR edits Portcullis config / baseline / lock to weaken its own review | PR mode reads them from the base commit and reports the change (FR-44) |
 | S8 | **Padding evasion** — payload placed after many MB of filler | Targets never skipped; oversize ⇒ `high` finding (FR-04) |
 | S9 | **Encoding evasion** — instruction file saved as UTF-16 | Decoded and reported (FR-05) |
 | S10 | **Normalisation evasion** — zero-width splitting, full-width letters | Dual-view matching (FR-10) |
@@ -93,9 +93,9 @@ Bekçi itself could be attacked.** A security tool that over-promises is itself 
 | S12 | **Unparseable config** used to slip past structural rules | Text rules still run; `high` finding (FR-07) |
 | S13 | **Case tricks** — `claude.md` instead of `CLAUDE.md` on case-insensitive file systems | Case-insensitive target matching (§5) |
 | S14 | **Output flooding** to bury a real finding | Per-file finding cap with summary (FR-14); severity-sorted output |
-| S15 | Bekçi executes scanned content | Never: no exec, no templating, no network (NFR-01, NFR-02) |
-| S16 | Compromised Bekçi release, dependency or Action | Minimal deps, Dependabot, `govulncheck`, cosign-signed releases, SLSA provenance, SHA-pinned actions, OpenSSF Scorecard |
-| S17 | Malicious samples in Bekçi's own corpus harm contributors | Corpus is defanged: no working payloads, reserved domains only |
+| S15 | Portcullis executes scanned content | Never: no exec, no templating, no network (NFR-01, NFR-02) |
+| S16 | Compromised Portcullis release, dependency or Action | Minimal deps, Dependabot, `govulncheck`, cosign-signed releases, SLSA provenance, SHA-pinned actions, OpenSSF Scorecard |
+| S17 | Malicious samples in Portcullis's own corpus harm contributors | Corpus is defanged: no working payloads, reserved domains only |
 
 ## 8. Review cadence
 

@@ -4,7 +4,7 @@
 - Date: 2026-10-13
 
 ## Context
-`context.lock` is reviewed by humans in PR diffs and parsed by Bekçi from possibly tampered
+`context.lock` is reviewed by humans in PR diffs and parsed by Portcullis from possibly tampered
 input. It must be stable across operating systems.
 
 ## Decision

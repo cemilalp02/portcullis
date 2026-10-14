@@ -3,7 +3,7 @@
 
 GO            ?= go
 GOLANGCI_LINT ?= golangci-lint
-PKG           := github.com/cemilalp02/bekci
+PKG           := github.com/cemilalp02/portcullis
 VERSION       ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT        ?= $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
 DATE          ?= $(shell git log -1 --format=%cI 2>/dev/null || echo unknown)
@@ -12,14 +12,14 @@ LDFLAGS       := -s -w \
 	-X $(PKG)/internal/version.commit=$(COMMIT) \
 	-X $(PKG)/internal/version.date=$(DATE)
 EXE           := $(if $(filter windows,$(shell $(GO) env GOOS)),.exe,)
-BIN           := bin/bekci$(EXE)
+BIN           := bin/portcullis$(EXE)
 
 .PHONY: all build test race cover lint fmt vuln tidy actionlint check clean
 
 all: check build
 
 build: ## Build a reproducible, static binary into ./bin
-	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/bekci
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/portcullis
 
 test: ## Run all tests
 	$(GO) test ./...

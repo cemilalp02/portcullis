@@ -5,7 +5,7 @@
 
 ## Context
 `.vscode/tasks.json` and `devcontainer.json` are JSON-with-comments and allow trailing
-commas. Bekçi needs exact byte positions for every node (line/column in findings) and must
+commas. Portcullis needs exact byte positions for every node (line/column in findings) and must
 detect duplicate keys (FR-08) — a parser-differential smuggling vector that `encoding/json`
 silently resolves (last key wins).
 
