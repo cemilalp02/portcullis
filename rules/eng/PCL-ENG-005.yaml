@@ -1,0 +1,17 @@
+schema: 1
+id: PCL-ENG-005
+title: Link to an agent context file points outside the repository
+severity: high
+confidence: high
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A symbolic link or junction with the name of an agent context file resolves outside the
+  scanned directory. An agent reading it may load files from elsewhere on the machine, such as
+  credentials, into its context.
+remediation: >
+  Replace the link with a regular file inside the repository.
+message: "Link resolves outside the scanned directory: {name}"
+match:
+  builtin: engine

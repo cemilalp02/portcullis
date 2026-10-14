@@ -1,0 +1,16 @@
+schema: 1
+id: PCL-ENG-004
+title: Unusual text encoding
+severity: medium
+confidence: medium
+targets: [instruction, config]
+owasp: [ASI06]
+since: 2026.10.0
+description: >
+  Agent context files are normally UTF-8. UTF-16 or invalid byte sequences can hide text from
+  byte-level tools while an agent may still decode it.
+remediation: >
+  Convert the file to UTF-8 and review its content.
+message: "File is encoded as {name}"
+match:
+  builtin: engine

@@ -1,0 +1,16 @@
+schema: 1
+id: PCL-ENG-011
+title: Directory link points outside the repository
+severity: medium
+confidence: medium
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A symbolic link or junction to a directory resolves outside the scanned directory.
+  Portcullis does not follow it, but an agent may read files through it.
+remediation: >
+  Remove the link or make sure agents do not read through it.
+message: "Directory link resolves outside the scanned directory: {name}"
+match:
+  builtin: engine

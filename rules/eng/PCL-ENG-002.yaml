@@ -1,0 +1,17 @@
+schema: 1
+id: PCL-ENG-002
+title: Configuration file could not be parsed
+severity: high
+confidence: medium
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A configuration file that can execute commands is not valid JSON with comments. Tools differ
+  in how they recover from errors, so a broken file can still be executed by one tool while
+  hiding its content from another.
+remediation: >
+  Fix the syntax error and re-run Portcullis. Text rules were still applied to the file.
+message: "Configuration could not be parsed: {name}"
+match:
+  builtin: engine

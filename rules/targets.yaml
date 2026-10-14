@@ -1,0 +1,89 @@
+# Files that AI coding agents read as instructions or that run automatically
+# (docs/REQUIREMENTS.md §5). Paths are matched case-insensitively against the
+# '/'-separated path relative to the scan root. "**" matches any number of
+# directories (including none). The first matching target wins, so specific
+# patterns come before generic ones.
+schema: 1
+targets:
+  # --- Instruction files -------------------------------------------------
+  - id: claude-memory
+    title: Claude memory file
+    family: instruction
+    patterns: ["**/CLAUDE.md", "**/CLAUDE.local.md"]
+
+  - id: agents-md
+    title: Generic agent instructions
+    family: instruction
+    patterns: ["**/AGENTS.md"]
+
+  - id: gemini-md
+    title: Gemini instructions
+    family: instruction
+    patterns: ["**/GEMINI.md"]
+
+  - id: skill
+    title: Agent skill
+    family: instruction
+    patterns: ["**/SKILL.md"]
+
+  - id: claude-commands
+    title: Claude slash command or sub-agent
+    family: instruction
+    patterns: [".claude/commands/**/*.md", ".claude/agents/**/*.md"]
+
+  - id: cursor-rules
+    title: Cursor rules
+    family: instruction
+    patterns: [".cursorrules", ".cursor/rules/**"]
+
+  - id: copilot-instructions
+    title: Copilot instructions or prompt
+    family: instruction
+    patterns:
+      - ".github/copilot-instructions.md"
+      - ".github/instructions/**/*.instructions.md"
+      - ".github/prompts/**/*.prompt.md"
+
+  - id: other-agent-rules
+    title: Windsurf / Cline rules
+    family: instruction
+    patterns: [".windsurfrules", ".clinerules", ".clinerules/**"]
+
+  # --- Configuration files that can execute commands ------------------------
+  - id: claude-settings
+    title: Claude Code settings
+    family: config
+    format: jsonc
+    extractor: claude_settings
+    patterns: [".claude/settings.json", ".claude/settings.local.json"]
+
+  - id: vscode-tasks
+    title: VS Code tasks
+    family: config
+    format: jsonc
+    extractor: vscode_tasks
+    patterns: [".vscode/tasks.json"]
+
+  - id: devcontainer
+    title: Dev container configuration
+    family: config
+    format: jsonc
+    extractor: devcontainer
+    patterns:
+      - ".devcontainer/devcontainer.json"
+      - ".devcontainer.json"
+      - ".devcontainer/*/devcontainer.json"
+
+  - id: mcp-config
+    title: MCP server configuration
+    family: config
+    format: jsonc
+    extractor: mcp_config
+    patterns: [".mcp.json", "**/mcp.json"]
+
+  - id: npm-manifest
+    title: npm package manifest
+    family: config
+    format: jsonc
+    extractor: npm_package
+    patterns: ["**/package.json"]

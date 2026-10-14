@@ -1,0 +1,16 @@
+schema: 1
+id: PCL-ENG-010
+title: Finding limit reached for file
+severity: info
+confidence: high
+targets: [instruction, config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A single file produced more findings than the per-file limit. Remaining findings are counted
+  but not listed, so that a hostile file cannot flood the report.
+remediation: >
+  Fix the reported findings and scan again to see the rest.
+message: "{count} further findings in this file were not listed"
+match:
+  builtin: engine
