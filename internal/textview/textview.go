@@ -29,6 +29,11 @@ func Invisible(r rune) bool {
 	return false
 }
 
+// MaxInput is the largest text Normalize accepts; offsets are stored as
+// int32 to halve memory use. Longer input is truncated (the engine never
+// reads files this large, see the scan --max-file-size limit).
+const MaxInput = 1 << 30
+
 // View is the normalised form of a text.
 type View struct {
 	// Text is the normalised text. Newlines are preserved so line-based rules
@@ -46,6 +51,9 @@ func (v *View) Raw(i int) int {
 
 // Normalize builds the normalised view of s.
 func Normalize(s string) *View {
+	if len(s) > MaxInput {
+		s = s[:MaxInput]
+	}
 	// Stage 1: drop invisible characters, remembering raw offsets.
 	filtered := make([]byte, 0, len(s))
 	fmap := make([]int32, 0, len(s)+1)
@@ -56,10 +64,10 @@ func Normalize(s string) *View {
 		n := len(filtered)
 		filtered = utf8.AppendRune(filtered, r)
 		for range len(filtered) - n {
-			fmap = append(fmap, int32(i))
+			fmap = append(fmap, int32(i)) //nolint:gosec // i < len(s) <= MaxInput < 2^31
 		}
 	}
-	fmap = append(fmap, int32(len(s)))
+	fmap = append(fmap, int32(len(s))) //nolint:gosec // len(s) <= MaxInput < 2^31
 
 	// Stages 2-4: NFKC per normalisation segment, case fold, collapse spaces.
 	fold := cases.Fold()
@@ -92,7 +100,7 @@ func Normalize(s string) *View {
 			}
 		}
 	}
-	offs = append(offs, int32(len(s)))
+	offs = append(offs, int32(len(s))) //nolint:gosec // len(s) <= MaxInput < 2^31
 	return &View{Text: string(out), offs: offs}
 }
 

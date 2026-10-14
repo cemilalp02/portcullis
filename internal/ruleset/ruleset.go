@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"go.yaml.in/yaml/v3"
 
@@ -344,10 +345,10 @@ func parseRange(s string) (Range, error) {
 	if m[2] != "" {
 		hi, _ = strconv.ParseUint(m[2], 16, 32)
 	}
-	if lo > hi || hi > 0x10FFFF {
+	if lo > hi || hi > unicode.MaxRune {
 		return Range{}, fmt.Errorf("invalid code point range %q", s)
 	}
-	return Range{Lo: rune(lo), Hi: rune(hi)}, nil
+	return Range{Lo: rune(lo), Hi: rune(hi)}, nil //nolint:gosec // lo <= hi <= unicode.MaxRune fits in a rune
 }
 
 // Set is a loaded rule set, ordered by rule ID.

@@ -78,10 +78,10 @@ func commandLine(n *jsonc.Node) (string, bool) {
 	}
 	parts := make([]string, 0, len(n.Elems))
 	for _, e := range n.Elems {
-		switch {
-		case e.Kind == jsonc.String:
+		switch e.Kind {
+		case jsonc.String:
 			parts = append(parts, e.Str)
-		case e.Kind == jsonc.Object:
+		case jsonc.Object:
 			if v, ok := e.Get("value").StringValue(); ok { // VS Code quoted args
 				parts = append(parts, v)
 			}

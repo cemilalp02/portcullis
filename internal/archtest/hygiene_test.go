@@ -58,7 +58,7 @@ func TestRepositoryHasNoHiddenCharacters(t *testing.T) {
 			if r == '\n' {
 				line++
 			}
-			if hidden(r) && !(r == 0xFEFF && i == 0) {
+			if hidden(r) && (r != 0xFEFF || i != 0) { // a leading BOM is allowed
 				t.Errorf("%s:%d: hidden character U+%04X", path, line, r)
 			}
 		}
