@@ -47,6 +47,9 @@ func TestDefaultTargets(t *testing.T) {
 		{".claude/settings.json", "claude-settings"},
 		{".claude/settings.local.json", "claude-settings"},
 		{".vscode/tasks.json", "vscode-tasks"},
+		{"apps/web/.vscode/tasks.json", "vscode-tasks"}, // subfolder opened as a project
+		{"services/api/.claude/settings.json", "claude-settings"},
+		{"tools/.mcp.json", "mcp-config"},
 		{".devcontainer/devcontainer.json", "devcontainer"},
 		{".devcontainer.json", "devcontainer"},
 		{".devcontainer/python/devcontainer.json", "devcontainer"},

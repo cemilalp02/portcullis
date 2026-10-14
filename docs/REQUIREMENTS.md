@@ -80,6 +80,9 @@ the approved state so that silent changes are caught.
 
 v0.1 recognises **13 target types** in two families. File-name matching **MUST** be
 case-insensitive, because agents on Windows and macOS read `claude.md` as `CLAUDE.md`.
+Every path matches **at any depth** (`apps/web/.vscode/tasks.json` counts like
+`.vscode/tasks.json`), because an agent or editor opened on a subfolder treats that folder
+as the project root.
 
 ### 5.1 Instruction files (natural-language text read by the agent)
 

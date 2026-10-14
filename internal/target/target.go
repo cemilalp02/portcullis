@@ -30,6 +30,9 @@ type Def struct {
 	Format    string   `yaml:"format"`    // "text" (default) or "jsonc"
 	Extractor string   `yaml:"extractor"` // config targets: name of the exec-point extractor
 	Patterns  []string `yaml:"patterns"`
+	// SkipCount excludes this target from the count of agent files found in
+	// skipped dependency directories (every npm dependency has a package.json).
+	SkipCount bool `yaml:"skip_count"`
 }
 
 // Set is an ordered collection of target definitions.
