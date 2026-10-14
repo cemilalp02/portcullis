@@ -1,0 +1,41 @@
+name: Missed detection / new technique
+description: Malicious or risky content that Bekçi does not flag.
+labels: [missed-detection, rules, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Defang everything.** Replace domains with `example.invalid`, IPs with `192.0.2.x`
+        and commands with inert equivalents. Never paste a working payload.
+        If the technique is being actively exploited in the wild, report it privately (SECURITY.md).
+  - type: dropdown
+    id: target
+    attributes:
+      label: Affected file type
+      options:
+        - Instruction file (CLAUDE.md, AGENTS.md, SKILL.md, rules, …)
+        - Claude settings / hooks
+        - VS Code tasks
+        - Dev container
+        - package.json scripts
+        - MCP configuration
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Defanged sample
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: What would an agent or the developer's machine do with this?
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Public reference (report, blog post, CVE), if any
