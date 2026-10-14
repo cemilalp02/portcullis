@@ -20,6 +20,10 @@
 
 ### `portcullis scan [path]`
 
+Available since Phase 3: `--format text|json`, `--output`, `--fail-on`, `--exclude`,
+`--max-file-size` (≤ 1 GiB), `--no-inventory`. Arriving in Phase 5: `sarif`, `--trusted`,
+`--config`, `--baseline`, `--base-snapshot`, `--rules`, `--color`.
+
 | Flag | Default | Description |
 |---|---|---|
 | `--format` | `text` | `text`, `json`, `sarif` |
