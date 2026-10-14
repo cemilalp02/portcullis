@@ -137,7 +137,7 @@ definition and fixtures.
   1. **raw** — exact text, used for invisible-character and encoding rules;
   2. **normalised** — Unicode NFKC, invisible/format characters removed, case-folded,
      whitespace runs collapsed — used for pattern rules.
-  This defeats `ig​nore previous instructions`, full-width `ｉｇｎｏｒｅ`, and similar tricks.
+  This defeats `ig\u200Bnore previous instructions`, full-width `ｉｇｎｏｒｅ`, and similar tricks.
 - **FR-11** Line/column in findings MUST always refer to the **raw** file.
 
 ### 6.3 Detectors

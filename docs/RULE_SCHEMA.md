@@ -73,7 +73,7 @@ tests:
 ```
 
 At least one positive and one negative case are required (FR-21). Invisible characters are
-written with YAML double-quoted escapes (`"​"`, `"\U000E0041"`) so fixtures stay
+written with YAML double-quoted escapes (`"\u200B"`, `"\U000E0041"`) so fixtures stay
 reviewable. Large or multi-file cases go in `testdata/corpus/` instead; inline cases are the
 minimum contract. `go test ./...` runs every inline case automatically.
 
