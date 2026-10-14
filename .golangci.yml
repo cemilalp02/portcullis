@@ -1,0 +1,60 @@
+version: "2"
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - asciicheck
+    - bidichk # Trojan Source protection for our own code
+    - depguard
+    - errorlint
+    - forbidigo
+    - gocritic
+    - gosec
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+    - unparam
+  settings:
+    depguard:
+      rules:
+        adr-0006-no-exec-or-network:
+          files: ["$all", "!$test"]
+          deny:
+            - pkg: os/exec
+              desc: "ADR-0006: bekci never starts processes"
+            - pkg: net
+              desc: "ADR-0006: bekci never opens network connections"
+            - pkg: plugin
+              desc: "ADR-0006: no dynamically loaded code"
+        adr-0007-dependencies:
+          files: ["$all"]
+          deny:
+            - pkg: gopkg.in/yaml.v3
+              desc: "ADR-0003: use go.yaml.in/yaml/v3 (maintained successor)"
+            - pkg: github.com/spf13/cobra
+              desc: "ADR-0007: CLI uses the standard flag package"
+    forbidigo:
+      forbid:
+        - pattern: ^(fmt\.Print(f|ln)?|print|println)$
+          msg: "write to an injected io.Writer; only internal/cli talks to the terminal"
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    generated: strict
+    presets:
+      - std-error-handling
+      - common-false-positives
+    rules:
+      - path: _test\.go
+        linters: [gosec, unparam]
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/cemilalp02/bekci

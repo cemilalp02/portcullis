@@ -1,0 +1,9 @@
+# Default owner for everything.
+*                     @cemilalp02
+
+# Security-relevant files get explicit ownership so branch protection can require review.
+/.github/             @cemilalp02
+/rules/               @cemilalp02
+/docs/THREAT_MODEL.md @cemilalp02
+/docs/adr/            @cemilalp02
+/action.yml           @cemilalp02
