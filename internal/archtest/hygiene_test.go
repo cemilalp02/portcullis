@@ -37,12 +37,17 @@ func TestRepositoryHasNoHiddenCharacters(t *testing.T) {
 		name := d.Name()
 		if d.IsDir() {
 			switch name {
-			case ".git", "testdata", "bin", "dist", "node_modules":
+			case ".git", "testdata", "bin", "dist", "node_modules", "__pycache__", ".venv":
 				return filepath.SkipDir
 			}
 			return nil
 		}
 		if !d.Type().IsRegular() || strings.HasSuffix(name, ".exe") || name == "coverage.out" {
+			return nil
+		}
+		if strings.HasSuffix(name, ".woff2") {
+			// Published font binaries (internal/report/html/fonts, see its
+			// README for their checksums); never text.
 			return nil
 		}
 		data, err := os.ReadFile(path)

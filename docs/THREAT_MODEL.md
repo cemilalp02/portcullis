@@ -103,7 +103,7 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S21 | Scanned text renders as links, images or HTML in the Markdown job summary (tracking pixels, phishing links) | All scanned text is HTML-escaped and Markdown punctuation is backslash-escaped (tested) |
 | S22 | Script injection through action inputs | Inputs reach `scripts/action/*.sh` only as environment variables; scripts pass shellcheck |
 | S23 | Attack samples in Portcullis's own repository are loaded by agents working on it | Samples are stored inside `.txtar` archives, never as real agent files |
-| S24 | Scanned text runs script or loads content in the HTML report (stored XSS, tracking requests when the report is opened) | Contextual escaping by `html/template`; Content Security Policy `default-src 'none'` that allows only the report's own style and script by SHA-256 hash; no external resources or links other than rule documentation (tested, including a mutation check of the hashes) |
+| S24 | Scanned text runs script or loads content in the HTML report (stored XSS, tracking requests when the report is opened) | Contextual escaping by `html/template`; Content Security Policy `default-src 'none'` that allows only the report's own style and script by SHA-256 hash, plus `data:` fonts and icon embedded by Portcullis; no event-handler attributes; no external resources or links other than rule documentation (tested, including a mutation check of the hashes) |
 
 ## 8. Review cadence
 
