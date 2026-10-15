@@ -1,0 +1,8 @@
+Dev container with ordinary in-container lifecycle commands.
+-- .devcontainer/devcontainer.json --
+// dev container
+{
+  "image": "mcr.microsoft.com/devcontainers/go:1",
+  "postCreateCommand": "go mod download",
+  "postStartCommand": {"tools": "make tools"},
+}

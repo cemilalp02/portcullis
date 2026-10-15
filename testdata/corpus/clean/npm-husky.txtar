@@ -1,0 +1,11 @@
+npm manifest with a husky prepare script.
+-- package.json --
+{
+  "name": "web",
+  "version": "2.0.0",
+  "scripts": {
+    "prepare": "husky",
+    "test": "vitest",
+    "build": "vite build"
+  }
+}

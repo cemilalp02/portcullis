@@ -1,0 +1,15 @@
+VS Code tasks that never run on their own.
+-- .vscode/tasks.json --
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "build"
+      ]
+    }
+  ]
+}

