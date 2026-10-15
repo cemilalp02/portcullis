@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="{{.CSP}}">
+<meta name="referrer" content="no-referrer">
+<meta name="generator" content="Portcullis {{.Version}}">
+<title>Portcullis · {{.Name}}</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <span class="brand">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 18V5.5L10 2l7 3.5V18"/><path d="M6.5 7v11M10 7v11M13.5 7v11M3 10.5h14M3 14.5h14"/></svg>
+      Portcullis
+    </span>
+    <span class="meta"><span>{{.Version}}</span><span>rule set {{.Ruleset}}</span><span>{{.Mode}} mode</span></span>
+    <span class="spacer"></span>
+    <button class="icon-btn" id="theme" type="button" hidden>Toggle theme</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="verdict">
+    <h1>{{.Headline}}</h1>
+    <div class="sub">
+      <span>{{.Name}}</span>
+      <span>{{.Targets}} agent context files in {{.Files}} files</span>
+      {{- if .Suppressed}}<span>{{.Suppressed}} suppressed by baseline</span>{{end}}
+      <span>exit code {{.ExitCode}}</span>
+    </div>
+    <span class="status {{.Status}}">{{.StatusLabel}}</span>
+  </div>
+
+  {{- if .Errors}}
+  <div class="notice" role="alert">
+    <strong>Analysis incomplete</strong>
+    These files could not be analysed, so this result must not be treated as clean:
+    <ul>{{range .Errors}}<li>{{.}}</li>{{end}}</ul>
+  </div>
+  {{- end}}
+
+  <div class="toolbar">
+    <div class="counters" role="group" aria-label="Filter findings by severity">
+      {{- range .Counts}}
+      <button type="button" class="counter sev-{{.Key}}{{if not .N}} zero{{end}}" data-sev="{{.Key}}" aria-pressed="true" disabled>
+        <span class="n">{{.N}}</span><span class="l">{{.Label}}</span>
+      </button>
+      {{- end}}
+    </div>
+    <input id="search" class="search" type="search" placeholder="Filter by rule, file or text" aria-label="Filter findings" autocomplete="off" hidden>
+  </div>
+
+  <section aria-labelledby="h-findings">
+    <div class="section-head"><h2 id="h-findings">Findings</h2><span class="count" id="findings-count" data-total="{{.Total}}">{{.Total}}</span><span class="hint">{{.ThresholdHint}}</span></div>
+    {{- if not .Groups}}
+    <div class="empty">No findings. Every agent context file was analysed and nothing matched a rule.</div>
+    {{- end}}
+    <div class="empty" id="no-match" hidden>No findings match the current filter.</div>
+    {{- range .Groups}}
+    <div class="file">
+      <div class="file-head"><span class="path">{{.Path}}</span>{{if .Kind}}<span class="kind">{{.Kind}}</span>{{end}}<span class="tally">{{.Tally}}</span></div>
+      {{- range .Findings}}
+      <details class="finding sev-{{.SevKey}}{{if not .Above}} below{{end}}" data-sev="{{.SevKey}}" data-text="{{.Text}}"{{if .Above}} open{{end}}>
+        <summary>
+          <span class="badge">{{.SevLabel}}</span>
+          <span class="rule">{{.RuleID}}</span>
+          <span class="headline"><span class="title">{{.Title}}</span><span class="msg">{{.Message}}</span></span>
+          <span class="loc">line {{.Line}}:{{.Column}}</span>
+        </summary>
+        <div class="detail">
+          {{- if .Excerpt}}
+          <pre class="excerpt"><span class="ln">{{.Line}}</span>{{range .Spans}}{{if .Hidden}}<mark class="esc" title="{{.Title}}">{{.Text}}{{if .More}}<span class="more">+{{.More}} more</span>{{end}}</mark>{{else}}{{.Text}}{{end}}{{end}}</pre>
+          {{- end}}
+          <div class="fix"><b>Fix:</b> {{.Remediation}}</div>
+          <div class="facts">
+            <span><b>Confidence</b> {{.Confidence}}</span>
+            {{- if .OWASP}}<span><b>OWASP</b> {{range .OWASP}}<span class="tag">{{.}}</span> {{end}}</span>{{end}}
+            <span><b>Fingerprint</b> <span class="mono">{{.Fingerprint}}</span> <button class="copy" type="button" data-copy="{{.Fingerprint}}" hidden>copy</button></span>
+            {{- if .DocURL}}<span><a href="{{.DocURL}}" rel="noreferrer noopener" target="_blank">Rule documentation</a></span>{{end}}
+          </div>
+        </div>
+      </details>
+      {{- end}}
+    </div>
+    {{- end}}
+  </section>
+
+  <section aria-labelledby="h-inventory">
+    <div class="section-head"><h2 id="h-inventory">Runs without asking</h2><span class="count">{{len .Inventory}}</span><span class="hint">commands executed automatically by agents, editors or package managers</span></div>
+    {{- if .Inventory}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kind</th><th>Trigger</th><th>Name</th><th>Location</th><th>Command</th></tr></thead>
+        <tbody>
+        {{- range .Inventory}}
+          <tr><td class="mono">{{.Kind}}</td><td>{{.Trigger}}</td><td class="mono">{{if .Name}}{{.Name}}{{else}}<span class="muted">—</span>{{end}}</td><td class="mono">{{.Path}}:{{.Line}}</td><td class="cmd">{{.Command}}</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </div>
+    {{- else}}
+    <div class="empty">Nothing in this repository runs automatically.</div>
+    {{- end}}
+  </section>
+
+  <section aria-labelledby="h-files">
+    <div class="section-head"><h2 id="h-files">Agent context files</h2><span class="count">{{len .TargetFiles}}</span><span class="hint">every file an agent reads or runs that was scanned</span></div>
+    {{- if .TargetFiles}}
+    {{- if .FoldFiles}}
+    <details class="fold">
+      <summary><span class="when-closed">Show all {{len .TargetFiles}} files</span><span class="when-open">Hide the file list</span></summary>
+    {{- end}}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>File</th><th>Type</th><th class="num">Findings</th></tr></thead>
+        <tbody>
+        {{- range .TargetFiles}}
+          <tr><td class="mono">{{.Path}}</td><td>{{.Kind}}</td><td class="num">{{if .Findings}}<span class="dot-list">{{range .Severities}}<span class="dot sev-{{.}}"></span>{{end}}</span> {{.Findings}}{{else}}<span class="muted">0</span>{{end}}</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </div>
+    {{- if .FoldFiles}}
+    </details>
+    {{- end}}
+    {{- else}}
+    <div class="empty">No agent context files were found.</div>
+    {{- end}}
+  </section>
+
+  {{- if .Rules}}
+  <section aria-labelledby="h-rules">
+    <div class="section-head"><h2 id="h-rules">Rules triggered</h2><span class="count">{{len .Rules}}</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>Title</th><th>Severity</th><th class="num">Findings</th></tr></thead>
+        <tbody>
+        {{- range .Rules}}
+          <tr class="sev-{{.SevKey}}"><td class="mono">{{if .DocURL}}<a href="{{.DocURL}}" rel="noreferrer noopener" target="_blank">{{.ID}}</a>{{else}}{{.ID}}{{end}}</td><td>{{.Title}}</td><td><span class="badge">{{.SevLabel}}</span></td><td class="num">{{.Count}}</td></tr>
+        {{- end}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {{- end}}
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Generated offline by Portcullis {{.Version}} with rule set {{.Ruleset}}. This report loads nothing from the network; text taken from scanned files is escaped and its scripts cannot run.</p>
+    <p>Portcullis detects known patterns and structures. A finding-free report reduces risk; it does not prove a repository is safe.</p>
+  </div>
+</footer>
+<script>{{.JS}}</script>
+</body>
+</html>

@@ -209,9 +209,9 @@ func TestBaseSnapshot(t *testing.T) {
 func TestOutputFormatsAndFiles(t *testing.T) {
 	root := repo(t, map[string]string{".claude/settings.json": poisonedSettings})
 	dir := t.TempDir()
-	sarif, summary := filepath.Join(dir, "r.sarif"), filepath.Join(dir, "summary.md")
+	sarif, summary, html := filepath.Join(dir, "r.sarif"), filepath.Join(dir, "summary.md"), filepath.Join(dir, "report.html")
 	writeTestFile(t, summary, "previous step\n")
-	code, stdout, stderr := run("scan", "--format", "github", "--sarif", sarif, "--summary", summary, "--path-prefix", "sub", root)
+	code, stdout, stderr := run("scan", "--format", "github", "--sarif", sarif, "--summary", summary, "--html", html, "--path-prefix", "sub", root)
 	if code != ExitFindings || stderr != "" {
 		t.Fatalf("exit %d, stderr %q", code, stderr)
 	}
@@ -223,6 +223,12 @@ func TestOutputFormatsAndFiles(t *testing.T) {
 	}
 	if s := readFile(t, summary); !strings.HasPrefix(s, "previous step\n## Portcullis") {
 		t.Errorf("summary must be appended:\n%s", s)
+	}
+	if s := readFile(t, html); !strings.HasPrefix(s, "<!doctype html>") || !strings.Contains(s, ".claude/settings.json") {
+		t.Errorf("html report:\n%.300s", s)
+	}
+	if code, stdout, _ := run("scan", "--format", "html", root); code != ExitFindings || !strings.Contains(stdout, "Content-Security-Policy") {
+		t.Errorf("--format html: exit %d\n%.300s", code, stdout)
 	}
 	for _, f := range []string{"sarif", "markdown", "json", "text"} {
 		if code, _, _ := run("scan", "--format", f, root); code != ExitFindings {
@@ -237,6 +243,9 @@ func TestOutputFormatsAndFiles(t *testing.T) {
 	}
 	if code, _, stderr := run("scan", "--sarif", filepath.Join(dir, "missing", "x"), root); code != ExitError || !strings.Contains(stderr, "writing SARIF") {
 		t.Errorf("unwritable SARIF: exit %d, %q", code, stderr)
+	}
+	if code, _, stderr := run("scan", "--html", filepath.Join(dir, "missing", "x"), root); code != ExitError || !strings.Contains(stderr, "writing HTML report") {
+		t.Errorf("unwritable HTML: exit %d, %q", code, stderr)
 	}
 }
 

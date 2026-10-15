@@ -167,6 +167,7 @@ type Options struct {
 type TargetFile struct {
 	Path     string // as found
 	ReadPath string // where to read it, relative to the root
+	Kind     string // target type title, e.g. "Claude Code settings"
 }
 
 // InventoryItem is one command that would run automatically. All strings
@@ -202,7 +203,7 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 	}
 	res := &Result{Root: dr.Root, Files: dr.Files, Targets: len(dr.Candidates), Complete: true}
 	for _, c := range dr.Candidates {
-		res.TargetFiles = append(res.TargetFiles, TargetFile{Path: c.Path, ReadPath: c.ReadPath})
+		res.TargetFiles = append(res.TargetFiles, TargetFile{Path: c.Path, ReadPath: c.ReadPath, Kind: c.Target.Title})
 	}
 	for _, ev := range dr.Events {
 		res.Findings = append(res.Findings, e.eventFinding(ev))
@@ -210,7 +211,11 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		case discover.ReadError:
 			res.fail(ev.Path, ev.Detail)
 		case discover.Oversize:
-			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath})
+			kind := "agent context file"
+			if d := e.Targets.Match(ev.Path); d != nil {
+				kind = d.Title
+			}
+			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath, Kind: kind})
 		}
 	}
 	slices.SortFunc(res.TargetFiles, func(a, b TargetFile) int { return strings.Compare(a.Path, b.Path) })
@@ -532,14 +537,21 @@ func excerpt(doc *source.Document, line, col int) string {
 	return prefix + escape.String(strings.TrimSpace(string(runes)), excerptLimit)
 }
 
-var placeholderRE = regexp.MustCompile(`\{([a-z]+)\}`)
+var placeholderRE = regexp.MustCompile(` ?'\{[a-z]+\}'|\{[a-z]+\}`)
 
 // expand substitutes {placeholders} in a single pass, so a value taken from a
 // scanned file can never inject another placeholder. Values are escaped;
-// unknown placeholders become empty.
+// unknown placeholders become empty. A quoted placeholder with an empty value
+// is dropped together with its quotes and leading space, so the message of an
+// unnamed hook reads "claude_hook (SessionStart)" without an empty name.
 func expand(msg string, vars map[string]string) string {
 	return placeholderRE.ReplaceAllStringFunc(msg, func(m string) string {
-		return escape.String(vars[m[1:len(m)-1]], valueLimit)
+		i, j := strings.IndexByte(m, '{'), strings.IndexByte(m, '}')
+		v := escape.String(vars[m[i+1:j]], valueLimit)
+		if i > 0 && v == "" {
+			return ""
+		}
+		return m[:i] + v + m[j+1:]
 	})
 }
 

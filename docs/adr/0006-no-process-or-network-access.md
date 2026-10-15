@@ -15,6 +15,14 @@ Information that would need git (base-commit copies of config, baseline and lock
 supplied by the caller through `--base-snapshot <dir>`; the GitHub Action does the `git show`
 in its own trusted step.
 
+### Amendment (2026-10-15)
+The HTML report uses `html/template`, whose contextual escaping depends on `net/url`, which in
+turn uses `net/netip`. Both only parse strings: they open no sockets and resolve no names. They
+are therefore allowed by name; every other package under `net/` and `net` itself remain
+forbidden, and because the check covers all transitive dependencies, an allowed package can
+never bring the socket code in. Our own code still may not import any `net` package
+(depguard).
+
 ## Consequences
 - Whole classes of vulnerabilities (command injection, SSRF, data leakage) are impossible by construction.
 - `portcullis open <repo>` (v0.2) will need a separate, carefully reviewed design.

@@ -10,9 +10,15 @@ uses [Semantic Versioning](https://semver.org/).
 
 - Project renamed from Bekçi to **Portcullis** (ADR-0009): module `github.com/cemilalp02/portcullis`,
   binary `portcullis`, rule ID prefix `PCL-`, config `.portcullis.yaml`.
+- Messages no longer show an empty name in quotes for unnamed hooks
+  (`claude_hook (SessionStart)` instead of `claude_hook '' (SessionStart)`).
 
 ### Added
 
+- Self-contained HTML report (`--format html`, `--html FILE`): one offline file with severity
+  filters, search, the auto-execution inventory and every scanned agent file; light and dark
+  themes; no network access, guarded by a hash-based Content Security Policy. The GitHub Action
+  uploads it as a workflow artifact.
 - `portcullis lock` / `portcullis verify`: approve agent context files in `context.lock` and fail
   when any of them is added, modified or removed without a new approval.
 - `portcullis baseline`: accept current findings by fingerprint (reasons required and kept).

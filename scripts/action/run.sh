@@ -14,6 +14,10 @@ bin="${PORTCULLIS_BIN:?PORTCULLIS_BIN is not set; run build.sh first}"
 work="${RUNNER_TEMP:-/tmp}/portcullis"
 mkdir -p "$work"
 sarif="$work/portcullis.sarif"
+# The report is uploaded unzipped, so its file name is the artifact name;
+# the category keeps several Portcullis runs in one workflow apart.
+category="$(printf '%s' "${INPUT_CATEGORY:-portcullis}" | tr -c 'A-Za-z0-9._-' '-')"
+html="$work/${category}-report.html"
 
 path="${INPUT_PATH:-.}"
 path="${path%/}"
@@ -56,7 +60,7 @@ if [ "${EVENT_NAME:-}" = "pull_request" ] && [ -n "${BASE_SHA:-}" ]; then
   common+=(--base-snapshot "$snapshot")
 fi
 
-scan=(scan --format github --sarif "$sarif" --path-prefix "$prefix")
+scan=(scan --format github --sarif "$sarif" --html "$html" --path-prefix "$prefix")
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   scan+=(--summary "$GITHUB_STEP_SUMMARY")
 fi
@@ -87,10 +91,14 @@ fi
 if [ ! -s "$sarif" ]; then
   sarif=""
 fi
+if [ ! -s "$html" ]; then
+  html=""
+fi
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   {
     echo "exit-code=$code"
     echo "sarif-file=$sarif"
+    echo "html-file=$html"
   } >>"$GITHUB_OUTPUT"
 fi
 echo "Portcullis finished with exit code $code"

@@ -19,6 +19,7 @@ var writers = map[string]func(io.Writer, *engine.Result, report.Meta) error{
 	"sarif":    report.WriteSARIF,
 	"github":   report.WriteGitHub,
 	"markdown": report.WriteMarkdown,
+	"html":     report.WriteHTML,
 }
 
 // useColor decides whether text output gets ANSI colours.
@@ -71,11 +72,12 @@ func runScan(args []string, stdout, stderr io.Writer) int {
 	fs.SetOutput(stderr)
 	var c common
 	c.register(fs)
-	format := fs.String("format", "text", "output `format`: text, json, sarif, github (workflow annotations) or markdown")
+	format := fs.String("format", "text", "output `format`: text, json, sarif, github (workflow annotations), markdown or html")
 	output := fs.String("output", "", "write results to `file` instead of stdout")
 	fs.StringVar(output, "o", "", "shorthand for -output")
 	sarifOut := fs.String("sarif", "", "also write SARIF 2.1.0 to `file`")
 	summaryOut := fs.String("summary", "", "also append a Markdown summary to `file` (e.g. $GITHUB_STEP_SUMMARY)")
+	htmlOut := fs.String("html", "", "also write a self-contained HTML report to `file`")
 	prefix := fs.String("path-prefix", "", "`prefix` for file paths in SARIF and annotations when scanning a subdirectory of a repository")
 	noInventory := fs.Bool("no-inventory", false, "hide the auto-execution inventory in text output")
 	color := fs.String("color", "auto", "colour text output: `auto`, always or never (NO_COLOR is honoured)")
@@ -100,7 +102,7 @@ func runScan(args []string, stdout, stderr io.Writer) int {
 	}
 	write, ok := writers[*format]
 	if !ok {
-		return fail(fmt.Errorf("unknown format %q (want text, json, sarif, github or markdown)", *format))
+		return fail(fmt.Errorf("unknown format %q (want text, json, sarif, github, markdown or html)", *format))
 	}
 	out := stdout
 	var outFile *os.File
@@ -138,6 +140,11 @@ func runScan(args []string, stdout, stderr io.Writer) int {
 	if *sarifOut != "" {
 		if err := writeFile(*sarifOut, false, func(w io.Writer) error { return report.WriteSARIF(w, res, meta) }); err != nil {
 			return fail(fmt.Errorf("writing SARIF: %w", err))
+		}
+	}
+	if *htmlOut != "" {
+		if err := writeFile(*htmlOut, false, func(w io.Writer) error { return report.WriteHTML(w, res, meta) }); err != nil {
+			return fail(fmt.Errorf("writing HTML report: %w", err))
 		}
 	}
 	if *summaryOut != "" {
