@@ -3,7 +3,7 @@ id: PCL-ENG-006
 title: File could not be read
 severity: high
 confidence: high
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI04]
 since: 2026.10.0
 description: >

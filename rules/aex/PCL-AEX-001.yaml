@@ -1,0 +1,26 @@
+schema: 1
+id: PCL-AEX-001
+title: Claude Code hook
+severity: info
+confidence: high
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  Claude Code runs this command automatically on the given event. Hooks are legitimate, but a
+  hook committed to a repository runs on every developer's machine that opens it with Claude
+  Code.
+remediation: >
+  Review the command before trusting the repository.
+message: "{kind} runs automatically on {trigger}: {match}"
+match:
+  scope: exec
+  kinds: [claude_hook]
+  every: true
+tests:
+  positive:
+    - file: .claude/settings.json
+      content: "{\"hooks\": {\"PostToolUse\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"npx prettier --write .\"}]}]}}"
+  negative:
+    - file: .claude/settings.json
+      content: "{\"permissions\": {\"allow\": [\"Bash(npm test)\"]}}"

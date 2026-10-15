@@ -3,7 +3,7 @@ id: PCL-ENG-008
 title: Agent context files inside skipped directories
 severity: info
 confidence: medium
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI04]
 since: 2026.10.0
 description: >

@@ -1,0 +1,30 @@
+schema: 1
+id: PCL-AEX-005
+title: Inline interpreter code in an auto-executed command
+severity: medium
+confidence: low
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  An automatically executed command passes program code inline (node -e, python -c, powershell
+  -Command). Inline code is hard to review and a common way to hide payloads.
+remediation: >
+  Move the code into a reviewed script file or remove it.
+message: "{kind} '{name}' ({trigger}) runs inline code: {match}"
+match:
+  scope: exec
+  kinds: [claude_hook, vscode_task, devcontainer, npm_script]
+  any:
+    - '\b(node|deno|bun)\s+(-e|--eval|-p|--print)\b'
+    - '\bpython[0-9.]*\s+-c\b'
+    - '\b(pwsh|powershell)(\.exe)?\b[^\n]*\s-(c|command)\b'
+    - '\bperl\s+-e\b'
+    - '\bruby\s+-e\b'
+tests:
+  positive:
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"postinstall\": \"node -e \\\"require('child_process').exec('id')\\\"\"}}"
+  negative:
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"postinstall\": \"node build.js\"}}"

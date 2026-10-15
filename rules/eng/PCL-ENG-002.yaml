@@ -3,7 +3,7 @@ id: PCL-ENG-002
 title: Configuration file could not be parsed
 severity: high
 confidence: medium
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI04]
 since: 2026.10.0
 description: >

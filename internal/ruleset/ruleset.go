@@ -43,10 +43,10 @@ type Rule struct {
 
 // Match selects what a rule looks at and how it matches.
 type Match struct {
-	Scope      string   `yaml:"scope"` // "text" (default) or "exec"
-	View       string   `yaml:"view"`  // "normalized" (default) or "raw"; text scope
-	Unit       string   `yaml:"unit"`  // "line" (default) or "document"; text scope
-	Kinds      []string `yaml:"kinds"` // exec scope; empty means all kinds
+	Scope      string   `yaml:"scope"`    // "text" (default) or "exec"
+	View       string   `yaml:"view"`     // "normalized" (default) or "raw"; text scope
+	Unit       string   `yaml:"unit"`     // "line" (default) or "document"; text scope
+	Kinds      []string `yaml:"kinds"`    // exec scope; empty means all kinds
 	Triggers   []string `yaml:"triggers"` // exec scope; regexes on the normalised trigger, any must match
 	Codepoints []string `yaml:"codepoints"`
 	Any        []string `yaml:"any"`
@@ -64,7 +64,7 @@ type Tests struct {
 
 // Case is one fixture: a file path (deciding its target type) and content.
 // Target names the target type explicitly, for companion targets that are
-// not matched by path (e.g. skill-resource).
+// not matched by path (e.g. skill-script).
 type Case struct {
 	File    string `yaml:"file"`
 	Target  string `yaml:"target"`

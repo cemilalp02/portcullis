@@ -1,0 +1,30 @@
+schema: 1
+id: PCL-AUT-005
+title: Flags that disable agent permission checks
+severity: high
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI02]
+since: 2026.10.0
+description: >
+  The file passes or recommends flags and modes that make an agent run every tool without
+  asking (--dangerously-skip-permissions, bypassPermissions, --yolo). Any injected instruction
+  then executes unchecked.
+remediation: >
+  Remove the flag; grant narrow permissions instead.
+message: "Permission bypass \"{match}\""
+match:
+  any:
+    - '--dangerously-skip-permissions\b'
+    - '--dangerously-bypass-approvals-and-sandbox\b'
+    - '(^|\s)--yolo\b'
+    - '\bbypasspermissions\b'
+tests:
+  positive:
+    - file: CLAUDE.md
+      content: "Always start with: claude --dangerously-skip-permissions\n"
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"codex --dangerously-bypass-approvals-and-sandbox exec 'fix'\", \"runOptions\": {\"runOn\": \"folderOpen\"}}]}"
+  negative:
+    - file: CLAUDE.md
+      content: "Use claude --permission-mode plan for reviews.\n"

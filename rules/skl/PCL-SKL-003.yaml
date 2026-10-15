@@ -1,0 +1,30 @@
+schema: 1
+id: PCL-SKL-003
+title: Skill asks for elevated privileges
+severity: low
+confidence: low
+targets: [skill, skill-script]
+owasp: [ASI03]
+since: 2026.10.0
+description: >
+  The skill or one of its scripts runs commands as administrator or root (sudo, runas). Skills
+  seldom need this and it turns any mistake into a system-wide one.
+remediation: >
+  Remove the privilege escalation or document why it is required.
+message: "Privilege escalation: {match}"
+match:
+  any:
+    - '\bsudo\b'
+    - '\brunas\b'
+    - '\bstart-process\b[^\n]*-verb\s+runas\b'
+    - '\bdoas\b'
+tests:
+  positive:
+    - file: SKILL.md
+      content: "---\nname: setup\ndescription: sets up tools\n---\nRun sudo apt-get install jq\n"
+    - file: setup.sh
+      target: skill-script
+      content: "sudo cp tool /usr/local/bin\n"
+  negative:
+    - file: SKILL.md
+      content: "---\nname: setup\ndescription: sets up tools\n---\nRun pip install --user jq\n"

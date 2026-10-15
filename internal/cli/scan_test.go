@@ -37,13 +37,13 @@ func TestScanCommand(t *testing.T) {
 		wantStdout string
 		wantStderr string
 	}{
-		{"clean repo", []string{"scan", clean}, ExitOK, "No findings.", ""},
+		{"clean repo", []string{"scan", clean}, ExitOK, "0 findings at or above 'high'", ""},
 		{"inventory shown", []string{"scan", clean}, ExitOK, "npm_script", ""},
 		{"poisoned repo", []string{"scan", poisoned}, ExitFindings, "CRITICAL  PCL-EXE-001", ""},
 		{"flags after path", []string{"scan", poisoned, "--fail-on", "none"}, ExitOK, "PCL-EXE-001", ""},
 		{"medium below threshold", []string{"scan", medium}, ExitOK, "PCL-ENG-004", ""},
 		{"medium at threshold", []string{"scan", "--fail-on", "medium", medium}, ExitFindings, "PCL-ENG-004", ""},
-		{"no inventory", []string{"scan", "--no-inventory", clean}, ExitOK, "No findings.", ""},
+		{"no inventory", []string{"scan", "--no-inventory", clean}, ExitOK, "PCL-AEX-009", ""},
 		{"bad format", []string{"scan", "--format", "xml", clean}, ExitError, "", `unknown format "xml"`},
 		{"bad severity", []string{"scan", "--fail-on", "severe", clean}, ExitError, "", "unknown severity"},
 		{"bad size", []string{"scan", "--max-file-size", "ten", clean}, ExitError, "", "invalid size"},
@@ -94,7 +94,7 @@ func TestScanJSONToFile(t *testing.T) {
 	if err := json.Unmarshal(data, &rep); err != nil {
 		t.Fatalf("invalid JSON: %v", err)
 	}
-	if rep.ExitCode != 1 || len(rep.Findings) != 1 || rep.Findings[0].RuleID != "PCL-EXE-001" || len(rep.Inventory) != 1 {
+	if rep.ExitCode != 1 || len(rep.Findings) != 2 || rep.Findings[0].RuleID != "PCL-EXE-001" || rep.Findings[1].RuleID != "PCL-AEX-001" || len(rep.Inventory) != 1 {
 		t.Errorf("report = %+v", rep)
 	}
 	if code, _, stderr := run("scan", "-o", filepath.Join(out, "x", "y"), poisoned); code != ExitError || stderr == "" {

@@ -1,0 +1,26 @@
+schema: 1
+id: PCL-AEX-004
+title: Auto-executed command runs a local script
+severity: medium
+confidence: low
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  A hook, folder-open task or dev container command runs a script from the repository.
+  Portcullis analyses the command, not the script, so the script needs a human review.
+remediation: >
+  Review the script, or inline a short, reviewable command.
+message: "{kind} '{name}' ({trigger}) runs a repository script: {match}"
+match:
+  scope: exec
+  kinds: [claude_hook, vscode_task, devcontainer]
+  any:
+    - '(^|[\s;&|(])(\.{1,2}/)?[\w./-]*[\w-]\.(sh|bash|zsh|ps1|psm1|bat|cmd|py|js|mjs|cjs|ts|rb|pl)\b'
+tests:
+  positive:
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"bash scripts/bootstrap.sh\", \"runOptions\": {\"runOn\": \"folderOpen\"}}]}"
+  negative:
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"npm run watch\", \"runOptions\": {\"runOn\": \"folderOpen\"}}]}"

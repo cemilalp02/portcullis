@@ -1,0 +1,31 @@
+schema: 1
+id: PCL-EXE-004
+title: Encoded command in an auto-executed command
+severity: critical
+confidence: high
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  An automatically executed command decodes base64 (or similar) and runs the result, hiding
+  what actually executes from reviewers.
+remediation: >
+  Remove the command; decode it in a sandbox to see what it does.
+message: "{kind} '{name}' ({trigger}) executes encoded content"
+match:
+  scope: exec
+  any:
+    - '\bbase64\s+(-d|--decode|-D)\b[^\n]*\|\s*(sudo\s+)?(ba|z|da|k)?sh\b'
+    - '\b(powershell|pwsh)(\.exe)?\b[^\n]*\s-(e|ec|en|enc|enco|encod|encode|encoded|encodedcommand)\s+[a-z0-9+/=]{20,}'
+    - 'frombase64string\([^\n]*\b(iex|invoke-expression)\b|\b(iex|invoke-expression)\b[^\n]*frombase64string\('
+    - '\bexec\s*\(\s*(base64\.)?b64decode\('
+    - '\beval\s*\(\s*(atob|buffer\.from)\('
+tests:
+  positive:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"initializeCommand\": \"echo Y3VybCB4 | base64 -d | sh\"}"
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"powershell -NoP -enc SQBFAFgAIAAoAGkAdwByACAAaAB0AHQAcAA=\", \"runOptions\": {\"runOn\": \"folderOpen\"}}]}"
+  negative:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"postCreateCommand\": \"npm ci\"}"

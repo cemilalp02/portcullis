@@ -62,7 +62,9 @@ func frontMatter(text string) (fields map[string]string, bodyStart int) {
 }
 
 var (
-	networkUse = regexp.MustCompile(`(?i)\b(curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|scp|rsync|ncat|ftp)\b|https?://[^\s)>"']+|\brequests\.(get|post|put)\b|\burllib\b|\bhttp\.client\b|\bfetch\(|\baxios\b`)
+	// Network commands and client libraries. Plain URLs are not counted: skills
+	// link to documentation all the time.
+	networkUse = regexp.MustCompile(`(?i)\b(curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|scp|rsync|ncat|ftp)\b|\brequests\.(get|post|put)\b|\burllib\b|\bhttp\.client\b|\bfetch\(|\baxios\b`)
 	networkDoc = regexp.MustCompile(`(?i)\b(download|upload|fetch|https?|url|urls|api|apis|web|website|internet|network|online|remote|cloud|server|sync|deploy|publish|install|github|git|search|browse|request|endpoint|webhook|scrape|crawl)`)
 )
 

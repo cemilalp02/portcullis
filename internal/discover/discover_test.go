@@ -120,8 +120,8 @@ func TestSkillCompanions(t *testing.T) {
 	want := map[string]string{
 		".claude/skills/pdf/SKILL.md":           "skill",
 		".claude/skills/pdf/AGENTS.md":          "agents-md",
-		".claude/skills/pdf/reference.md":       "skill-resource",
-		".claude/skills/pdf/scripts/extract.py": "skill-resource",
+		".claude/skills/pdf/reference.md":       "skill-doc",
+		".claude/skills/pdf/scripts/extract.py": "skill-script",
 	}
 	if len(got) != len(want) {
 		t.Errorf("candidates = %v, want %v", got, want)

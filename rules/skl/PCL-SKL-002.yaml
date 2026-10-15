@@ -1,0 +1,24 @@
+schema: 1
+id: PCL-SKL-002
+title: Skill pre-approves unrestricted shell access
+severity: medium
+confidence: medium
+targets: [skill]
+owasp: [ASI02]
+since: 2026.10.0
+description: >
+  The skill's allowed-tools grants Bash without restrictions, so any command can run without
+  the user being asked while the skill is active.
+remediation: >
+  Restrict the tool, e.g. allowed-tools: Bash(python scripts/convert.py:*).
+message: "Unrestricted tool grant: {match}"
+match:
+  any:
+    - '^allowed-tools\s*:[^\n]*\bbash\b(\s*\(\s*\*\s*\))?\s*(,|\]|$)'
+tests:
+  positive:
+    - file: SKILL.md
+      content: "---\nname: helper\ndescription: helps\nallowed-tools: Read, Bash\n---\n"
+  negative:
+    - file: SKILL.md
+      content: "---\nname: helper\ndescription: helps\nallowed-tools: Read, Bash(git status:*)\n---\n"

@@ -27,11 +27,19 @@ targets:
     family: instruction
     patterns: ["**/SKILL.md"]
 
-  - id: skill-resource
-    title: Script or resource bundled with an agent skill
+  # Files next to a SKILL.md (any depth) are part of the skill: code the
+  # agent may run, and reference documents it reads as instructions.
+  - id: skill-script
+    title: Script bundled with an agent skill
     family: script
     companion_of: skill
-    extensions: [.sh, .bash, .zsh, .py, .js, .mjs, .cjs, .ts, .ps1, .psm1, .bat, .cmd, .rb, .pl, .md, .txt, .json, .yaml, .yml, .toml]
+    extensions: [.sh, .bash, .zsh, .py, .js, .mjs, .cjs, .ts, .ps1, .psm1, .bat, .cmd, .rb, .pl]
+
+  - id: skill-doc
+    title: Reference document bundled with an agent skill
+    family: instruction
+    companion_of: skill
+    extensions: [.md, .txt, .json, .yaml, .yml, .toml]
 
   - id: claude-commands
     title: Claude slash command or sub-agent

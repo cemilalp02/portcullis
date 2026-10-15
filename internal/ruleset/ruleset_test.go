@@ -1,6 +1,7 @@
 package ruleset
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -21,7 +22,7 @@ func opts(t *testing.T) Options {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Options{Targets: ts, Builtins: []string{"engine"}}
+	return Options{Targets: ts, Builtins: []string{"engine", "skill_capability_mismatch"}}
 }
 
 func TestLoadEmbedded(t *testing.T) {
@@ -44,8 +45,8 @@ func TestLoadEmbedded(t *testing.T) {
 	for _, r := range s.Rules() {
 		ids = append(ids, r.ID)
 	}
-	if !strings.HasPrefix(strings.Join(ids, ","), "PCL-ENG-001,PCL-ENG-002") {
-		t.Errorf("rules not sorted by ID: %v", ids)
+	if !slices.IsSorted(ids) || len(ids) < 30 {
+		t.Errorf("rules not sorted by ID or missing: %v", ids)
 	}
 	if s.Get("PCL-NOPE-001") != nil {
 		t.Error("Get of unknown id")
@@ -116,7 +117,7 @@ func TestTriggersAndScriptTargets(t *testing.T) {
 	if !c.MatchTrigger("initializecommand (runs on host)") || c.MatchTrigger("postcreatecommand") {
 		t.Error("MatchTrigger")
 	}
-	if !c.AppliesTo(opts(t).Targets.Get("skill-resource")) {
+	if !c.AppliesTo(opts(t).Targets.Get("skill-script")) {
 		t.Error("script family not applied")
 	}
 	plain, err := Parse("aut/PCL-AUT-001.yaml", []byte(valid), opts(t))

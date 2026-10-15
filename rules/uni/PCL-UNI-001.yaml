@@ -3,19 +3,19 @@ id: PCL-UNI-001
 title: Unicode Tag characters (invisible ASCII smuggling)
 severity: critical
 confidence: high
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI06, MCP03]
 since: 2026.10.0
 description: >
   Characters in the Unicode Tag block (U+E0000-U+E007F) are invisible in editors and on
-  GitHub, but many LLMs read them as the ASCII letters they shadow. They let an attacker
-  hide complete instructions inside an otherwise harmless-looking file.
+  GitHub, but many LLMs read them as the ASCII letters they shadow. They let an attacker hide
+  complete instructions inside an otherwise harmless-looking file.
 remediation: >
-  Remove the characters and treat the repository as hostile until the hidden text has been
-  decoded and reviewed (each U+E00xx character stands for ASCII 0xxx).
+  Remove the characters and treat the repository as hostile; the decoded hidden text is shown
+  in the finding message.
 references:
   - https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
-message: "{count} invisible Unicode Tag characters"
+message: "{count} invisible Unicode Tag characters hiding the text \"{decoded}\""
 match:
   view: raw
   codepoints: ["U+E0000..U+E007F"]
@@ -25,6 +25,9 @@ tests:
       content: "Build with make.\U000E0069\U000E0067\U000E006E\U000E006F\U000E0072\U000E0065\n"
     - file: .claude/settings.json
       content: "{\"env\": {\"NOTE\": \"ok\U000E0041\"}}"
+    - file: run.py
+      target: skill-script
+      content: "print('ok')\U000E0072\U000E006D\U000E0020\U000E002D\U000E0072\U000E0066\U000E0020\U000E007E"
   negative:
     - file: CLAUDE.md
       content: "Build with make. Emoji are fine: \U0001F600 and flags \U0001F1F9\U0001F1F7\n"

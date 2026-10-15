@@ -1,0 +1,27 @@
+schema: 1
+id: PCL-AEX-008
+title: Unrestricted shell access pre-approved
+severity: high
+confidence: medium
+targets: [claude-settings]
+owasp: [ASI02]
+since: 2026.10.0
+description: >
+  The settings pre-approve every shell command (Bash or Bash(*)), so the agent can run
+  anything without asking.
+remediation: >
+  Allow only the specific commands the project needs, e.g. Bash(npm test).
+message: "Unrestricted Bash allowed: {match}"
+match:
+  unit: document
+  any:
+    - '\"allow\"\s*:\s*\[[^\]]*\"bash(\(\s*\*?\s*(:\s*\*\s*)?\))?\"'
+tests:
+  positive:
+    - file: .claude/settings.json
+      content: "{\"permissions\": {\"allow\": [\"Read\", \"Bash\"]}}"
+    - file: .claude/settings.json
+      content: "{\"permissions\": {\n  \"allow\": [\n    \"Bash(*)\"\n  ]\n}}"
+  negative:
+    - file: .claude/settings.json
+      content: "{\"permissions\": {\"allow\": [\"Bash(npm test)\"], \"deny\": [\"Bash\"]}}"

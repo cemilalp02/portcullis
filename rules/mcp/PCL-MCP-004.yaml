@@ -1,0 +1,26 @@
+schema: 1
+id: PCL-MCP-004
+title: Hard-coded credential in MCP configuration
+severity: high
+confidence: medium
+targets: [mcp-config]
+owasp: [ASI03]
+since: 2026.10.0
+description: >
+  The MCP configuration committed to the repository contains what looks like a literal API key
+  or token. Anyone with the repository has the credential, and agents may echo it.
+remediation: >
+  Move the secret to an environment variable or input prompt (e.g. ${env:TOKEN}) and rotate
+  it.
+message: "Literal credential in MCP config: {match}"
+match:
+  any:
+    - '\"[a-z_]*(api[_-]?key|token|secret|password|passwd|bearer)[a-z_]*\"\s*:\s*\"[a-z0-9_\-]{20,}\"'
+    - '\"authorization\"\s*:\s*\"bearer\s+[a-z0-9._\-]{20,}\"'
+tests:
+  positive:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server@1.0.0\"], \"env\": {\"API_KEY\": \"test0000000000000000000000000000\"}}}}"
+  negative:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server@1.0.0\"], \"env\": {\"API_KEY\": \"${env:EXAMPLE_API_KEY}\"}}}}"

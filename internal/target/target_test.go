@@ -22,11 +22,11 @@ func loadDefault(t *testing.T) *Set {
 
 func TestDefaultTargets(t *testing.T) {
 	s := loadDefault(t)
-	if n := len(s.Defs()); n != 14 {
-		t.Errorf("got %d target types, want 14 (REQUIREMENTS §5)", n)
+	if n := len(s.Defs()); n != 15 {
+		t.Errorf("got %d target types, want 15 (REQUIREMENTS §5)", n)
 	}
 	comp := s.Companions("skill")
-	if len(comp) != 1 || comp[0].ID != "skill-resource" || comp[0].Family != Script {
+	if len(comp) != 2 || comp[0].ID != "skill-script" || comp[0].Family != Script || comp[1].ID != "skill-doc" || comp[1].Family != Instruction {
 		t.Fatalf("skill companions = %+v", comp)
 	}
 	if !comp[0].HasExtension("scripts/RUN.PY") || comp[0].HasExtension("logo.png") {
