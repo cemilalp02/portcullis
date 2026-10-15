@@ -153,7 +153,7 @@ func TestScanEndToEnd(t *testing.T) {
 	if len(exe) != 1 || exe[0].Path != ".claude/settings.json" || exe[0].Line != 3 || exe[0].Severity != finding.Critical {
 		t.Errorf("EXE-001 = %+v", exe)
 	}
-	if !strings.Contains(exe[0].Message, "claude_hook '' (SessionStart)") {
+	if !strings.Contains(exe[0].Message, "claude_hook (SessionStart)") {
 		t.Errorf("EXE-001 message = %q", exe[0].Message)
 	}
 	if d := byRule(res.Findings, RuleDuplicateKey); len(d) != 1 || d[0].Path != "package.json" || d[0].Column != 43 || d[0].EndColumn != 52 {
@@ -436,6 +436,16 @@ func TestExpandIsSinglePass(t *testing.T) {
 	}
 	if got := expand("{unknown}!", nil); got != "!" {
 		t.Errorf("unknown placeholder = %q", got)
+	}
+	for _, tt := range []struct{ name, want string }{
+		{"", "hook (SessionStart) runs"},
+		{"setup", "hook 'setup' (SessionStart) runs"},
+		{"{trigger}", "hook '{trigger}' (SessionStart) runs"},
+	} {
+		got := expand("hook '{name}' ({trigger}) runs", map[string]string{"name": tt.name, "trigger": "SessionStart"})
+		if got != tt.want {
+			t.Errorf("quoted name %q: expand = %q, want %q", tt.name, got, tt.want)
+		}
 	}
 }
 

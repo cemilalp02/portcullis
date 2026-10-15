@@ -10,6 +10,8 @@ uses [Semantic Versioning](https://semver.org/).
 
 - Project renamed from Bekçi to **Portcullis** (ADR-0009): module `github.com/cemilalp02/portcullis`,
   binary `portcullis`, rule ID prefix `PCL-`, config `.portcullis.yaml`.
+- Messages no longer show an empty name in quotes for unnamed hooks
+  (`claude_hook (SessionStart)` instead of `claude_hook '' (SessionStart)`).
 
 ### Added
 
