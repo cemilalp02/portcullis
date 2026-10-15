@@ -84,6 +84,12 @@ func Normalize(s string) *View {
 		// by a mark). Lower-casing and re-normalising gives one stable form.
 		seg := norm.NFKC.String(lower(fold.String(string(it.Next()))))
 		for _, r := range seg {
+			// NFKC can produce a character that stage 1 would have dropped:
+			// the norm package inserts U+034F after 30 combining marks
+			// (Stream-Safe Text Format). Dropping it keeps the view idempotent.
+			if Invisible(r) {
+				continue
+			}
 			if r != '\n' && unicode.IsSpace(r) {
 				if lastSpace {
 					continue
