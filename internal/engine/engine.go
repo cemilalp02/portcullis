@@ -498,6 +498,9 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 			c.add(r, start, end, c.doc.Text[start:end], map[string]string{"match": c.doc.Text[start:end]})
 		}
 	}
+	if !r.MayMatch(s) {
+		return
+	}
 	if r.Match.Unit == ruleset.UnitDocument {
 		report(0, s)
 		return
@@ -505,10 +508,11 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 	for base := 0; base <= len(s); {
 		end := strings.IndexByte(s[base:], '\n')
 		if end < 0 {
-			report(base, s[base:])
-			break
+			end = len(s) - base
 		}
-		report(base, s[base:base+end])
+		if line := s[base : base+end]; r.MayMatch(line) {
+			report(base, line)
+		}
 		base += end + 1
 	}
 }

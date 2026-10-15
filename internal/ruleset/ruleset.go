@@ -106,6 +106,7 @@ type Compiled struct {
 	families       map[target.Family]bool
 	targetIDs      map[string]bool
 	kinds          map[extract.Kind]bool
+	lits           *filter // pre-filter, see prefilter.go
 }
 
 // AppliesTo reports whether the rule inspects files of target d.
@@ -373,6 +374,7 @@ func compileMatch(c *Compiled, opts Options) []error {
 			*set.dst = append(*set.dst, re)
 		}
 	}
+	c.lits = prefilter(m)
 	return errs
 }
 
