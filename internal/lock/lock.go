@@ -132,6 +132,23 @@ func Format(f File) []byte {
 	return b.Bytes()
 }
 
+// validVersion accepts rule-set versions such as 2026.10.1: 1 to 64 letters,
+// digits, dots, plus and minus signs, so that a version always survives a
+// write and re-read unchanged.
+func validVersion(v string) bool {
+	if v == "" || len(v) > 64 {
+		return false
+	}
+	for _, c := range []byte(v) {
+		switch {
+		case '0' <= c && c <= '9', 'a' <= c && c <= 'z', 'A' <= c && c <= 'Z', c == '.', c == '+', c == '-':
+		default:
+			return false
+		}
+	}
+	return true
+}
+
 // Parse reads a context.lock strictly: any deviation from the format is an
 // error, so a tampered or truncated file never verifies (FR-53).
 func Parse(data []byte) (File, error) {
@@ -159,7 +176,7 @@ func Parse(data []byte) (File, error) {
 			continue
 		case 3:
 			v, ok := strings.CutPrefix(text, "ruleset ")
-			if !ok || v == "" || strings.ContainsAny(v, " \t") {
+			if !ok || !validVersion(v) {
 				return fail("expected 'ruleset <version>'")
 			}
 			f.Ruleset = v
