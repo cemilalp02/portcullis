@@ -243,6 +243,46 @@ func TestBuiltinRules(t *testing.T) {
 	}
 }
 
+func TestCustomRulesAndMerge(t *testing.T) {
+	o := opts(t)
+	custom := strings.ReplaceAll(valid, "PCL-AUT-001", "ACME-AUT-001")
+	fsys := fstest.MapFS{
+		"ACME-AUT-001.yaml":     {Data: []byte(custom)},
+		"sub/ACME-AUT-002.yaml": {Data: []byte(strings.ReplaceAll(valid, "PCL-AUT-001", "ACME-AUT-002"))},
+	}
+	o.Custom = true
+	extra, err := Load(fsys, o)
+	if err != nil {
+		t.Fatalf("custom rules: %v", err)
+	}
+	if extra.Get("ACME-AUT-001") == nil || extra.Get("ACME-AUT-002") == nil {
+		t.Fatal("custom rules not loaded from both levels")
+	}
+
+	o.Custom = false
+	base, err := Load(rules.FS, o)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := len(base.Rules())
+	if err := base.Merge(extra); err != nil || len(base.Rules()) != n+2 || base.Get("ACME-AUT-001") == nil {
+		t.Errorf("Merge: %v, %d rules", err, len(base.Rules()))
+	}
+	if err := base.Merge(extra); err == nil || !strings.Contains(err.Error(), "defined twice") {
+		t.Errorf("duplicate merge error = %v", err)
+	}
+
+	o.Custom = true
+	pcl := fstest.MapFS{"PCL-AUT-001.yaml": {Data: []byte(valid)}}
+	if _, err := Load(pcl, o); err == nil || !strings.Contains(err.Error(), "must not use the PCL- prefix") {
+		t.Errorf("custom PCL rule error = %v", err)
+	}
+	bad := fstest.MapFS{"x.yaml": {Data: []byte(strings.ReplaceAll(valid, "PCL-AUT-001", "acme-1"))}}
+	if _, err := Load(bad, o); err == nil || !strings.Contains(err.Error(), "invalid id") {
+		t.Errorf("bad custom id error = %v", err)
+	}
+}
+
 func TestLoadErrors(t *testing.T) {
 	o := opts(t)
 	if _, err := Load(fstest.MapFS{}, o); err == nil || !strings.Contains(err.Error(), "no rules") {

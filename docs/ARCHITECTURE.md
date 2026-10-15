@@ -57,7 +57,7 @@ All packages live under `internal/` — Portcullis exposes a CLI, not a Go API, 
 |---|---|---|
 | `cmd/portcullis` | `main`: wires CLI, maps errors to exit codes | — |
 | `internal/cli` | Sub-command parsing (stdlib `flag`), help text | `Command` |
-| `internal/config` *(Phase 5)* | Resolve settings from flags + out-of-tree config (+ in-tree / base snapshot in trusted mode) | `Settings`, `Mode` |
+| `internal/config` | Resolve settings from flags + out-of-tree config (+ in-tree / base snapshot in trusted mode) | `Settings`, `Mode` |
 | `internal/target` | Embedded target definitions, case-insensitive path matcher | `Def`, `Family`, `Matcher` |
 | `internal/discover` | Directory walk, skip policy, symlink policy, size checks | `Candidate`, `Event` |
 | `internal/source` | Read bytes, detect BOM / UTF-16, decode, build line index | `Document`, `Encoding` |
@@ -67,8 +67,8 @@ All packages live under `internal/` — Portcullis exposes a CLI, not a Go API, 
 | `internal/ruleset` | Rule YAML schema, strict loading, validation, regex compilation | `Rule`, `Compiled`, `Set` |
 | `internal/engine` | Evaluate rules on a document + facts; built-in checks registry; caps; fingerprints | `Engine`, `Builtin` |
 | `internal/finding` | Finding model, severity / confidence enums, ordering | `Finding`, `Severity` |
-| `internal/baseline` *(Phase 5)* | Load baseline, match by fingerprint | `Baseline` |
-| `internal/lock` *(Phase 5)* | Read / write / verify `context.lock` | `File`, `Diff` |
+| `internal/baseline` | Load baseline, match by fingerprint | `Baseline` |
+| `internal/lock` | Read / write / verify `context.lock` | `File`, `Diff` |
 | `internal/report` | `text`, `json`, `sarif` writers | `Writer` |
 | `internal/escape` | Safe, truncated excerpts for any output channel | `Excerpt()` |
 | `rules` (root package) | Embeds `targets.yaml` and `<category>/<RULE-ID>.yaml`; exports `FS` and the rule-set `Version` | `FS`, `Version` |
@@ -239,17 +239,22 @@ process (ADR-0006). If the tree's copy of a protected file differs from the snap
 
 ## 9. GitHub Action flow (FR-44, FR-60)
 
+Composite action in `action.yml`; the logic lives in `scripts/action/*.sh` so it can be run and
+tested outside GitHub. Inputs reach the scripts only as environment variables.
+
 ```
-on: pull_request
-1. actions/checkout (fetch-depth: 0)                         [SHA-pinned]
-2. install portcullis release binary, verify checksum (+ cosign in v0.1 release)
-3. for f in .portcullis.yaml .portcullis-baseline.yaml context.lock:
-       git show $BASE_SHA:$f > $RUNNER_TEMP/portcullis-base/$f   (if it exists)
-4. portcullis scan   --trusted --base-snapshot $RUNNER_TEMP/portcullis-base --format sarif --output portcullis.sarif
-5. portcullis verify (tree vs PR's own context.lock; lock diff vs base reported as PCL-ENG-009)
-6. github/codeql-action/upload-sarif                          [SHA-pinned, runs even on failure]
-7. job result = worst exit code of 4 and 5
-permissions: contents: read, security-events: write
+1. actions/setup-go                                           [SHA-pinned]
+2. scripts/action/build.sh: go build ./cmd/portcullis from the action's own source
+   (replaced by a checksum- and cosign-verified release download in Phase 7)
+3. scripts/action/run.sh:
+   pull_request: fetch the base commit if needed, export .portcullis.yaml,
+                 .portcullis-baseline.yaml, context.lock and .portcullis/ from it
+                 into $RUNNER_TEMP/portcullis/base
+   portcullis scan --trusted [--base-snapshot base] --format github --sarif ... --summary $GITHUB_STEP_SUMMARY
+   portcullis verify (if context.lock exists or verify-lock: true)
+   exit-code output = worst of scan and verify
+4. github/codeql-action/upload-sarif                          [SHA-pinned; skipped for fork PRs]
+5. fail the job with the recorded exit code
 ```
 
 Effect: a PR cannot weaken config/baseline (base copies are used), cannot change a context

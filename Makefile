@@ -14,7 +14,7 @@ LDFLAGS       := -s -w \
 EXE           := $(if $(filter windows,$(shell $(GO) env GOOS)),.exe,)
 BIN           := bin/portcullis$(EXE)
 
-.PHONY: all build test race cover lint fmt vuln tidy actionlint check clean
+.PHONY: all build test race cover lint fmt vuln tidy actionlint shellcheck check clean
 
 all: check build
 
@@ -46,7 +46,10 @@ tidy: ## Fail if go.mod / go.sum are not tidy
 actionlint: ## Lint GitHub workflow files
 	$(GO) run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
-check: tidy lint test vuln actionlint ## Everything CI runs
+shellcheck: ## Lint the GitHub Action scripts
+	shellcheck -s bash scripts/action/*.sh
+
+check: tidy lint test vuln actionlint shellcheck ## Everything CI runs
 
 clean:
 	rm -rf bin coverage.out

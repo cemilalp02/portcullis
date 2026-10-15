@@ -361,6 +361,45 @@ func TestScanIncompleteAndEvents(t *testing.T) {
 	}
 }
 
+func TestTargetFilesAndOverrides(t *testing.T) {
+	e := defaultEngine(t)
+	root := t.TempDir()
+	write(t, root, "CLAUDE.md", []byte("x"+tags("hi")))
+	write(t, root, "big/AGENTS.md", []byte(strings.Repeat("a", 100)))
+	write(t, root, "package.json", []byte(`{"scripts": {"prepare": "husky"}}`))
+	write(t, root, "README.md", []byte("not a target"))
+
+	res, err := e.Scan(root, Options{MaxFileSize: 50})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var paths []string
+	for _, tf := range res.TargetFiles {
+		paths = append(paths, tf.Path)
+	}
+	if strings.Join(paths, ",") != "CLAUDE.md,big/AGENTS.md,package.json" {
+		t.Errorf("TargetFiles = %v (oversize files must be included)", paths)
+	}
+
+	res, err = e.Scan(root, Options{
+		MaxFileSize: 50,
+		Disabled:    map[string]bool{"PCL-AEX-009": true},
+		Severity:    map[string]finding.Severity{"PCL-UNI-001": finding.Low},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(byRule(res.Findings, "PCL-AEX-009")) != 0 {
+		t.Error("disabled rule still reported")
+	}
+	if u := byRule(res.Findings, "PCL-UNI-001"); len(u) != 1 || u[0].Severity != finding.Low {
+		t.Errorf("severity override not applied: %+v", u)
+	}
+	if f := e.RuleFinding(RuleOversize, "x.md", map[string]string{"name": "1 > 0"}); f.Line != 1 || f.RuleID != RuleOversize || f.Fingerprint == "" {
+		t.Errorf("RuleFinding = %+v", f)
+	}
+}
+
 func TestNewValidation(t *testing.T) {
 	e := defaultEngine(t)
 	m := fstest.MapFS{}

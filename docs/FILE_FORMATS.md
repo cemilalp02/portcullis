@@ -43,8 +43,14 @@ rules:
   disable: [PCL-AEX-001]      # rule IDs; disabling a critical rule prints a warning
   severity:                   # per-rule overrides
     PCL-AEX-002: medium
-  dirs: [tools/portcullis-rules]   # extra rule directories
+  dirs: [.portcullis/rules]       # custom rules, relative to this file
 ```
+
+Keep custom rules and other control files under `.portcullis/`: in pull-request mode the
+GitHub Action reads that directory from the base commit, and changes to it are reported
+(`PCL-ENG-009`). `PCL-ENG-*` rules cannot be disabled or given another severity. A per-user
+configuration in `%APPDATA%\portcullis\config.yaml` or `$XDG_CONFIG_HOME/portcullis/config.yaml`
+applies to every scan, including untrusted ones.
 
 ## 3. `.portcullis-baseline.yaml` (suppressions)
 
@@ -61,3 +67,5 @@ suppressions:
 ```
 
 `rule` and `path` are informational (for review); matching is by fingerprint only.
+`portcullis baseline` writes this file from the current findings and keeps existing reasons.
+A baseline is honoured with `--baseline FILE`, or from the repository with `--trusted`.

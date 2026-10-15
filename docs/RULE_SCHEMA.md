@@ -144,7 +144,15 @@ tests:
       content: '{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"npx prettier --write ."}]}]}}'
 ```
 
-## 6. Rule catalogue
+## 6. Custom rules
+
+Organisations can add their own rules without forking: put rule files in a directory (for
+example `.portcullis/rules/`) and point to it with `rules.dirs` in `.portcullis.yaml` or with
+`--rules DIR`. Custom rules use the same schema, must carry fixtures, and must use their own ID
+prefix (`ACME-AUT-001`); the `PCL-` prefix is reserved. Rule directories inside a scanned
+repository are only loaded in trusted mode.
+
+## 6a. Rule catalogue
 
 [`RULES.md`](RULES.md) lists every rule. It is generated from the YAML files and a test fails if
 it is out of date (`go test ./internal/cli -run TestRulesDoc -update` regenerates it).

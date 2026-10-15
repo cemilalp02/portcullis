@@ -199,6 +199,10 @@ func checkPattern(p string) error {
 	return nil
 }
 
+// ValidPattern reports whether p is a valid relative '/'-separated glob for
+// MatchPattern.
+func ValidPattern(p string) bool { return checkPattern(p) == nil }
+
 // MatchPattern reports whether the '/'-separated path rel matches the glob
 // pattern, case-insensitively. "**" matches zero or more whole segments;
 // other segments use path.Match syntax.

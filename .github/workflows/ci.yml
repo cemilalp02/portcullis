@@ -36,6 +36,8 @@ jobs:
           version: v2.14.0
       - name: Lint workflows
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+      - name: Lint action scripts
+        run: shellcheck -s bash scripts/action/*.sh
 
   test:
     name: Test (${{ matrix.os }}, Go ${{ matrix.go }})

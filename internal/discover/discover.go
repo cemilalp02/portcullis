@@ -40,10 +40,11 @@ const (
 
 // Event is a reportable observation that is not a file to analyse.
 type Event struct {
-	Kind   EventKind
-	Path   string // '/'-separated, relative to the root
-	Detail string
-	Count  int
+	Kind     EventKind
+	Path     string // '/'-separated, relative to the root
+	ReadPath string // Oversize only: where the file can be read, relative to the root
+	Detail   string
+	Count    int
 }
 
 // Candidate is a target file to analyse.
@@ -172,6 +173,7 @@ func (w *walker) visit(p string, d fs.DirEntry, err error) error {
 func (w *walker) add(rel, readRel string, def *target.Def, size int64) {
 	if size > w.opts.MaxFileSize {
 		w.event(Oversize, rel, fmt.Sprintf("%d bytes > %d bytes", size, w.opts.MaxFileSize), 0)
+		w.res.Events[len(w.res.Events)-1].ReadPath = readRel
 		return
 	}
 	w.res.Candidates = append(w.res.Candidates, Candidate{Path: rel, ReadPath: readRel, Target: def, Size: size})
