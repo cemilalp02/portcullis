@@ -91,7 +91,7 @@ as the project root.
 | 1 | Claude memory | `**/CLAUDE.md`, `**/CLAUDE.local.md` |
 | 2 | Generic agent instructions | `**/AGENTS.md` |
 | 3 | Gemini instructions | `**/GEMINI.md` |
-| 4 | Skills | `**/SKILL.md` and every text file in the same skill folder |
+| 4 | Skills | `**/SKILL.md`; every file next to it (any depth) is a companion target: code as `skill-script`, documents as `skill-doc` |
 | 5 | Claude commands & sub-agents | `.claude/commands/**/*.md`, `.claude/agents/**/*.md` |
 | 6 | Cursor rules | `.cursorrules`, `.cursor/rules/**` |
 | 7 | Copilot instructions & prompts | `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, `.github/prompts/**/*.prompt.md` |

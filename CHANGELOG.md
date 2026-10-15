@@ -13,6 +13,13 @@ uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- 46 detection rules (48 in total) across seven groups: UNI (invisible and deceptive Unicode),
+  AUT (authority and concealment), EXE (execution, credentials, exfiltration), BAI (scanner
+  bait), AEX (auto-execution), MCP (server definitions) and SKL (skills). See `docs/RULES.md`.
+- Scripts and documents next to a `SKILL.md` are scanned as `skill-script` / `skill-doc`.
+- Exec rules can filter on the trigger; the hidden text of Unicode Tag runs is shown decoded.
+- `portcullis rules list --format markdown` and the generated rule catalogue `docs/RULES.md`.
+- Defanged corpus: 33 known attacks (100% recall required) and 10 clean repositories.
 - `portcullis scan`: scans a directory for agent context files and reports findings as text or
   JSON, with an auto-execution inventory and exit codes 0/1/2 (fail closed).
 - `portcullis rules list|show`.

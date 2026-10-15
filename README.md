@@ -22,6 +22,11 @@ portcullis scan --format json -o r.json # machine-readable report
 portcullis rules list                   # what is checked
 ```
 
+Portcullis ships 48 detection rules in seven groups - invisible Unicode, instruction override,
+execution and exfiltration, scanner bait, auto-execution, MCP servers and agent skills - plus 11
+input-integrity rules. Every rule is tested against positive and negative examples and a defanged
+corpus of 33 known attacks (100% detected) and 10 clean repositories (no false alarms).
+
 Exit codes: `0` nothing at or above the threshold (`--fail-on`, default `high`), `1` findings at
 or above it, `2` usage error or **incomplete analysis** (Portcullis never reports "clean" for
 something it could not read).
@@ -48,6 +53,7 @@ Auto-execution inventory (runs without asking):
 | [Requirements](docs/REQUIREMENTS.md) | Scope, scanned surface, functional and non-functional requirements, success metrics |
 | [Threat model](docs/THREAT_MODEL.md) | What Portcullis protects against — and what it does not |
 | [Architecture](docs/ARCHITECTURE.md) | Pipeline, packages, algorithms, trust model |
+| [Rule catalogue](docs/RULES.md) | All 59 rules: what each detects, severity and fix |
 | [Rule schema](docs/RULE_SCHEMA.md) | How detection rules are written and tested |
 | [CLI](docs/CLI.md) · [File formats](docs/FILE_FORMATS.md) | Commands, exit codes, outputs, `context.lock` |
 | [Decision records](docs/adr/) | Why things are the way they are |
