@@ -1,0 +1,80 @@
+name: Portcullis
+description: Scan AI agent context files (CLAUDE.md, SKILL.md, hooks, MCP configs) for hidden instructions and auto-execution.
+author: Cemil Alp
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  path:
+    description: Directory to scan, relative to the repository root.
+    default: "."
+  fail-on:
+    description: Fail on findings at or above this severity (info, low, medium, high, critical, none). Empty uses the repository configuration or "high".
+    default: ""
+  exclude:
+    description: Directory globs to skip, one per line.
+    default: ""
+  verify-lock:
+    description: Check context.lock (auto = only if the file exists, true, false).
+    default: auto
+  upload-sarif:
+    description: Upload results to GitHub code scanning (needs security-events write; skipped for pull requests from forks).
+    default: "true"
+  sarif-category:
+    description: Code scanning category, to tell several Portcullis runs apart.
+    default: portcullis
+  go-version:
+    description: Go version used to build Portcullis.
+    default: stable
+
+outputs:
+  exit-code:
+    description: 0 clean, 1 findings at or above the threshold or context.lock mismatch, 2 error or incomplete analysis.
+    value: ${{ steps.scan.outputs.exit-code }}
+  sarif-file:
+    description: Path of the SARIF file.
+    value: ${{ steps.scan.outputs.sarif-file }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version: ${{ inputs.go-version }}
+        cache: false
+
+    - name: Build Portcullis
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: bash "$ACTION_PATH/scripts/action/build.sh"
+
+    - name: Scan
+      id: scan
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        INPUT_VERIFY_LOCK: ${{ inputs.verify-lock }}
+        EVENT_NAME: ${{ github.event_name }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      run: bash "$ACTION_PATH/scripts/action/run.sh"
+
+    - name: Upload SARIF
+      if: >-
+        always() && inputs.upload-sarif == 'true' && steps.scan.outputs.sarif-file != '' &&
+        (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif-file }}
+        category: ${{ inputs.sarif-category }}
+
+    - name: Result
+      shell: bash
+      env:
+        EXIT_CODE: ${{ steps.scan.outputs.exit-code }}
+      run: exit "${EXIT_CODE:-2}"

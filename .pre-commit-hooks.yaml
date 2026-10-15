@@ -1,0 +1,17 @@
+# pre-commit (https://pre-commit.com) hooks. pre-commit builds Portcullis from
+# this repository with the Go toolchain (language: golang).
+- id: portcullis
+  name: Portcullis (AI agent context scanner)
+  description: Block commits that add hidden instructions or risky auto-execution to agent context files.
+  entry: portcullis scan --trusted
+  language: golang
+  pass_filenames: false
+  always_run: true
+
+- id: portcullis-verify
+  name: Portcullis context.lock check
+  description: Block commits that change approved agent context files without updating context.lock.
+  entry: portcullis verify --trusted
+  language: golang
+  pass_filenames: false
+  always_run: true
