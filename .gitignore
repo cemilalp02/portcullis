@@ -8,6 +8,10 @@ coverage.out
 *.prof
 /testdata/fuzz-cache/
 
+# Brand tooling (scripts/brand)
+__pycache__/
+/.venv/
+
 # Editors and OS
 /.idea/
 /.vscode/
