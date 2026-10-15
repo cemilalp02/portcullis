@@ -178,6 +178,7 @@ var placeholders = []string{"match", "count", "kind", "trigger", "name", "decode
 
 var (
 	idRE       = regexp.MustCompile(`^PCL-(UNI|AUT|EXE|BAI|AEX|MCP|SKL|ENG)-\d{3}$`)
+	customRE   = regexp.MustCompile(`^[A-Z][A-Z0-9]{1,15}-[A-Z]{3}-\d{3}$`)
 	owaspRE    = regexp.MustCompile(`^(ASI|MCP)\d{2}$`)
 	sinceRE    = regexp.MustCompile(`^\d{4}\.\d{1,2}\.\d+$`)
 	cpRE       = regexp.MustCompile(`^U\+([0-9A-Fa-f]{4,6})(?:\.\.U\+([0-9A-Fa-f]{4,6}))?$`)
@@ -189,6 +190,10 @@ var (
 type Options struct {
 	Targets  *target.Set
 	Builtins []string // names of registered built-in checks
+	// Custom loads user rules: IDs use the user's own prefix (ACME-AUT-001),
+	// never PCL-, and files may sit directly in the directory or one level
+	// below it.
+	Custom bool
 }
 
 // Parse decodes and validates one rule file. name is the file name used for
@@ -217,7 +222,12 @@ func compile(r *Rule, opts Options) (*Compiled, error) {
 	if r.Schema != 1 {
 		fail("unsupported schema %d", r.Schema)
 	}
-	if !idRE.MatchString(r.ID) {
+	switch {
+	case opts.Custom && strings.HasPrefix(r.ID, "PCL-"):
+		fail("custom rule %q must not use the PCL- prefix (use your own, e.g. ACME-AUT-001)", r.ID)
+	case opts.Custom && !customRE.MatchString(r.ID):
+		fail("invalid id %q (want <PREFIX>-<CAT>-<NNN>)", r.ID)
+	case !opts.Custom && !idRE.MatchString(r.ID):
 		fail("invalid id %q (want PCL-<CAT>-<NNN>)", r.ID)
 	}
 	if r.Title == "" || len(r.Title) > 80 {
@@ -389,6 +399,13 @@ func Load(fsys fs.FS, opts Options) (*Set, error) {
 	if err != nil {
 		return nil, err
 	}
+	if opts.Custom {
+		top, err := fs.Glob(fsys, "*.yaml")
+		if err != nil {
+			return nil, err
+		}
+		files = append(top, files...)
+	}
 	s := &Set{byID: map[string]*Compiled{}}
 	var errs []error
 	for _, f := range files {
@@ -417,6 +434,21 @@ func Load(fsys fs.FS, opts Options) (*Set, error) {
 	}
 	slices.SortFunc(s.rules, func(a, b *Compiled) int { return strings.Compare(a.ID, b.ID) })
 	return s, nil
+}
+
+// Merge adds the rules of other to s. Rule IDs must be unique.
+func (s *Set) Merge(other *Set) error {
+	for _, r := range other.rules {
+		if _, dup := s.byID[r.ID]; dup {
+			return fmt.Errorf("rule %s is defined twice", r.ID)
+		}
+	}
+	for _, r := range other.rules {
+		s.byID[r.ID] = r
+		s.rules = append(s.rules, r)
+	}
+	slices.SortFunc(s.rules, func(a, b *Compiled) int { return strings.Compare(a.ID, b.ID) })
+	return nil
 }
 
 // Rules returns all rules ordered by ID.

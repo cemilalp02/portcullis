@@ -49,14 +49,17 @@ const (
 	RuleReadError      = "PCL-ENG-006"
 	RuleInTreeConfig   = "PCL-ENG-007"
 	RuleSkippedTargets = "PCL-ENG-008"
+	RuleProtected      = "PCL-ENG-009"
 	RuleFindingCap     = "PCL-ENG-010"
 	RuleDirLinkEscape  = "PCL-ENG-011"
 	RuleUnresolvedLink = "PCL-ENG-012"
+	RuleStaleBaseline  = "PCL-ENG-013"
 )
 
 var engineRules = []string{
 	RuleOversize, RuleUnparseable, RuleDuplicateKey, RuleEncoding, RuleLinkEscape, RuleReadError,
-	RuleInTreeConfig, RuleSkippedTargets, RuleFindingCap, RuleDirLinkEscape, RuleUnresolvedLink,
+	RuleInTreeConfig, RuleSkippedTargets, RuleProtected, RuleFindingCap, RuleDirLinkEscape, RuleUnresolvedLink,
+	RuleStaleBaseline,
 }
 
 const builtinEngine = "engine"

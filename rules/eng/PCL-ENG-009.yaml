@@ -1,0 +1,18 @@
+schema: 1
+id: PCL-ENG-009
+title: Change touches Portcullis configuration
+severity: medium
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  The change under review adds, modifies or removes Portcullis configuration, the baseline,
+  context.lock or custom rules. In pull-request mode Portcullis keeps using the versions from
+  the base commit, so the change cannot weaken its own review, but reviewers should check what
+  it re-approves or suppresses.
+remediation: >
+  Review the change to this file as carefully as code; it decides what Portcullis accepts.
+message: "Portcullis control file {name} in this change"
+match:
+  builtin: engine

@@ -1,0 +1,17 @@
+schema: 1
+id: PCL-ENG-013
+title: Stale baseline entry
+severity: info
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  A baseline entry no longer matches any finding: the accepted problem was fixed, the file
+  moved, or the content changed. Stale entries should be removed so the baseline only
+  suppresses what was actually reviewed.
+remediation: >
+  Delete the entry from the baseline file.
+message: "Baseline entry {name} matches no finding"
+match:
+  builtin: engine
