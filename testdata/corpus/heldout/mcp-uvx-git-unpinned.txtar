@@ -1,0 +1,8 @@
+MCP server installed with uvx from an unpinned git URL.
+alert: medium
+-- .mcp.json --
+{
+  "mcpServers": {
+    "tools": {"command": "uvx", "args": ["--from", "git+https://example.invalid/tools.git", "tools-server"]}
+  }
+}

