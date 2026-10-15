@@ -11,5 +11,6 @@
 | [0007](0007-minimal-dependency-policy.md) | Minimal dependency policy | Accepted |
 | [0008](0008-line-based-lock-format.md) | Line-based `context.lock` format | Accepted |
 | [0009](0009-project-name-portcullis.md) | Project name "Portcullis" | Accepted |
+| [0010](0010-prose-view.md) | A prose view for natural-language rules | Accepted |
 
 New ADR: copy [`0000-template.md`](0000-template.md) and take the next number.
