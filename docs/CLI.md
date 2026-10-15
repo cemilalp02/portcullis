@@ -22,10 +22,11 @@
 
 | Flag | Default | Description |
 |---|---|---|
-| `--format` | `text` | `text`, `json`, `sarif` (SARIF 2.1.0), `github` (workflow annotations), `markdown` |
+| `--format` | `text` | `text`, `json`, `sarif` (SARIF 2.1.0), `github` (workflow annotations), `markdown`, `html` (self-contained report) |
 | `--output`, `-o` | stdout | Write results to a file |
 | `--sarif` | — | Also write SARIF to a file |
 | `--summary` | — | Also append a Markdown summary to a file (e.g. `$GITHUB_STEP_SUMMARY`) |
+| `--html` | — | Also write a self-contained HTML report to a file |
 | `--path-prefix` | — | Prefix for paths in SARIF and annotations when scanning a subdirectory of a repository |
 | `--fail-on` | `high` | Threshold: `info` … `critical`, or `none` (never exit 1) |
 | `--trusted` | off | Honour the repository's `.portcullis.yaml` and `.portcullis-baseline.yaml` |
