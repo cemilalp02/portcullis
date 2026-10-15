@@ -13,6 +13,7 @@ remediation: >
   Remove the instruction or limit it to specific, harmless commands.
 message: "Skip-confirmation instruction \"{match}\""
 match:
+  view: prose
   any:
     - '\b(always|automatically)\s+(approve|accept|allow|confirm)\s+(all|every|any)\s+(commands?|tool\s+calls?|tools|actions|requests|permissions)\b'
     - '\b(do not|don''?t|never)\s+ask\s+(the\s+user\s+)?(for\s+)?(permission|confirmation|approval)\b'

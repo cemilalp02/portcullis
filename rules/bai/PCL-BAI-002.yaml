@@ -13,6 +13,7 @@ remediation: >
   Review the file manually; such text is a reason for more scrutiny, not less.
 message: "Self-clearing text \"{match}\""
 match:
+  view: prose
   any:
     - '\b(classify|mark|report|label|treat|consider|rate)\s+(this|it|the)(\s+(file|code|repository|repo|project|package|skill|content))?\s+as\s+(safe|benign|harmless|clean|trusted|legitimate|not malicious|verified)\b'
     - '\b(do not|don''?t|never)\s+(flag|report|mention|surface)\s+(this|it|these|anything)\s+(file|code|content|issue|finding|as)\b'

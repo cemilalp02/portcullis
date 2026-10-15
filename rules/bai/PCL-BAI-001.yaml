@@ -14,6 +14,7 @@ remediation: >
   Treat the file as hostile and review it manually.
 message: "Scanner bait \"{match}\""
 match:
+  view: prose
   unit: document
   all:
     - '\b(if you are|as|dear|attention|note to|to)\s+(an?\s+)?(ai|llm|large language model|language model|ai assistant|automated (scanner|reviewer|tool|analy[sz]er)|security (scanner|tool|reviewer)|code review(er)? (bot|tool))\b'

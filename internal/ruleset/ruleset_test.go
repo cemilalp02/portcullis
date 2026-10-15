@@ -38,7 +38,7 @@ func TestLoadEmbedded(t *testing.T) {
 		t.Error("UNI-001 ranges")
 	}
 	exe := s.Get("PCL-EXE-001")
-	if exe == nil || exe.Match.Scope != ScopeExec || len(exe.Any) != 2 || !exe.HasKind(extract.NPMScript) {
+	if exe == nil || exe.Match.Scope != ScopeExec || len(exe.Any) != 4 || !exe.HasKind(extract.NPMScript) {
 		t.Fatalf("PCL-EXE-001 = %+v", exe)
 	}
 	ids := []string{}

@@ -13,6 +13,7 @@ remediation: >
   Review the file manually without an LLM in the loop.
 message: "Refusal bait \"{match}\""
 match:
+  view: prose
   any:
     - '\b(you must|you should|you are required to|always)\s+refuse\b'
     - '\bi(''?m| am)\s+sorry,?\s+(but\s+)?i\s+(can(no|'')?t|cannot|won''?t)\s+(help|assist|continue|comply|analy[sz]e|review)\s+with\s+(this|that)\b'
