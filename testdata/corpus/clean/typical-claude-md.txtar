@@ -1,0 +1,12 @@
+Ordinary project memory with build and style instructions.
+-- CLAUDE.md --
+# Acme API
+
+## Commands
+- `make test` runs the unit tests
+- `make lint` runs golangci-lint
+
+## Style
+- Wrap errors with fmt.Errorf
+- Ignore the previous build output when it is stale.
+- Always tell the user which files you changed.

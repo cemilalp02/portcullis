@@ -1,0 +1,25 @@
+schema: 1
+id: PCL-AEX-002
+title: VS Code task runs when the folder is opened
+severity: low
+confidence: high
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  The task has runOptions.runOn set to folderOpen, so VS Code (and compatible editors) start
+  it as soon as the folder is opened in a trusted workspace.
+remediation: >
+  Remove runOn: folderOpen or review the command before trusting the folder.
+message: "Task '{name}' runs on folder open: {match}"
+match:
+  scope: exec
+  kinds: [vscode_task]
+  every: true
+tests:
+  positive:
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"npm run watch\", \"runOptions\": {\"runOn\": \"folderOpen\"}}]}"
+  negative:
+    - file: .vscode/tasks.json
+      content: "{\"version\": \"2.0.0\", \"tasks\": [{\"label\": \"setup\", \"command\": \"npm run watch\"}]}"

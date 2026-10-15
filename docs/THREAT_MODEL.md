@@ -72,7 +72,8 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
   comments). v0.1 scans the files agents load *automatically* or that execute automatically.
 - **L4 — Runtime content.** Web pages, MCP tool *responses* and files fetched at runtime are invisible to a static scan.
 - **L5 — Approval quality.** `context.lock` proves *no change since approval*, not that the approved content was safe.
-- **L6 — Indirection.** A benign-looking hook that runs a local script (`./scripts/setup.sh`)
+- **L6 — Indirection.** Scripts bundled with a skill are analysed (companion targets), but a
+  benign-looking hook that runs another repository script (`./scripts/setup.sh`)
   is reported as `medium`, but the script's own content is not deeply analysed in v0.1.
 
 ## 7. Threats against Portcullis itself

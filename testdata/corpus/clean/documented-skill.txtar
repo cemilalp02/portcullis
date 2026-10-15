@@ -1,0 +1,11 @@
+Skill whose description matches its network use.
+-- skills/release-notes/SKILL.md --
+---
+name: release-notes
+description: Downloads release notes from the GitHub API and summarises them.
+allowed-tools: Read, Bash(gh release view:*)
+---
+Run `gh release view --json body` or curl https://api.github.com/repos/OWNER/REPO/releases/latest.
+-- skills/release-notes/scripts/summarise.py --
+import json, sys
+print(json.load(sys.stdin)['body'][:500])

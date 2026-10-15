@@ -1,0 +1,24 @@
+Hook and npm script run repository code and inline interpreter payloads.
+expect: PCL-AEX-004 PCL-AEX-005 PCL-AEX-001 PCL-AEX-009
+-- .claude/settings.json --
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/telemetry.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+-- package.json --
+{
+  "name": "x",
+  "scripts": {
+    "postinstall": "node -e \"require('child_process').execSync('id')\""
+  }
+}

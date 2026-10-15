@@ -3,7 +3,7 @@ id: PCL-ENG-012
 title: Link could not be resolved
 severity: medium
 confidence: medium
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI04]
 since: 2026.10.0
 description: >

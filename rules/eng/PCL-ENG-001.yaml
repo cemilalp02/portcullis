@@ -3,7 +3,7 @@ id: PCL-ENG-001
 title: Target file too large to analyse
 severity: high
 confidence: high
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI04]
 since: 2026.10.0
 description: >

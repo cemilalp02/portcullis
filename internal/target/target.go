@@ -20,6 +20,7 @@ type Family string
 const (
 	Instruction Family = "instruction" // natural-language text read by agents
 	Config      Family = "config"      // structured files that may execute commands
+	Script      Family = "script"      // code shipped with an agent skill and run by the agent
 )
 
 // Def describes one target type.
@@ -33,6 +34,24 @@ type Def struct {
 	// SkipCount excludes this target from the count of agent files found in
 	// skipped dependency directories (every npm dependency has a package.json).
 	SkipCount bool `yaml:"skip_count"`
+	// CompanionOf makes this a companion target: instead of matching
+	// patterns, it covers the files with one of Extensions that live in the
+	// directory (and subdirectories) of a file of the named target, e.g. the
+	// scripts bundled next to a SKILL.md.
+	CompanionOf string   `yaml:"companion_of"`
+	Extensions  []string `yaml:"extensions"`
+}
+
+// HasExtension reports whether name ends with one of d.Extensions
+// (case-insensitive).
+func (d *Def) HasExtension(name string) bool {
+	name = strings.ToLower(name)
+	for _, e := range d.Extensions {
+		if strings.HasSuffix(name, strings.ToLower(e)) {
+			return true
+		}
+	}
+	return false
 }
 
 // Set is an ordered collection of target definitions.
@@ -70,6 +89,14 @@ func Load(data []byte) (*Set, error) {
 		s.byID[d.ID] = d
 		s.defs = append(s.defs, d)
 	}
+	for _, d := range s.defs {
+		if d.CompanionOf == "" {
+			continue
+		}
+		if p := s.byID[d.CompanionOf]; p == nil || p.CompanionOf != "" {
+			errs = append(errs, fmt.Errorf("targets %q: companion_of %q is not a pattern-based target", d.ID, d.CompanionOf))
+		}
+	}
 	if len(s.defs) == 0 && len(errs) == 0 {
 		errs = append(errs, errors.New("targets: no targets defined"))
 	}
@@ -87,9 +114,9 @@ func validate(d *Def) error {
 		d.Format = "text"
 	}
 	switch d.Family {
-	case Instruction:
+	case Instruction, Script:
 		if d.Format != "text" || d.Extractor != "" {
-			return errors.New("instruction targets are plain text without an extractor")
+			return errors.New("instruction and script targets are plain text without an extractor")
 		}
 	case Config:
 		if d.Format != "jsonc" || d.Extractor == "" {
@@ -97,6 +124,20 @@ func validate(d *Def) error {
 		}
 	default:
 		return fmt.Errorf("unknown family %q", d.Family)
+	}
+	if d.CompanionOf != "" {
+		if len(d.Patterns) > 0 || len(d.Extensions) == 0 {
+			return errors.New("companion targets have extensions instead of patterns")
+		}
+		for _, e := range d.Extensions {
+			if !strings.HasPrefix(e, ".") || strings.ContainsAny(e, "/*?[") {
+				return fmt.Errorf("invalid extension %q (want e.g. .py)", e)
+			}
+		}
+		return nil
+	}
+	if len(d.Extensions) > 0 {
+		return errors.New("extensions are only valid with companion_of")
 	}
 	if len(d.Patterns) == 0 {
 		return errors.New("at least one pattern is required")
@@ -114,6 +155,17 @@ func (s *Set) Defs() []*Def { return slices.Clone(s.defs) }
 
 // Get returns the definition with the given ID, or nil.
 func (s *Set) Get(id string) *Def { return s.byID[id] }
+
+// Companions returns the companion targets of the target with the given ID.
+func (s *Set) Companions(id string) []*Def {
+	var out []*Def
+	for _, d := range s.defs {
+		if d.CompanionOf == id {
+			out = append(out, d)
+		}
+	}
+	return out
+}
 
 // Match returns the first definition matching the '/'-separated relative
 // path, or nil. Matching is case-insensitive because agents on Windows and

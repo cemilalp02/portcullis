@@ -1,0 +1,27 @@
+MCP servers pinned to exact versions with secrets from the environment.
+-- .mcp.json --
+{
+  "mcpServers": {
+    "files": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2025.8.21",
+        "."
+      ]
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git==0.6.2"
+      ]
+    },
+    "search": {
+      "type": "http",
+      "url": "https://mcp.example.invalid/sse",
+      "headers": {
+        "Authorization": "Bearer ${env:SEARCH_TOKEN}"
+      }
+    }
+  }
+}

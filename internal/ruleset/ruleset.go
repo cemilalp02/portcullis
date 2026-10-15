@@ -43,10 +43,11 @@ type Rule struct {
 
 // Match selects what a rule looks at and how it matches.
 type Match struct {
-	Scope      string   `yaml:"scope"` // "text" (default) or "exec"
-	View       string   `yaml:"view"`  // "normalized" (default) or "raw"; text scope
-	Unit       string   `yaml:"unit"`  // "line" (default) or "document"; text scope
-	Kinds      []string `yaml:"kinds"` // exec scope; empty means all kinds
+	Scope      string   `yaml:"scope"`    // "text" (default) or "exec"
+	View       string   `yaml:"view"`     // "normalized" (default) or "raw"; text scope
+	Unit       string   `yaml:"unit"`     // "line" (default) or "document"; text scope
+	Kinds      []string `yaml:"kinds"`    // exec scope; empty means all kinds
+	Triggers   []string `yaml:"triggers"` // exec scope; regexes on the normalised trigger, any must match
 	Codepoints []string `yaml:"codepoints"`
 	Any        []string `yaml:"any"`
 	All        []string `yaml:"all"`
@@ -62,9 +63,23 @@ type Tests struct {
 }
 
 // Case is one fixture: a file path (deciding its target type) and content.
+// Target names the target type explicitly, for companion targets that are
+// not matched by path (e.g. skill-script).
 type Case struct {
 	File    string `yaml:"file"`
+	Target  string `yaml:"target"`
 	Content string `yaml:"content"`
+}
+
+// CaseTarget returns the target type a fixture is analysed as, or nil.
+func CaseTarget(ts *target.Set, tc Case) *target.Def {
+	if ts == nil {
+		return nil
+	}
+	if tc.Target != "" {
+		return ts.Get(tc.Target)
+	}
+	return ts.Match(tc.File)
 }
 
 // Scopes, views and units.
@@ -84,6 +99,7 @@ type Range struct{ Lo, Hi rune }
 type Compiled struct {
 	Rule
 	Any, All, None []*regexp.Regexp
+	TriggerREs     []*regexp.Regexp
 	Ranges         []Range
 	families       map[target.Family]bool
 	targetIDs      map[string]bool
@@ -97,6 +113,20 @@ func (c *Compiled) AppliesTo(d *target.Def) bool {
 
 // HasKind reports whether an exec rule inspects execution points of kind k.
 func (c *Compiled) HasKind(k extract.Kind) bool { return len(c.kinds) == 0 || c.kinds[k] }
+
+// MatchTrigger reports whether an exec rule applies to an execution point
+// with the given (normalised) trigger.
+func (c *Compiled) MatchTrigger(trigger string) bool {
+	if len(c.TriggerREs) == 0 {
+		return true
+	}
+	for _, re := range c.TriggerREs {
+		if re.MatchString(trigger) {
+			return true
+		}
+	}
+	return false
+}
 
 // InRanges reports whether r is in one of the rule's code point ranges.
 func (c *Compiled) InRanges(r rune) bool {
@@ -144,7 +174,7 @@ func (c *Compiled) MatchUnit(s string) [][]int {
 }
 
 // Placeholders allowed in messages.
-var placeholders = []string{"match", "count", "kind", "trigger", "name"}
+var placeholders = []string{"match", "count", "kind", "trigger", "name", "decoded"}
 
 var (
 	idRE       = regexp.MustCompile(`^PCL-(UNI|AUT|EXE|BAI|AEX|MCP|SKL|ENG)-\d{3}$`)
@@ -223,7 +253,7 @@ func compile(r *Rule, opts Options) (*Compiled, error) {
 	}
 	for _, t := range r.Targets {
 		switch {
-		case t == string(target.Instruction) || t == string(target.Config):
+		case t == string(target.Instruction) || t == string(target.Config) || t == string(target.Script):
 			c.families[target.Family(t)] = true
 		case opts.Targets != nil && opts.Targets.Get(t) != nil:
 			c.targetIDs[t] = true
@@ -240,11 +270,7 @@ func compile(r *Rule, opts Options) (*Compiled, error) {
 	}
 	if r.Tests != nil {
 		for _, tc := range append(slices.Clone(r.Tests.Positive), r.Tests.Negative...) {
-			var d *target.Def
-			if opts.Targets != nil {
-				d = opts.Targets.Match(tc.File)
-			}
-			if d == nil || !c.AppliesTo(d) {
+			if d := CaseTarget(opts.Targets, tc); d == nil || !c.AppliesTo(d) {
 				fail("test file %q is not a target this rule inspects", tc.File)
 			}
 		}
@@ -280,8 +306,8 @@ func compileMatch(c *Compiled, opts Options) []error {
 	}
 	switch m.Scope {
 	case ScopeText:
-		if len(m.Kinds) > 0 || m.Every {
-			fail("kinds and every are only valid with scope exec")
+		if len(m.Kinds) > 0 || len(m.Triggers) > 0 || m.Every {
+			fail("kinds, triggers and every are only valid with scope exec")
 		}
 	case ScopeExec:
 		if len(m.Codepoints) > 0 {
@@ -322,7 +348,7 @@ func compileMatch(c *Compiled, opts Options) []error {
 	for _, set := range []struct {
 		src []string
 		dst *[]*regexp.Regexp
-	}{{m.Any, &c.Any}, {m.All, &c.All}, {m.None, &c.None}} {
+	}{{m.Any, &c.Any}, {m.All, &c.All}, {m.None, &c.None}, {m.Triggers, &c.TriggerREs}} {
 		for _, p := range set.src {
 			re, err := regexp.Compile(p)
 			if err != nil {

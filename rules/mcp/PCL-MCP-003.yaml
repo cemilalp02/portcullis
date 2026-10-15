@@ -1,0 +1,30 @@
+schema: 1
+id: PCL-MCP-003
+title: Remote MCP server over plain HTTP
+severity: medium
+confidence: high
+targets: [config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  The remote MCP server is reached over unencrypted HTTP, so anyone on the network path can
+  read or change the tools and data the agent receives.
+remediation: >
+  Use https:// for remote servers.
+message: "MCP server '{name}' uses plain HTTP: {match}"
+match:
+  scope: exec
+  kinds: [mcp_server]
+  any:
+    - '^http://'
+  none:
+    - '^http://(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)(:|/|$)'
+tests:
+  positive:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"type\": \"http\", \"url\": \"http://mcp.example.invalid/sse\"}}}"
+  negative:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"type\": \"http\", \"url\": \"http://localhost:8080/mcp\"}}}"
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"type\": \"http\", \"url\": \"https://mcp.example.invalid/sse\"}}}"

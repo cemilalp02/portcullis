@@ -1,0 +1,32 @@
+schema: 1
+id: PCL-MCP-002
+title: MCP server package is not pinned
+severity: medium
+confidence: medium
+targets: [config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  The MCP server is fetched by npx, bunx, uvx or pipx without a version, so whatever version
+  the registry serves - including a hijacked one - runs with the agent's privileges (rug
+  pull).
+remediation: >
+  Pin an exact version, e.g. npx -y @scope/server@1.2.3 or uvx server==1.2.3.
+message: "MCP server '{name}' is not pinned: {match}"
+match:
+  scope: exec
+  kinds: [mcp_server]
+  any:
+    - '^(npx|bunx|pnpx)\s+(-y\s+|--yes\s+)*(@[a-z0-9._-]+/)?[a-z0-9_][a-z0-9._-]*(\s|$)'
+    - '^(uvx|pipx\s+run)\s+[a-z0-9_][a-z0-9._-]*(\s|$)'
+tests:
+  positive:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server-files\", \".\"]}}}"
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"uvx\", \"args\": [\"mcp-server-fetch\"]}}}"
+  negative:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server-files@1.4.0\", \".\"]}}}"
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tool\": {\"command\": \"uvx\", \"args\": [\"mcp-server-fetch==2025.4.7\"]}}}"

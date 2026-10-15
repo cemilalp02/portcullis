@@ -3,7 +3,7 @@ id: PCL-ENG-004
 title: Unusual text encoding
 severity: medium
 confidence: medium
-targets: [instruction, config]
+targets: [instruction, config, script]
 owasp: [ASI06]
 since: 2026.10.0
 description: >

@@ -1,0 +1,25 @@
+schema: 1
+id: PCL-UNI-004
+title: Variation selectors used to smuggle data
+severity: high
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI06]
+since: 2026.10.0
+description: >
+  Supplementary variation selectors (U+E0100-U+E01EF) are invisible and can encode arbitrary
+  bytes after a visible character (emoji smuggling). They have no legitimate use in agent
+  instructions.
+remediation: >
+  Remove the characters and decode them to see what was hidden.
+message: "{count} supplementary variation selectors can carry hidden data"
+match:
+  view: raw
+  codepoints: ["U+E0100..U+E01EF"]
+tests:
+  positive:
+    - file: CLAUDE.md
+      content: "Have fun \U0001F600\U000E0100\U000E0141\U000E0142\n"
+  negative:
+    - file: CLAUDE.md
+      content: "A red heart \u2764\uFE0F uses an ordinary selector\n"

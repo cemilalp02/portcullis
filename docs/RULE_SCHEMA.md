@@ -28,13 +28,13 @@ or missing required fields are load errors (exit `2`) — a typo must never sile
 | `title` | string | ✔ | ≤ 80 chars, sentence case |
 | `severity` | enum | ✔ | `info` `low` `medium` `high` `critical` (see REQUIREMENTS §6.4) |
 | `confidence` | enum | ✔ | `low` `medium` `high` — how often a match is truly malicious |
-| `targets` | list | ✔ | Families (`instruction`, `config`) and/or target IDs from `targets.yaml` |
+| `targets` | list | ✔ | Families (`instruction`, `config`, `script`) and/or target IDs from `targets.yaml` |
 | `owasp` | list | ✔ | e.g. `ASI06`, `MCP03` |
 | `since` | string | ✔ | Rule-set version that introduced the rule (`2026.10.0`) |
 | `description` | string | ✔ | What the attack is and why it matters |
 | `remediation` | string | ✔ | What the user should do |
 | `references` | list | | URLs |
-| `message` | string | ✔ | Per-finding message; placeholders: `{match}` `{count}` `{kind}` `{trigger}` `{name}` (plain substitution, no template engine; values are escaped) |
+| `message` | string | ✔ | Per-finding message; placeholders: `{match}` `{count}` `{kind}` `{trigger}` `{name}` `{decoded}` (decoded Unicode Tag text, code point rules) (single-pass substitution, no template engine; values are escaped) |
 | `match` | object | ✔ | See §3 |
 | `tests` | object | ✔ | See §4 |
 
@@ -48,6 +48,7 @@ Exactly one of `codepoints`, (`any` / `all`), `every`, `builtin` must be used.
 | `view` | `text` | `raw` or `normalized` (default `normalized`) |
 | `unit` | `text` | `line` (default) or `document` |
 | `kinds` | `exec` | Subset of `claude_hook`, `vscode_task`, `devcontainer`, `npm_script`, `mcp_server`; default all |
+| `triggers` | `exec` | Regexes on the normalised trigger (e.g. `^initializecommand`); the point is inspected if any matches; default all |
 | `codepoints` | `text`, `raw` | List of code points / ranges: `U+202E`, `U+E0000..U+E007F` |
 | `any` | both | Regexes; unit matches if **any** matches |
 | `all` | both | Regexes; **all** must match within the unit |
@@ -72,7 +73,9 @@ tests:
       content: "…"
 ```
 
-At least one positive and one negative case are required (FR-21). Invisible characters are
+At least one positive and one negative case are required (FR-21), except for `builtin` rules,
+which are tested in Go. A case may set `target: <id>` to analyse the content as a target type that
+is not matched by path, such as the companion targets `skill-script` and `skill-doc`. Invisible characters are
 written with YAML double-quoted escapes (`"\u200B"`, `"\U000E0041"`) so fixtures stay
 reviewable. Large or multi-file cases go in `testdata/corpus/` instead; inline cases are the
 minimum contract. `go test ./...` runs every inline case automatically.
@@ -141,7 +144,12 @@ tests:
       content: '{"hooks":{"PostToolUse":[{"hooks":[{"type":"command","command":"npx prettier --write ."}]}]}}'
 ```
 
-## 6. Review checklist for new rules
+## 6. Rule catalogue
+
+[`RULES.md`](RULES.md) lists every rule. It is generated from the YAML files and a test fails if
+it is out of date (`go test ./internal/cli -run TestRulesDoc -update` regenerates it).
+
+## 7. Review checklist for new rules
 
 - [ ] Positive and negative fixtures; negative includes a *realistic legitimate* case.
 - [ ] Severity follows attacker gain (REQUIREMENTS §6.4), confidence is honest.

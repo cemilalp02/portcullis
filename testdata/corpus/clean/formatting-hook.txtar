@@ -1,0 +1,17 @@
+Claude hook that formats files after edits.
+-- .claude/settings.json --
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATHS\""
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ]
+  }
+}

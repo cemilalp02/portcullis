@@ -183,10 +183,20 @@ Rules are compiled once (RE2). Per document:
 - **`scope: text`** — unit is each *line* (default) or the whole *document*; view is `raw`
   or `normalized`. A unit matches if ≥ 1 `any` regex matches, all `all` regexes match and
   no `none` regex matches. `codepoints` rules scan the raw view and report each run.
-- **`scope: exec`** — unit is each `ExecPoint` whose `Kind` is in `kinds`; matching is on
-  the normalised `Command`. `every: true` matches each point (used for the inventory).
-- **`builtin: <name>`** — named Go check (registry), e.g. `skill_capability_mismatch`,
-  `mcp_shell_launcher`. Built-ins are listed with YAML metadata like any other rule.
+- **`scope: exec`** — unit is each `ExecPoint` whose `Kind` is in `kinds` and whose
+  normalised trigger matches `triggers` (if given); matching is on the normalised `Command`.
+  `every: true` matches each point (used for the inventory-style rules).
+- **`builtin: <name>`** — named Go check (registry in `engine/builtins.go`). v0.1 has one:
+  `skill_capability_mismatch` reads the `SKILL.md` front-matter with a minimal line parser (no
+  YAML parser ever sees scanned content) and reports network commands in the body when the
+  name and description never mention network use. The special builtin `engine` marks rules
+  that the engine emits itself (`PCL-ENG-*`).
+- **Companion targets** — a target with `companion_of: skill` covers every file with one of its
+  extensions below a directory that contains a `SKILL.md`: code becomes `skill-script`
+  (family `script`), documents become `skill-doc` (family `instruction`). `discover` adds them
+  after the main walk, without following links.
+- **Unicode Tag runs** are decoded back to the ASCII text an LLM reads and shown through the
+  `{decoded}` placeholder (PCL-UNI-001).
 
 Caps: ≤ 50 findings per file (then one `PCL-ENG-010` summary), ≤ 5 per rule per file.
 

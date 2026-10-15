@@ -1,0 +1,25 @@
+schema: 1
+id: PCL-AEX-009
+title: npm install-time script
+severity: info
+confidence: high
+targets: [config]
+owasp: [ASI04]
+since: 2026.10.0
+description: >
+  npm runs this script automatically during npm install / npm ci, including when an agent
+  installs dependencies.
+remediation: >
+  Review the script; consider --ignore-scripts for untrusted packages.
+message: "{trigger} runs on npm install: {match}"
+match:
+  scope: exec
+  kinds: [npm_script]
+  every: true
+tests:
+  positive:
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"prepare\": \"husky\"}}"
+  negative:
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"test\": \"jest\"}}"

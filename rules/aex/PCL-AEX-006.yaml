@@ -1,0 +1,25 @@
+schema: 1
+id: PCL-AEX-006
+title: All project MCP servers enabled without approval
+severity: high
+confidence: high
+targets: [claude-settings]
+owasp: [ASI04, MCP03]
+since: 2026.10.0
+description: >
+  enableAllProjectMcpServers makes Claude Code start every server in the repository's
+  .mcp.json without asking, so a malicious server definition runs as soon as the project is
+  opened.
+remediation: >
+  Remove the setting and approve MCP servers individually.
+message: "Project MCP servers auto-enabled: {match}"
+match:
+  any:
+    - '\"enableallprojectmcpservers\"\s*:\s*true'
+tests:
+  positive:
+    - file: .claude/settings.json
+      content: "{\"enableAllProjectMcpServers\": true}"
+  negative:
+    - file: .claude/settings.json
+      content: "{\"enableAllProjectMcpServers\": false}"

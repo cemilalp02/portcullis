@@ -1,0 +1,28 @@
+schema: 1
+id: PCL-AEX-003
+title: Dev container command runs on the host
+severity: medium
+confidence: high
+targets: [config]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  initializeCommand runs on the developer's machine, not inside the container, before the
+  container is created. It is the dev container field with the widest access.
+remediation: >
+  Move the command into the container (onCreateCommand, postCreateCommand) or review it
+  carefully.
+message: "initializeCommand runs on the host: {match}"
+match:
+  scope: exec
+  kinds: [devcontainer]
+  triggers:
+    - '^initializecommand'
+  every: true
+tests:
+  positive:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"initializeCommand\": \"./scripts/prepare-host.sh\"}"
+  negative:
+    - file: .devcontainer/devcontainer.json
+      content: "{\"image\": \"mcr.microsoft.com/devcontainers/base:ubuntu\", \"postCreateCommand\": \"./scripts/prepare-host.sh\"}"

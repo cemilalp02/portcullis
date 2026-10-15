@@ -1,0 +1,27 @@
+schema: 1
+id: PCL-AUT-008
+title: Instruction to change shell start-up files
+severity: medium
+confidence: low
+targets: [instruction, config, script]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  The text asks for changes to shell start-up files such as ~/.bashrc or ~/.zshrc. Setup
+  guides do this for PATH or environment variables, but it is also a simple way to run code in
+  every future shell.
+remediation: >
+  Check what is added; prefer project-local environment files.
+message: "Shell start-up file change \"{match}\""
+match:
+  any:
+    - '\b(write|add|append|insert|modify|edit|overwrite|update|put)\b.{0,60}(\.bashrc|\.zshrc|\.bash_profile|\.zprofile|\.profile\b|powershell_profile|\$profile\b)'
+  none:
+    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+tests:
+  positive:
+    - file: CLAUDE.md
+      content: "Append the helper alias to ~/.bashrc so it survives restarts.\n"
+  negative:
+    - file: CLAUDE.md
+      content: "Shell completion docs live in docs/shell.md.\n"

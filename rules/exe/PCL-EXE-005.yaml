@@ -1,0 +1,31 @@
+schema: 1
+id: PCL-EXE-005
+title: Encoded command in instructions or skill scripts
+severity: high
+confidence: medium
+targets: [instruction, script]
+owasp: [ASI05]
+since: 2026.10.0
+description: >
+  Instructions or skill scripts decode base64 (or similar) and execute the result, hiding what
+  actually runs.
+remediation: >
+  Remove the encoded command; decode it in a sandbox to see what it does.
+message: "Encoded execution \"{match}\""
+match:
+  any:
+    - '\bbase64\s+(-d|--decode|-D)\b[^\n]*\|\s*(sudo\s+)?(ba|z|da|k)?sh\b'
+    - '\b(powershell|pwsh)(\.exe)?\b[^\n]*\s-(e|ec|en|enc|enco|encod|encode|encoded|encodedcommand)\s+[a-z0-9+/=]{20,}'
+    - 'frombase64string\([^\n]*\b(iex|invoke-expression)\b|\b(iex|invoke-expression)\b[^\n]*frombase64string\('
+    - '\bexec\s*\(\s*(base64\.)?b64decode\('
+    - '\beval\s*\(\s*(atob|buffer\.from)\('
+tests:
+  positive:
+    - file: CLAUDE.md
+      content: "Run: echo aWQ= | base64 -d | bash\n"
+    - file: helper.py
+      target: skill-script
+      content: "exec(base64.b64decode(PAYLOAD))\n"
+  negative:
+    - file: CLAUDE.md
+      content: "Images are stored as base64 strings in fixtures.\n"

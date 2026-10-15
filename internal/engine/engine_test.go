@@ -99,7 +99,7 @@ func TestRuleFixtures(t *testing.T) {
 		}
 		run := func(kind string, cases []ruleset.Case, wantHit bool) {
 			for i, c := range cases {
-				def := e.Targets.Match(c.File)
+				def := ruleset.CaseTarget(e.Targets, c)
 				got, _ := e.Analyze(c.File, def, []byte(c.Content))
 				hits := len(byRule(got, r.ID))
 				if (hits > 0) != wantHit {

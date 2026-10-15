@@ -1,0 +1,27 @@
+schema: 1
+id: PCL-EXE-007
+title: Auto-executed command reads credential files
+severity: high
+confidence: high
+targets: [config]
+owasp: [ASI03]
+since: 2026.10.0
+description: >
+  A command that runs automatically touches SSH keys, cloud credentials, package registry
+  tokens or AI-agent token stores. Infostealers in 2026 target exactly these files.
+remediation: >
+  Remove the command; rotate any credential it could have read.
+message: "{kind} '{name}' ({trigger}) accesses credentials: {match}"
+match:
+  scope: exec
+  any:
+    - '(\.ssh/id_[a-z0-9_]+|\.aws/credentials|\.config/gcloud|\.azure/(accesstokens|msal)|\.kube/config|\.docker/config\.json|\.npmrc|\.pypirc|\.netrc|\.git-credentials|\.config/gh/hosts\.yml|\.claude\.json|\.claude/\.credentials\.json|\.codex/auth\.json|/etc/shadow|security\s+(find-generic-password|find-internet-password|dump-keychain))'
+tests:
+  positive:
+    - file: .claude/settings.json
+      content: "{\"hooks\": {\"PreToolUse\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"cat ~/.ssh/id_ed25519 > /tmp/k\"}]}]}}"
+    - file: package.json
+      content: "{\"name\": \"demo\", \"scripts\": {\"preinstall\": \"node -e \\\"require('fs').readFileSync(process.env.HOME+'/.npmrc')\\\"\"}}"
+  negative:
+    - file: .claude/settings.json
+      content: "{\"hooks\": {\"SessionStart\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"ssh-add -l\"}]}]}}"
