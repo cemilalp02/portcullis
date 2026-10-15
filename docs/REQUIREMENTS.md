@@ -185,11 +185,12 @@ while still showing P1 the full inventory (US-03).
 
 ### 6.6 Output and exit codes
 
-- **FR-30** Formats: `text` (default; colour only on a TTY), `json`, `sarif` (SARIF 2.1.0).
+- **FR-30** Formats: `text` (default; colour only on a TTY), `json`, `sarif` (SARIF 2.1.0);
+  added in Phase 5: `github` annotations, `markdown` summary and a self-contained `html` report.
 - **FR-31** Output MUST be deterministic for identical input (stable ordering, no timestamps in findings).
 - **FR-32** Exit codes: `0` nothing at/above threshold · `1` finding(s) at/above threshold · `2` usage error or incomplete analysis.
 - **FR-33** `--fail-on <severity>` sets the threshold; default `high`.
-- **FR-34** All scanned content echoed anywhere (terminal, JSON, SARIF) MUST be escaped:
+- **FR-34** All scanned content echoed anywhere (terminal, JSON, SARIF, Markdown, HTML) MUST be escaped:
   control characters, ANSI sequences and bidi controls rendered as visible escapes.
 
 ### 6.7 Trust modes, configuration and suppression

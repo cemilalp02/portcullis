@@ -27,6 +27,7 @@ locally, without sending anything anywhere, and never executes what it scans.
 go install github.com/cemilalp02/portcullis/cmd/portcullis@main
 
 portcullis scan path/to/cloned/repo   # check a repository before opening it with an agent
+portcullis scan --html report.html .  # also write an offline HTML report
 portcullis rules list                 # what is checked
 ```
 
@@ -45,9 +46,10 @@ In CI, add the GitHub Action ([full guide](docs/GITHUB_ACTION.md)):
       - uses: cemilalp02/portcullis@main
 ```
 
-Findings appear on the pull request diff, in the Security tab and in the job summary. In pull
-requests the configuration, baseline and lock are read from the base commit, so a pull request
-cannot weaken the check that reviews it.
+Findings appear on the pull request diff, in the Security tab and in the job summary, and each
+run keeps a self-contained HTML report as an artifact. In pull requests the configuration,
+baseline and lock are read from the base commit, so a pull request cannot weaken the check that
+reviews it.
 
 ## What it finds
 

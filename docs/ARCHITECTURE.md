@@ -69,7 +69,7 @@ All packages live under `internal/` — Portcullis exposes a CLI, not a Go API, 
 | `internal/finding` | Finding model, severity / confidence enums, ordering | `Finding`, `Severity` |
 | `internal/baseline` | Load baseline, match by fingerprint | `Baseline` |
 | `internal/lock` | Read / write / verify `context.lock` | `File`, `Diff` |
-| `internal/report` | `text`, `json`, `sarif` writers | `Writer` |
+| `internal/report` | `text`, `json`, `sarif`, `github`, `markdown` and `html` writers | `Writer` |
 | `internal/escape` | Safe, truncated excerpts for any output channel | `Excerpt()` |
 | `rules` (root package) | Embeds `targets.yaml` and `<category>/<RULE-ID>.yaml`; exports `FS` and the rule-set `Version` | `FS`, `Version` |
 
@@ -250,11 +250,12 @@ tested outside GitHub. Inputs reach the scripts only as environment variables.
    pull_request: fetch the base commit if needed, export .portcullis.yaml,
                  .portcullis-baseline.yaml, context.lock and .portcullis/ from it
                  into $RUNNER_TEMP/portcullis/base
-   portcullis scan --trusted [--base-snapshot base] --format github --sarif ... --summary $GITHUB_STEP_SUMMARY
+   portcullis scan --trusted [--base-snapshot base] --format github --sarif ... --html ... --summary $GITHUB_STEP_SUMMARY
    portcullis verify (if context.lock exists or verify-lock: true)
    exit-code output = worst of scan and verify
 4. github/codeql-action/upload-sarif                          [SHA-pinned; skipped for fork PRs]
-5. fail the job with the recorded exit code
+5. actions/upload-artifact: <category>-report.html, unzipped  [SHA-pinned; upload-report: true]
+6. fail the job with the recorded exit code
 ```
 
 Effect: a PR cannot weaken config/baseline (base copies are used), cannot change a context

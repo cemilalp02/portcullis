@@ -33,3 +33,6 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 | Phase 5 | Run the action itself on GitHub once Actions can start jobs on the account | when unblocked |
 | Phase 5 | Action downloads signed release binaries instead of building from source | Phase 7 |
 | Phase 3 | Memory use of the normalised view (~8 bytes per input byte) | Phase 6 |
+| Phase 5 | Offline HTML report (`--format html`, Action artifact) | ✅ before Phase 6 |
+| Phase 5 | Project website (GitHub Pages: landing page, rule catalogue, sample report) | Phase 7 |
+| Phase 5 | VS Code extension showing findings in the editor | v0.2 |
