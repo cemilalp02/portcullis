@@ -476,7 +476,7 @@ func (c *collector) exec(r *ruleset.Compiled, points []extract.ExecPoint) {
 		if !r.HasKind(p.Kind) || !r.MatchTrigger(textview.Normalize(p.Trigger).Text) {
 			continue
 		}
-		if !r.Match.Every && r.MatchUnit(textview.Normalize(p.Command).Text) == nil {
+		if !r.Match.Every && r.MatchUnit(shellView(textview.Normalize(p.Command).Text)) == nil {
 			continue
 		}
 		c.add(r, p.Start, p.End, p.Command, map[string]string{
