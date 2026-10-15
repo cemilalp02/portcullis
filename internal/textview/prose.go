@@ -32,6 +32,7 @@ func Prose(v *View) *View {
 		}
 	}
 	lastSpace, lastNL := true, true
+	var word []tok
 	space := func(src int) {
 		if !lastSpace {
 			emit(' ', src)
@@ -46,7 +47,8 @@ func Prose(v *View) *View {
 			for j < len(toks) && isWordRune(toks[j].r) {
 				j++
 			}
-			for _, w := range foldWord(toks[i:j]) {
+			word = foldWord(word[:0], toks[i:j])
+			for _, w := range word {
 				emit(w.r, w.src)
 			}
 			lastSpace, lastNL = false, false
@@ -166,7 +168,7 @@ var leet = map[rune]rune{'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 
 // Latin letters, or consists entirely of look-alikes, so genuine Cyrillic
 // or Greek words stay readable for rules written in those languages.
 // Digits become letters only in words that also contain letters.
-func foldWord(w []tok) []tok {
+func foldWord(out, w []tok) []tok {
 	latin, foreign, allLook, letters, digits := false, false, true, false, false
 	for _, t := range w {
 		switch {
@@ -184,7 +186,6 @@ func foldWord(w []tok) []tok {
 		}
 	}
 	foldForeign := foreign && (latin || allLook)
-	out := make([]tok, 0, len(w))
 	for _, t := range w {
 		r := t.r
 		if m, ok := latinLike[r]; ok {

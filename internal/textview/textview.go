@@ -70,41 +70,66 @@ func Normalize(s string) *View {
 	fmap = append(fmap, int32(len(s))) //nolint:gosec // len(s) <= MaxInput < 2^31
 
 	// Stages 2-4: NFKC per normalisation segment, case fold, collapse spaces.
-	fold := cases.Fold()
 	out := make([]byte, 0, len(filtered))
 	offs := make([]int32, 0, len(filtered)+1)
 	lastSpace := false
+	emit := func(r rune, raw int32) {
+		// NFKC can produce a character that stage 1 would have dropped: the
+		// norm package inserts U+034F after 30 combining marks (Stream-Safe
+		// Text Format). Dropping it here keeps the view idempotent.
+		if Invisible(r) {
+			return
+		}
+		if r != '\n' && unicode.IsSpace(r) {
+			if lastSpace {
+				return
+			}
+			r = ' '
+			lastSpace = true
+		} else {
+			lastSpace = false
+		}
+		n := len(out)
+		out = utf8.AppendRune(out, r)
+		for range len(out) - n {
+			offs = append(offs, raw)
+		}
+	}
+	// An ASCII character followed by another ASCII character is its own
+	// normalisation segment: NFKC leaves it alone and nothing composes with
+	// it, and folding it is lower-casing. Such characters take a fast path;
+	// everything else, up to the next such character, goes through NFKC.
+	plain := func(i int) bool {
+		return filtered[i] < utf8.RuneSelf && (i+1 == len(filtered) || filtered[i+1] < utf8.RuneSelf)
+	}
+	fold := cases.Fold()
 	var it norm.Iter
-	it.Init(norm.NFKC, filtered)
-	for !it.Done() {
-		raw := fmap[it.Pos()]
-		// Full case folding is not idempotent for every script (Cherokee
-		// folds lower->upper while upper folds back to lower) and can emit
-		// combining marks out of canonical order (Turkish dotted I followed
-		// by a mark). Lower-casing and re-normalising gives one stable form.
-		seg := norm.NFKC.String(lower(fold.String(string(it.Next()))))
-		for _, r := range seg {
-			// NFKC can produce a character that stage 1 would have dropped:
-			// the norm package inserts U+034F after 30 combining marks
-			// (Stream-Safe Text Format). Dropping it keeps the view idempotent.
-			if Invisible(r) {
-				continue
+	for i := 0; i < len(filtered); {
+		if plain(i) {
+			c := filtered[i]
+			if 'A' <= c && c <= 'Z' {
+				c += 'a' - 'A'
 			}
-			if r != '\n' && unicode.IsSpace(r) {
-				if lastSpace {
-					continue
-				}
-				r = ' '
-				lastSpace = true
-			} else {
-				lastSpace = false
-			}
-			n := len(out)
-			out = utf8.AppendRune(out, r)
-			for range len(out) - n {
-				offs = append(offs, raw)
+			emit(rune(c), fmap[i])
+			i++
+			continue
+		}
+		j := i + 1
+		for j < len(filtered) && !plain(j) {
+			j++
+		}
+		it.Init(norm.NFKC, filtered[i:j])
+		for !it.Done() {
+			raw := fmap[i+it.Pos()]
+			// Full case folding is not idempotent for every script (Cherokee
+			// folds lower->upper while upper folds back to lower) and can emit
+			// combining marks out of canonical order (Turkish dotted I followed
+			// by a mark). Lower-casing and re-normalising gives one stable form.
+			for _, r := range norm.NFKC.String(lower(fold.String(string(it.Next())))) {
+				emit(r, raw)
 			}
 		}
+		i = j
 	}
 	offs = append(offs, int32(len(s))) //nolint:gosec // len(s) <= MaxInput < 2^31
 	return &View{Text: string(out), offs: offs}
