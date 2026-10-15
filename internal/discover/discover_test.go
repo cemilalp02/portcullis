@@ -99,6 +99,40 @@ func TestWalkFindsTargets(t *testing.T) {
 	}
 }
 
+func TestSkillCompanions(t *testing.T) {
+	root := t.TempDir()
+	write(t, root, ".claude/skills/pdf/SKILL.md", "---\nname: pdf\n---\n")
+	write(t, root, ".claude/skills/pdf/scripts/extract.py", "print(1)")
+	write(t, root, ".claude/skills/pdf/reference.md", "docs")
+	write(t, root, ".claude/skills/pdf/logo.png", "png")
+	write(t, root, ".claude/skills/pdf/node_modules/x/index.js", "skipped")
+	write(t, root, ".claude/skills/pdf/AGENTS.md", "already a target")
+	write(t, root, "src/tool.py", "not part of a skill")
+
+	res, err := Walk(root, targets(t), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, c := range res.Candidates {
+		got[c.Path] = c.Target.ID
+	}
+	want := map[string]string{
+		".claude/skills/pdf/SKILL.md":           "skill",
+		".claude/skills/pdf/AGENTS.md":          "agents-md",
+		".claude/skills/pdf/reference.md":       "skill-resource",
+		".claude/skills/pdf/scripts/extract.py": "skill-resource",
+	}
+	if len(got) != len(want) {
+		t.Errorf("candidates = %v, want %v", got, want)
+	}
+	for p, id := range want {
+		if got[p] != id {
+			t.Errorf("%s: target %q, want %q", p, got[p], id)
+		}
+	}
+}
+
 func TestWalkDefaults(t *testing.T) {
 	root := t.TempDir()
 	write(t, root, "node_modules/a/CLAUDE.md", "x")

@@ -109,6 +109,7 @@ func Walk(root string, targets *target.Set, opts Options) (*Result, error) {
 	if err := filepath.WalkDir(resolvedRoot, w.visit); err != nil {
 		return nil, err
 	}
+	w.addCompanions()
 	slices.SortFunc(w.res.Candidates, func(a, b Candidate) int { return strings.Compare(a.Path, b.Path) })
 	slices.SortFunc(w.res.Events, func(a, b Event) int {
 		return cmp.Or(strings.Compare(a.Path, b.Path), cmp.Compare(a.Kind, b.Kind))
@@ -206,6 +207,51 @@ func (w *walker) link(abs, rel string, d fs.DirEntry) {
 		return // directories inside the root are scanned at their real location
 	}
 	w.add(rel, relSlash(w.root, resolved), def, st.Size())
+}
+
+// addCompanions adds the files that belong to a found target's directory,
+// such as the scripts next to a SKILL.md (target.Def.CompanionOf). Links are
+// not followed; the main walk has already reported them.
+func (w *walker) addCompanions() {
+	seen := make(map[string]bool, len(w.res.Candidates))
+	for _, c := range w.res.Candidates {
+		seen[c.Path] = true
+	}
+	doneDirs := map[string]bool{}
+	for _, c := range slices.Clone(w.res.Candidates) {
+		comps := w.targets.Companions(c.Target.ID)
+		dir := path.Dir(c.Path)
+		if len(comps) == 0 || doneDirs[dir] {
+			continue
+		}
+		doneDirs[dir] = true
+		_ = filepath.WalkDir(filepath.Join(w.root, filepath.FromSlash(dir)), func(p string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return nil //nolint:nilerr // unreadable entries were reported by the main walk
+			}
+			rel := relSlash(w.root, p)
+			if d.IsDir() {
+				if p != filepath.Join(w.root, filepath.FromSlash(dir)) && (strings.EqualFold(d.Name(), ".git") || w.skipped(rel, d.Name())) {
+					return fs.SkipDir
+				}
+				return nil
+			}
+			if seen[rel] || d.Type()&(fs.ModeSymlink|fs.ModeIrregular) != 0 {
+				return nil
+			}
+			for _, cd := range comps {
+				if !cd.HasExtension(d.Name()) {
+					continue
+				}
+				seen[rel] = true
+				if info, err := d.Info(); err == nil {
+					w.add(rel, rel, cd, info.Size())
+				}
+				break
+			}
+			return nil
+		})
+	}
 }
 
 func (w *walker) skipped(rel, name string) bool {

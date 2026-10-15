@@ -102,6 +102,32 @@ func TestParseValidAndMatchUnit(t *testing.T) {
 	}
 }
 
+func TestTriggersAndScriptTargets(t *testing.T) {
+	src := strings.NewReplacer(
+		"targets: [instruction]", "targets: [config, script]",
+		"  any: ['ignore (all )?previous instructions']\n", "  scope: exec\n  kinds: [devcontainer]\n  triggers: ['^initializecommand']\n  every: true\n",
+		"  none: ['example of an attack']\n", "",
+		"file: CLAUDE.md", "file: .devcontainer.json",
+	).Replace(valid)
+	c, err := Parse("aut/PCL-AUT-001.yaml", []byte(src), opts(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !c.MatchTrigger("initializecommand (runs on host)") || c.MatchTrigger("postcreatecommand") {
+		t.Error("MatchTrigger")
+	}
+	if !c.AppliesTo(opts(t).Targets.Get("skill-resource")) {
+		t.Error("script family not applied")
+	}
+	plain, err := Parse("aut/PCL-AUT-001.yaml", []byte(valid), opts(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !plain.MatchTrigger("anything") {
+		t.Error("rules without triggers must match every trigger")
+	}
+}
+
 func TestMatchUnitAll(t *testing.T) {
 	src := strings.Replace(valid, "  any: ['ignore (all )?previous instructions']\n", "  all: ['curl', 'secret']\n", 1)
 	c, err := Parse("aut/PCL-AUT-001.yaml", []byte(src), opts(t))
@@ -140,6 +166,8 @@ func TestParseErrors(t *testing.T) {
 		{"bad view", "match:\n", "match:\n  view: pretty\n", "unknown view"},
 		{"bad unit", "match:\n", "match:\n  unit: page\n", "unknown unit"},
 		{"kinds on text", "match:\n", "match:\n  kinds: [npm_script]\n", "only valid with scope exec"},
+		{"triggers on text", "match:\n", "match:\n  triggers: ['^post']\n", "only valid with scope exec"},
+		{"bad trigger regex", "match:\n", "match:\n  scope: exec\n  triggers: ['((']\n", "invalid pattern"},
 		{"unknown kind", "match:\n", "match:\n  scope: exec\n  kinds: [cron]\n", "unknown kind"},
 		{"no tests", "tests:\n", "xtests:\n", "field xtests"},
 		{"missing negative", "  negative: [{file: CLAUDE.md, content: \"hello\"}]\n", "", "at least one positive and one negative"},

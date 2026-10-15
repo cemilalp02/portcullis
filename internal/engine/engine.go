@@ -61,8 +61,22 @@ var engineRules = []string{
 
 const builtinEngine = "engine"
 
+// builtins are named Go checks that rules reference with `builtin: <name>`.
+// The "engine" builtin is special: those rules are emitted by the engine
+// itself (discovery events, decoding and parsing problems).
+var builtins = map[string]func(c *collector, r *ruleset.Compiled){
+	"skill_capability_mismatch": skillCapabilityMismatch,
+}
+
 // Builtins lists the built-in check names rules may reference.
-func Builtins() []string { return []string{builtinEngine} }
+func Builtins() []string {
+	names := []string{builtinEngine}
+	for n := range builtins {
+		names = append(names, n)
+	}
+	slices.Sort(names)
+	return names
+}
 
 // Engine evaluates a rule set against target files. It is safe for
 // concurrent use.
@@ -262,10 +276,12 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 
 	var view *textview.View
 	for _, r := range e.rules {
-		if r.Match.Builtin != "" || !r.AppliesTo(def) {
+		if r.Match.Builtin == builtinEngine || !r.AppliesTo(def) {
 			continue
 		}
 		switch {
+		case r.Match.Builtin != "":
+			builtins[r.Match.Builtin](col, r)
 		case len(r.Ranges) > 0:
 			col.codepoints(r)
 		case r.Match.Scope == ruleset.ScopeExec:
@@ -357,7 +373,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 	start, n := -1, 0
 	report := func(end int) {
 		if n > 0 {
-			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end]})
+			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end], "decoded": decodeTags(text[start:end])})
 		}
 		start, n = -1, 0
 	}
@@ -377,7 +393,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 // exec evaluates an exec-scope rule against each execution point.
 func (c *collector) exec(r *ruleset.Compiled, points []extract.ExecPoint) {
 	for _, p := range points {
-		if !r.HasKind(p.Kind) {
+		if !r.HasKind(p.Kind) || !r.MatchTrigger(textview.Normalize(p.Trigger).Text) {
 			continue
 		}
 		if !r.Match.Every && r.MatchUnit(textview.Normalize(p.Command).Text) == nil {
