@@ -167,6 +167,7 @@ type Options struct {
 type TargetFile struct {
 	Path     string // as found
 	ReadPath string // where to read it, relative to the root
+	Kind     string // target type title, e.g. "Claude Code settings"
 }
 
 // InventoryItem is one command that would run automatically. All strings
@@ -202,7 +203,7 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 	}
 	res := &Result{Root: dr.Root, Files: dr.Files, Targets: len(dr.Candidates), Complete: true}
 	for _, c := range dr.Candidates {
-		res.TargetFiles = append(res.TargetFiles, TargetFile{Path: c.Path, ReadPath: c.ReadPath})
+		res.TargetFiles = append(res.TargetFiles, TargetFile{Path: c.Path, ReadPath: c.ReadPath, Kind: c.Target.Title})
 	}
 	for _, ev := range dr.Events {
 		res.Findings = append(res.Findings, e.eventFinding(ev))
@@ -210,7 +211,11 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		case discover.ReadError:
 			res.fail(ev.Path, ev.Detail)
 		case discover.Oversize:
-			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath})
+			kind := "agent context file"
+			if d := e.Targets.Match(ev.Path); d != nil {
+				kind = d.Title
+			}
+			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath, Kind: kind})
 		}
 	}
 	slices.SortFunc(res.TargetFiles, func(a, b TargetFile) int { return strings.Compare(a.Path, b.Path) })
