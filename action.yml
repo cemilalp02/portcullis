@@ -22,8 +22,11 @@ inputs:
     description: Upload results to GitHub code scanning (needs security-events write; skipped for pull requests from forks).
     default: "true"
   sarif-category:
-    description: Code scanning category, to tell several Portcullis runs apart.
+    description: Code scanning category, to tell several Portcullis runs apart. Also names the HTML report.
     default: portcullis
+  upload-report:
+    description: Upload the self-contained HTML report as a workflow artifact named <sarif-category>-report.html.
+    default: "true"
   go-version:
     description: Go version used to build Portcullis.
     default: stable
@@ -35,6 +38,12 @@ outputs:
   sarif-file:
     description: Path of the SARIF file.
     value: ${{ steps.scan.outputs.sarif-file }}
+  html-file:
+    description: Path of the HTML report.
+    value: ${{ steps.scan.outputs.html-file }}
+  report-url:
+    description: Download URL of the uploaded HTML report (empty when upload-report is false).
+    value: ${{ steps.report.outputs.artifact-url }}
 
 runs:
   using: composite
@@ -60,6 +69,7 @@ runs:
         INPUT_FAIL_ON: ${{ inputs.fail-on }}
         INPUT_EXCLUDE: ${{ inputs.exclude }}
         INPUT_VERIFY_LOCK: ${{ inputs.verify-lock }}
+        INPUT_CATEGORY: ${{ inputs.sarif-category }}
         EVENT_NAME: ${{ github.event_name }}
         BASE_SHA: ${{ github.event.pull_request.base.sha }}
       run: bash "$ACTION_PATH/scripts/action/run.sh"
@@ -72,6 +82,15 @@ runs:
       with:
         sarif_file: ${{ steps.scan.outputs.sarif-file }}
         category: ${{ inputs.sarif-category }}
+
+    - name: Upload HTML report
+      id: report
+      if: always() && inputs.upload-report == 'true' && steps.scan.outputs.html-file != ''
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        path: ${{ steps.scan.outputs.html-file }}
+        archive: false
+        if-no-files-found: warn
 
     - name: Result
       shell: bash

@@ -32,8 +32,10 @@ What it does on every run:
    pull request diff** (works for private repositories and forks; no GitHub Advanced Security needed).
 3. Uploads SARIF to **code scanning** (Security tab) when the token may do so.
 4. Writes a Markdown summary to the job summary, including the auto-execution inventory.
-5. Runs `portcullis verify` when the repository has a `context.lock`.
-6. Fails the job when a finding is at or above the threshold (default `high`) or when an approved
+5. Uploads a self-contained **HTML report** as a workflow artifact (`portcullis-report.html`):
+   one file, opens offline in any browser, with severity filters and search.
+6. Runs `portcullis verify` when the repository has a `context.lock`.
+7. Fails the job when a finding is at or above the threshold (default `high`) or when an approved
    file changed without updating `context.lock`.
 
 ### Inputs
@@ -45,10 +47,15 @@ What it does on every run:
 | `exclude` | | Directory globs to skip, one per line |
 | `verify-lock` | `auto` | `auto` (if `context.lock` exists), `true` or `false` |
 | `upload-sarif` | `true` | Upload to code scanning (skipped automatically for pull requests from forks) |
-| `sarif-category` | `portcullis` | Code scanning category, to tell several runs apart |
+| `sarif-category` | `portcullis` | Code scanning category, to tell several runs apart; also names the HTML report (`<category>-report.html`) |
+| `upload-report` | `true` | Upload the HTML report as a workflow artifact |
 | `go-version` | `stable` | Go version used to build Portcullis |
 
-Outputs: `exit-code` (0, 1 or 2) and `sarif-file`.
+Outputs: `exit-code` (0, 1 or 2), `sarif-file`, `html-file` and `report-url` (download link of the
+uploaded report).
+
+When you run the action more than once in a workflow, give each run its own `sarif-category`;
+artifact names must be unique within a workflow run.
 
 ### Pull requests cannot weaken their own review
 
@@ -114,4 +121,5 @@ portcullis scan --trusted --format sarif -o portcullis.sarif .
 
 Exit codes: `0` clean, `1` findings at or above the threshold, `2` usage error or incomplete
 analysis. `--format github` prints GitHub workflow annotations, `--summary FILE` appends a
-Markdown summary, `--path-prefix DIR` fixes paths when you scan a subdirectory.
+Markdown summary, `--path-prefix DIR` fixes paths when you scan a subdirectory, and `--html FILE` writes the
+offline HTML report for your CI system to archive.
