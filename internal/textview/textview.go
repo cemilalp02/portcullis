@@ -49,8 +49,44 @@ func (v *View) Raw(i int) int {
 	return int(v.offs[i])
 }
 
-// Normalize builds the normalised view of s.
+// Normalize builds the normalised view of s. The view is a fixed point:
+// normalising its text again changes nothing, so rules see stable input.
 func Normalize(s string) *View {
+	v := normalizeOnce(s)
+	// One pass is enough unless combining marks pile up: case folding can
+	// turn a mark into a letter (U+0345 becomes iota), and runs of more than
+	// 30 marks are segmented differently once the letters around them
+	// change. Repeat until the text is stable, composing the offset maps.
+	for range 3 {
+		if !hasMarkRun(v.Text) {
+			break
+		}
+		w := normalizeOnce(v.Text)
+		if w.Text == v.Text {
+			break
+		}
+		for i, o := range w.offs {
+			w.offs[i] = v.offs[o]
+		}
+		v = w
+	}
+	return v
+}
+
+// hasMarkRun reports whether s contains two combining marks in a row.
+func hasMarkRun(s string) bool {
+	prev := false
+	for _, r := range s {
+		mark := unicode.In(r, unicode.Mn, unicode.Me, unicode.Mc)
+		if mark && prev {
+			return true
+		}
+		prev = mark
+	}
+	return false
+}
+
+func normalizeOnce(s string) *View {
 	if len(s) > MaxInput {
 		s = s[:MaxInput]
 	}

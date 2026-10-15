@@ -11,9 +11,27 @@ import (
 )
 
 // normalizeReference is Normalize without the ASCII fast path: every
-// segment goes through NFKC and case folding. The fast path must give the
-// same text and offsets.
+// segment goes through NFKC and case folding, repeated to a fixed point the
+// same way. The fast path must give the same text and offsets.
 func normalizeReference(s string) *View {
+	v := referenceOnce(s)
+	for range 3 {
+		if !hasMarkRun(v.Text) {
+			break
+		}
+		w := referenceOnce(v.Text)
+		if w.Text == v.Text {
+			break
+		}
+		for i, o := range w.offs {
+			w.offs[i] = v.offs[o]
+		}
+		v = w
+	}
+	return v
+}
+
+func referenceOnce(s string) *View {
 	filtered := make([]byte, 0, len(s))
 	fmap := make([]int32, 0, len(s)+1)
 	for i, r := range s {
