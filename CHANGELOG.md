@@ -15,10 +15,15 @@ uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Brand identity: the Portcullis mark (a pointed gateway with its grille lowered) in two
+  optical sizes, logo lockups, app icon and favicon, generated from exact geometry by
+  `scripts/brand`; guide in `docs/BRAND.md`.
 - Self-contained HTML report (`--format html`, `--html FILE`): one offline file with severity
   filters, search, the auto-execution inventory and every scanned agent file; light and dark
   themes; no network access, guarded by a hash-based Content Security Policy. The GitHub Action
-  uploads it as a workflow artifact.
+  uploads it as a workflow artifact. Report design: ink masthead with the verdict, severity
+  distribution bar, sticky severity filters and search (`/`), expand/collapse all, invisible
+  characters highlighted in excerpts, IBM Plex typography embedded (SIL OFL 1.1).
 - `portcullis lock` / `portcullis verify`: approve agent context files in `context.lock` and fail
   when any of them is added, modified or removed without a new approval.
 - `portcullis baseline`: accept current findings by fingerprint (reasons required and kept).

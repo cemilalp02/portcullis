@@ -2,8 +2,10 @@ package report
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"html"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
@@ -44,12 +46,19 @@ func TestWriteHTMLEscapesScannedText(t *testing.T) {
 	if n := strings.Count(out, "<script"); n != 1 {
 		t.Errorf("page has %d script elements, want only its own", n)
 	}
-	if n := strings.Count(out, "<svg"); n != 1 {
-		t.Errorf("page has %d svg elements, want only the logo", n)
+	// No element of the page may carry an event handler attribute; the
+	// report's own markup never uses them. Quoted attribute values are
+	// removed first: escaped text inside them is not an attribute.
+	quoted := regexp.MustCompile(`"[^"]*"`)
+	handler := regexp.MustCompile(`\son[a-z]+\s*=`)
+	for _, tag := range regexp.MustCompile(`<[a-zA-Z][^>]*>`).FindAllString(out, -1) {
+		if handler.MatchString(quoted.ReplaceAllString(tag, `""`)) {
+			t.Errorf("element with an event handler: %q", tag)
+		}
 	}
 	for _, want := range []string{
 		`data-copy="&#34;&gt;&lt;img src=x onerror=alert(1)&gt;`,
-		`<title>Portcullis · &lt;b onmouseover=alert(3)&gt;repo</title>`,
+		`<title>&lt;b onmouseover=alert(3)&gt;repo · Portcullis report</title>`,
 		`<mark class="esc" title="1 invisible character">&lt;U&#43;200B&gt;</mark>`,
 	} {
 		if !strings.Contains(out, want) {
@@ -79,16 +88,31 @@ func TestHTMLPolicyCoversOnlyInlineAssets(t *testing.T) {
 		}
 	}
 
-	// Nothing may be loaded: no src attributes, no CSS imports or url()s,
-	// and links only to the rule documentation.
-	for _, bad := range []string{" src=", "@import", "url(", "http-equiv=\"refresh\""} {
+	// Fonts and the icon are embedded; nothing else may be loaded.
+	for _, d := range []string{"font-src data:;", "img-src data:;"} {
+		if !strings.Contains(csp, d) {
+			t.Errorf("policy lacks %q", d)
+		}
+	}
+	if n := strings.Count(csp, "http"); n != 0 {
+		t.Errorf("policy allows network sources: %s", csp)
+	}
+
+	// Nothing may be loaded: no src attributes, no CSS imports, url()s only
+	// for the embedded fonts, and links only to in-page anchors, the
+	// embedded icon and the rule documentation.
+	for _, bad := range []string{" src=", "@import", "http-equiv=\"refresh\""} {
 		if strings.Contains(out, bad) {
 			t.Errorf("page loads or redirects: found %q", bad)
 		}
 	}
+	if n, fonts := strings.Count(out, "url("), strings.Count(out, "url(data:font/woff2;base64,"); n != fonts || fonts != len(fontFaces) {
+		t.Errorf("%d url() references, %d of them embedded fonts; want exactly the %d fonts", n, fonts, len(fontFaces))
+	}
 	for _, h := range regexp.MustCompile(`href="([^"]*)"`).FindAllStringSubmatch(out, -1) {
-		if !strings.HasPrefix(h[1], rulesDocURL) {
-			t.Errorf("unexpected link %q", h[1])
+		link := html.UnescapeString(h[1])
+		if !strings.HasPrefix(link, "#") && !strings.HasPrefix(link, rulesDocURL) && link != htmlFavicon {
+			t.Errorf("unexpected link %q", link)
 		}
 	}
 }
@@ -108,15 +132,15 @@ func TestWriteHTMLVerdicts(t *testing.T) {
 		want []string
 	}{
 		{"fails", sample(), Meta{FailOn: finding.High, Suppressed: 2},
-			[]string{"<h1>1 finding at or above high</h1>", `class="status fail"`, "2 suppressed by baseline", "exit code 1"}},
+			[]string{`<p class="v-text">1 finding at or above high</p>`, `class="verdict v-fail"`, "#i-fail", "2 suppressed by baseline", "exit code 1", `aria-label="1 critical, 1 medium"`}},
 		{"below threshold", onlyMedium, Meta{FailOn: finding.High},
-			[]string{"<h1>No findings at or above high</h1>", `class="status pass"`, "exit code 0"}},
+			[]string{`<p class="v-text">No findings at or above high</p>`, `class="verdict v-pass"`, "#i-pass", "exit code 0"}},
 		{"threshold disabled", sample(), Meta{NoFail: true},
-			[]string{"<h1>2 findings, failure threshold disabled</h1>", "threshold: none", `class="status pass"`}},
+			[]string{`<p class="v-text">2 findings, failure threshold disabled</p>`, "threshold none", `class="verdict v-pass"`}},
 		{"empty", empty, Meta{FailOn: finding.High},
-			[]string{"<h1>No findings</h1>", "nothing matched a rule", "No agent context files were found."}},
+			[]string{`<p class="v-text">No findings</p>`, "nothing matched a rule", "No agent context files were found.", `class="dist clean"`, `aria-label="No findings"`}},
 		{"incomplete", incomplete, Meta{FailOn: finding.High},
-			[]string{"<h1>Analysis incomplete</h1>", `class="status incomplete"`, `role="alert"`, "CLAUDE.md: permission denied", "exit code 2"}},
+			[]string{`<p class="v-text">Some files could not be analysed</p>`, `class="verdict v-incomplete"`, "#i-warn", `role="alert"`, "CLAUDE.md: permission denied", "exit code 2"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -145,7 +169,7 @@ func TestWriteHTMLGroupsAndFolds(t *testing.T) {
 	if i, j := strings.Index(out, `<span class="path">CLAUDE.md</span>`), strings.Index(out, `<span class="path">AGENTS.md</span>`); i < 0 || j < i {
 		t.Errorf("critical file must come first (CLAUDE.md at %d, AGENTS.md at %d)", i, j)
 	}
-	if !strings.Contains(out, `<span class="kind">Claude memory file</span><span class="tally">1 critical</span>`) {
+	if !strings.Contains(out, `<span class="kind">Claude memory file</span><span class="tally"><span class="sev-critical">1 critical</span></span>`) {
 		t.Error("group header lacks kind or tally")
 	}
 	// Findings at or above the threshold start open, the rest closed.
@@ -177,6 +201,80 @@ func TestExcerptSpans(t *testing.T) {
 		got := excerptSpans(tt.in)
 		if fmt.Sprint(got) != fmt.Sprint(tt.want) {
 			t.Errorf("excerptSpans(%q) =\n %v\nwant\n %v", tt.in, got, tt.want)
+		}
+	}
+}
+
+func TestDistribution(t *testing.T) {
+	segs := distribution([]htmlCount{{Key: "critical", N: 1}, {Key: "high"}, {Key: "medium", N: 500}, {Key: "low", N: 3}, {Key: "info"}})
+	if len(segs) != 3 || segs[0].Key != "critical" || segs[1].Key != "medium" || segs[2].Key != "low" {
+		t.Fatalf("segments = %+v", segs)
+	}
+	if segs[0].W < 10 || segs[2].W < 10 {
+		t.Errorf("small counts must stay visible: %+v", segs)
+	}
+	last := segs[len(segs)-1]
+	if segs[0].X != 0 || last.X+last.W != 1000 {
+		t.Errorf("segments must fill the bar exactly: %+v", segs)
+	}
+	for i := 1; i < len(segs); i++ {
+		if segs[i].X <= segs[i-1].X+segs[i-1].W {
+			t.Errorf("segments overlap: %+v", segs)
+		}
+	}
+	if got := distribution([]htmlCount{{Key: "critical"}, {Key: "info"}}); len(got) != 1 || got[0].W != 1000 {
+		t.Errorf("no findings = %+v", got)
+	}
+}
+
+func TestFormatInt(t *testing.T) {
+	for n, want := range map[int]string{0: "0", 999: "999", 1000: "1,000", 1778: "1,778", 1234567: "1,234,567", -1234: "-1,234", -999: "-999"} {
+		if got := formatInt(n); got != want {
+			t.Errorf("formatInt(%d) = %q, want %q", n, got, want)
+		}
+	}
+}
+
+// The report's logo and icon must stay identical to the published brand
+// assets in docs/assets/brand.
+func TestHTMLBrandMatchesAssets(t *testing.T) {
+	mark, err := os.ReadFile("../../docs/assets/brand/portcullis-mark-small.svg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(mark), `d="`+markPath+`"`) {
+		t.Error("markPath differs from docs/assets/brand/portcullis-mark-small.svg")
+	}
+	icon, err := os.ReadFile("../../docs/assets/brand/favicon.svg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(icon, mustRead("html/favicon.svg")) {
+		t.Error("html/favicon.svg differs from docs/assets/brand/favicon.svg")
+	}
+	if n := strings.Count(htmlCSS, "@font-face"); n != len(fontFaces) {
+		t.Errorf("%d @font-face rules, want %d", n, len(fontFaces))
+	}
+}
+
+// The embedded fonts are third-party binaries; they must be the files whose
+// checksums html/fonts/README.md publishes.
+func TestEmbeddedFontsMatchPublishedChecksums(t *testing.T) {
+	readme, err := os.ReadFile("html/fonts/README.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range fontFaces {
+		sum := sha256.Sum256(mustRead("html/fonts/" + f.file))
+		want := fmt.Sprintf("`%x`", sum)
+		found := false
+		for _, line := range strings.Split(string(readme), "\n") {
+			if strings.Contains(line, "`"+f.file+"`") && strings.Contains(line, want) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s: SHA-256 %x is not the one listed in html/fonts/README.md", f.file, sum)
 		}
 	}
 }

@@ -2,3 +2,9 @@ Portcullis
 Copyright 2026 Cemil Alp and the Portcullis contributors
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The HTML report embeds the IBM Plex Sans and IBM Plex Mono typefaces
+(internal/report/html/fonts), Copyright IBM Corp. with Reserved Font Name
+"Plex", licensed under the SIL Open Font License, Version 1.1
+(internal/report/html/fonts/LICENSE.txt). The files are IBM's published
+subsets, unmodified.

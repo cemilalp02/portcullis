@@ -1,6 +1,13 @@
-# Portcullis
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/portcullis-logo-dark.svg">
+    <img alt="Portcullis" src="docs/assets/brand/portcullis-logo.svg" height="52">
+  </picture>
+</h1>
 
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+<p align="center">Inspect what your AI coding agent will read and run, before it does.</p>
+
+<p align="center"><a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a></p>
 
 A *portcullis* is the iron grille dropped in front of a castle gate: nothing passes until it
 has been inspected.
@@ -104,6 +111,7 @@ The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly.
 | [Requirements](docs/REQUIREMENTS.md) · [Architecture](docs/ARCHITECTURE.md) | Scope, design, trust model |
 | [Rule schema](docs/RULE_SCHEMA.md) | Writing and testing rules, custom rules |
 | [Decision records](docs/adr/) | Why things are the way they are |
+| [Brand](docs/BRAND.md) | Logo, colours and type |
 
 ## Building from source
 
