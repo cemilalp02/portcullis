@@ -99,6 +99,10 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S17 | Malicious samples in Portcullis's own corpus harm contributors | Corpus is defanged: no working payloads, reserved domains only |
 | S18 | Unstable normalisation (same text normalises differently on a second pass) lets a pattern match only sometimes | Fuzz-tested idempotency; two real cases (Cherokee folding, dotted İ + combining mark) found and fixed |
 | S19 | Hidden characters in Portcullis's own sources or docs (Trojan Source) | Repository hygiene test fails on any format/bidi/Tag/filler character outside `testdata/` |
+| S20 | Scanned text injects GitHub workflow commands through annotations (e.g. a message containing a newline followed by `::set-output` or `::add-mask`) | Annotation data and properties are percent-encoded; newlines cannot start a new command (tested) |
+| S21 | Scanned text renders as links, images or HTML in the Markdown job summary (tracking pixels, phishing links) | All scanned text is HTML-escaped and Markdown punctuation is backslash-escaped (tested) |
+| S22 | Script injection through action inputs | Inputs reach `scripts/action/*.sh` only as environment variables; scripts pass shellcheck |
+| S23 | Attack samples in Portcullis's own repository are loaded by agents working on it | Samples are stored inside `.txtar` archives, never as real agent files |
 
 ## 8. Review cadence
 

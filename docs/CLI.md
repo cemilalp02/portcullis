@@ -20,39 +20,50 @@
 
 ### `portcullis scan [path]`
 
-Available since Phase 3: `--format text|json`, `--output`, `--fail-on`, `--exclude`,
-`--max-file-size` (≤ 1 GiB), `--no-inventory`. Arriving in Phase 5: `sarif`, `--trusted`,
-`--config`, `--baseline`, `--base-snapshot`, `--rules`, `--color`.
-
 | Flag | Default | Description |
 |---|---|---|
-| `--format` | `text` | `text`, `json`, `sarif` |
+| `--format` | `text` | `text`, `json`, `sarif` (SARIF 2.1.0), `github` (workflow annotations), `markdown` |
 | `--output`, `-o` | stdout | Write results to a file |
+| `--sarif` | — | Also write SARIF to a file |
+| `--summary` | — | Also append a Markdown summary to a file (e.g. `$GITHUB_STEP_SUMMARY`) |
+| `--path-prefix` | — | Prefix for paths in SARIF and annotations when scanning a subdirectory of a repository |
 | `--fail-on` | `high` | Threshold: `info` … `critical`, or `none` (never exit 1) |
-| `--trusted` | off | Honour in-tree `.portcullis.yaml`, `.portcullis-baseline.yaml` |
-| `--config` | — | Config file **outside** the scan root |
+| `--trusted` | off | Honour the repository's `.portcullis.yaml` and `.portcullis-baseline.yaml` |
+| `--config` | — | Config file; must be **outside** the scan root unless `--trusted` |
 | `--baseline` | — | Baseline file (honoured in any mode when passed explicitly) |
-| `--base-snapshot` | — | Directory with base-commit copies of protected files (implies their use instead of in-tree ones) |
+| `--base-snapshot` | — | Directory with base-commit copies of the control files (pull-request mode, implies `--trusted`); changes are reported as `PCL-ENG-009` |
 | `--exclude` | — | Extra directory glob to skip (repeatable) |
-| `--max-file-size` | `10MiB` | Hard limit per target file |
-| `--rules` | — | Extra rule directory **outside** the scan root (repeatable) |
+| `--max-file-size` | `10MiB` | Hard limit per target file (≤ 1 GiB) |
+| `--rules` | — | Extra rule directory; outside the scan root unless `--trusted` (repeatable) |
 | `--no-inventory` | off | Hide the auto-execution inventory in text output |
-| `--color` | `auto` | `auto`, `always`, `never` |
+| `--color` | `auto` | `auto`, `always`, `never` (`NO_COLOR` is honoured) |
+
+Settings are resolved in this order, later wins: built-in defaults, the user configuration
+(`%APPDATA%\portcullis\config.yaml`, `$XDG_CONFIG_HOME/portcullis/config.yaml`), `--config`,
+the repository's `.portcullis.yaml` (only with `--trusted`; from the base snapshot in
+pull-request mode), and finally flags. `PCL-ENG-*` rules can never be disabled or downgraded.
 
 ### `portcullis lock [path]`
 
-Scans first; refuses (exit `1`) if findings ≥ threshold exist unless `--force`.
-Writes `<path>/context.lock` (or `--output`). Accepts `--fail-on`, `--config`, `--trusted`.
+Scans first (with the same settings as `scan`); refuses (exit `1`) if findings at or above the
+threshold exist unless `--force`, which is recorded as `forced true`. Writes the hashes of every
+agent context file - including oversize ones - to `<path>/context.lock` (or `--output`).
 
 ### `portcullis verify [path]`
 
-Compares current targets with `context.lock` (`--lock <file>` to override).
-Exit `1` on any added / modified / removed target; lists each with old/new hash.
-With `--base-snapshot`, additionally reports lock changes vs base (`PCL-ENG-009`).
+Compares current agent context files with `context.lock` (`--lock <file>` to override).
+Exit `1` on any added, modified or removed file, `2` if the lock is missing or malformed.
+`--format json` prints `{match, approved, ruleset, forced, added, modified, removed, reapproved}`.
+With `--base-snapshot`, it also lists the files a pull request re-approves by changing the lock.
+
+### `portcullis baseline [path]`
+
+Writes `<path>/.portcullis-baseline.yaml` (or `--output`) accepting every current finding.
+`--reason` sets the reason for new entries; reasons of entries already in the file are kept.
 
 ### `portcullis rules list` / `portcullis rules show <id>`
 
-`list`: table of ID, severity, confidence, title (`--format json` available).
+`list`: table of ID, severity, confidence, title (`--format json` or `markdown`).
 `show`: full metadata, description, remediation, references, OWASP mapping.
 
 ### `portcullis version`

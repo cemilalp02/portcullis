@@ -13,6 +13,15 @@ uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `portcullis lock` / `portcullis verify`: approve agent context files in `context.lock` and fail
+  when any of them is added, modified or removed without a new approval.
+- `portcullis baseline`: accept current findings by fingerprint (reasons required and kept).
+- Configuration (`.portcullis.yaml`, user config, `--config`), `--trusted` mode, pull-request
+  mode with `--base-snapshot`, custom rule directories (`--rules`), `--color`.
+- Output formats SARIF 2.1.0 (validated against the official schema), GitHub workflow
+  annotations and Markdown summaries; `--sarif`, `--summary`, `--path-prefix`.
+- GitHub Action (`action.yml`), pre-commit hooks, and a workflow that scans this repository.
+- Rules PCL-ENG-009 (change touches Portcullis control files) and PCL-ENG-013 (stale baseline).
 - 46 detection rules (48 in total) across seven groups: UNI (invisible and deceptive Unicode),
   AUT (authority and concealment), EXE (execution, credentials, exfiltration), BAI (scanner
   bait), AEX (auto-execution), MCP (server definitions) and SKL (skills). See `docs/RULES.md`.

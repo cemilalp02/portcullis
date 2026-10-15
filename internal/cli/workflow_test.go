@@ -36,11 +36,10 @@ func TestLockVerifyWorkflow(t *testing.T) {
 		"README.md":    "not an agent file",
 	})
 
-	code, stdout, stderr := run("verify", root)
-	if code != ExitError || !strings.Contains(stderr, "portcullis lock") {
+	if code, _, stderr := run("verify", root); code != ExitError || !strings.Contains(stderr, "portcullis lock") {
 		t.Fatalf("verify without lock: exit %d, %q", code, stderr)
 	}
-	code, stdout, stderr = run("lock", root)
+	code, stdout, stderr := run("lock", root)
 	if code != ExitOK || !strings.Contains(stdout, "Approved 2 agent context files") {
 		t.Fatalf("lock: exit %d\n%s%s", code, stdout, stderr)
 	}
@@ -265,7 +264,7 @@ tests:
 	if code != ExitFindings || !strings.Contains(stdout, "ACME-AUT-001") {
 		t.Errorf("custom rule: exit %d\n%s", code, stdout)
 	}
-	if code, _, stderr := run("scan", "--rules", filepath.Join(root), root); code != ExitError || !strings.Contains(stderr, "inside the scanned directory") {
+	if code, _, stderr := run("scan", "--rules", root, root); code != ExitError || !strings.Contains(stderr, "inside the scanned directory") {
 		t.Errorf("in-tree rules dir: exit %d, %q", code, stderr)
 	}
 	if code, _, stderr := run("scan", "--rules", filepath.Join(rules, "missing"), root); code != ExitError || !strings.Contains(stderr, "rules directory") {

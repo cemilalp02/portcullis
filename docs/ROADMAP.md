@@ -10,8 +10,8 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 | **2** | Repository skeleton | Go module, layout, Makefile, `golangci-lint`, CI (lint/test/coverage/vuln), Apache-2.0, `SECURITY.md`, `CONTRIBUTING.md`, templates, Dependabot | Empty project green in CI; `portcullis version` works | ✅ Done (2026-10-14) — local checks green; GitHub CI runs on first push |
 | **3** | Core engine | Discovery, decoding, JSONC parsing, normaliser, rule engine, text/JSON output | One rule works end-to-end; coverage ≥ 80% | ✅ Done (2026-10-14) — 2 rules end-to-end, coverage 95.2% |
 | **4** | Detectors & rules | D1–D4, ≥ 30 rules with fixtures, defanged known-attack corpus | 100% recall on `corpus/known` | ✅ Done (2026-10-15) — 48 detection rules, recall 64/64, 0 high findings in the clean corpus |
-| **5** | Lock & integrations | `lock` / `verify`, SARIF, GitHub Action, pre-commit hook | Poisoned demo repo fails the Action; alert visible in Code Scanning | ⏳ Next |
-| **6** | Validation & hardening | FP benchmark (1,000 repos), held-out corpus, fuzzing, benchmarks, self-scan | FP < 2%, held-out recall ≥ 80%, 0 fuzz crashes, NFR-04 met | |
+| **5** | Lock & integrations | `lock` / `verify`, SARIF, GitHub Action, pre-commit hook | Poisoned demo repo fails the Action; alert visible in Code Scanning | ✅ Done (2026-10-15) — action scripts run on a malicious pull request (exit 1, base config enforced); SARIF ingested by GitHub code scanning via API (Actions itself is billing-locked) |
+| **6** | Validation & hardening | FP benchmark (1,000 repos), held-out corpus, fuzzing, benchmarks, self-scan | FP < 2%, held-out recall ≥ 80%, 0 fuzz crashes, NFR-04 met | ⏳ Next |
 | **7** | Release | goreleaser builds, cosign signatures, SLSA provenance, README + demo GIF, `README.tr.md`, `CHANGELOG.md`, `v0.1.0` tag | Ready to publish on GitHub | |
 
 ## Working agreement
@@ -29,5 +29,7 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 | Phase 3 | Skill sibling files and `SKILL.md` front-matter for the skill-consistency check | ✅ Phase 4 |
 | Phase 4 | Confusable / mixed-script identifier detection (homoglyphs beyond NFKC) | v0.2 |
 | Phase 4 | Deep analysis of repository scripts called by hooks (L6) | v0.2 |
-| Phase 3 | `--trusted`, `--config`, `--baseline`, `--base-snapshot`, `--rules`, `--color`, SARIF | Phase 5 |
+| Phase 3 | `--trusted`, `--config`, `--baseline`, `--base-snapshot`, `--rules`, `--color`, SARIF | ✅ Phase 5 |
+| Phase 5 | Run the action itself on GitHub once Actions can start jobs on the account | when unblocked |
+| Phase 5 | Action downloads signed release binaries instead of building from source | Phase 7 |
 | Phase 3 | Memory use of the normalised view (~8 bytes per input byte) | Phase 6 |

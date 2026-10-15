@@ -35,7 +35,7 @@ var severityIcon = map[finding.Severity]string{
 func WriteMarkdown(w io.Writer, res *engine.Result, m Meta) error {
 	var b strings.Builder
 	b.WriteString("## Portcullis\n\n")
-	fmt.Fprintf(&b, "%s\n\n", mdText(summaryLine(res, m)))
+	fmt.Fprintf(&b, "**%s**\n\n", summaryLine(res, m)) // our own text, no scanned content
 	if !res.Complete {
 		b.WriteString("> [!WARNING]\n> Analysis incomplete; these files could not be analysed:\n")
 		for _, e := range res.Errors {
