@@ -6,76 +6,83 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
+	"runtime"
 
-	"github.com/cemilalp02/portcullis/internal/discover"
 	"github.com/cemilalp02/portcullis/internal/engine"
-	"github.com/cemilalp02/portcullis/internal/finding"
 	"github.com/cemilalp02/portcullis/internal/report"
-	"github.com/cemilalp02/portcullis/internal/textview"
 	"github.com/cemilalp02/portcullis/internal/version"
 )
 
-// stringList is a repeatable string flag.
-type stringList []string
-
-func (s *stringList) String() string     { return strings.Join(*s, ",") }
-func (s *stringList) Set(v string) error { *s = append(*s, v); return nil }
-
-// parseArgs parses flags that may appear before or after positional
-// arguments and returns the positional ones.
-func parseArgs(fs *flag.FlagSet, args []string) ([]string, error) {
-	var pos []string
-	for {
-		if err := fs.Parse(args); err != nil {
-			return nil, err
-		}
-		if fs.NArg() == 0 {
-			return pos, nil
-		}
-		pos = append(pos, fs.Arg(0))
-		args = fs.Args()[1:]
-	}
+var writers = map[string]func(io.Writer, *engine.Result, report.Meta) error{
+	"text":     report.WriteText,
+	"json":     report.WriteJSON,
+	"sarif":    report.WriteSARIF,
+	"github":   report.WriteGitHub,
+	"markdown": report.WriteMarkdown,
 }
 
-// parseSize parses sizes such as 10MiB, 512KiB, 2MB or 1048576.
-func parseSize(s string) (int64, error) {
-	units := []struct {
-		suffix string
-		mult   int64
-	}{{"kib", 1 << 10}, {"mib", 1 << 20}, {"gib", 1 << 30}, {"kb", 1e3}, {"mb", 1e6}, {"gb", 1e9}, {"b", 1}}
-	t := strings.ToLower(strings.TrimSpace(s))
-	mult := int64(1)
-	for _, u := range units {
-		if strings.HasSuffix(t, u.suffix) {
-			t, mult = strings.TrimSpace(strings.TrimSuffix(t, u.suffix)), u.mult
-			break
-		}
+// useColor decides whether text output gets ANSI colours.
+func useColor(mode string, out io.Writer) (bool, error) {
+	switch mode {
+	case "always":
+		return true, nil
+	case "never":
+		return false, nil
+	case "auto":
+	default:
+		return false, fmt.Errorf("-color: unknown value %q (want auto, always or never)", mode)
 	}
-	n, err := strconv.ParseInt(t, 10, 64)
-	if err != nil || n <= 0 || n > textview.MaxInput/mult {
-		return 0, fmt.Errorf("invalid size %q (want 1 byte to 1GiB, e.g. 10MiB, 512KiB or a byte count)", s)
+	if os.Getenv("NO_COLOR") != "" || os.Getenv("TERM") == "dumb" {
+		return false, nil
 	}
-	return n * mult, nil
+	f, ok := out.(*os.File)
+	if !ok {
+		return false, nil
+	}
+	fi, err := f.Stat()
+	if err != nil || fi.Mode()&os.ModeCharDevice == 0 {
+		return false, nil
+	}
+	if runtime.GOOS == "windows" && os.Getenv("WT_SESSION") == "" && os.Getenv("TERM") == "" && os.Getenv("ANSICON") == "" {
+		return false, nil // legacy console without ANSI support
+	}
+	return true, nil
+}
+
+// writeFile writes a report to path (append for GitHub step summaries).
+func writeFile(path string, appendMode bool, write func(io.Writer) error) error {
+	flags := os.O_CREATE | os.O_WRONLY | os.O_TRUNC
+	if appendMode {
+		flags = os.O_CREATE | os.O_WRONLY | os.O_APPEND
+	}
+	f, err := os.OpenFile(path, flags, 0o644) //nolint:gosec // reports are meant to be shared, like any build output
+	if err != nil {
+		return err
+	}
+	if err := write(f); err != nil {
+		_ = f.Close()
+		return err
+	}
+	return f.Close()
 }
 
 func runScan(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("scan", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	format := fs.String("format", "text", "output format: text or json")
+	var c common
+	c.register(fs)
+	format := fs.String("format", "text", "output `format`: text, json, sarif, github (workflow annotations) or markdown")
 	output := fs.String("output", "", "write results to `file` instead of stdout")
 	fs.StringVar(output, "o", "", "shorthand for -output")
-	failOn := fs.String("fail-on", "high", "exit 1 if a finding is at or above `severity` (info, low, medium, high, critical, none)")
-	maxSize := fs.String("max-file-size", "10MiB", "hard `size` limit per agent file")
+	sarifOut := fs.String("sarif", "", "also write SARIF 2.1.0 to `file`")
+	summaryOut := fs.String("summary", "", "also append a Markdown summary to `file` (e.g. $GITHUB_STEP_SUMMARY)")
+	prefix := fs.String("path-prefix", "", "`prefix` for file paths in SARIF and annotations when scanning a subdirectory of a repository")
 	noInventory := fs.Bool("no-inventory", false, "hide the auto-execution inventory in text output")
-	var excludes stringList
-	fs.Var(&excludes, "exclude", "skip directories matching `glob` (repeatable)")
+	color := fs.String("color", "auto", "colour text output: `auto`, always or never (NO_COLOR is honoured)")
 	fs.Usage = func() {
-		fmt.Fprint(stderr, "Usage: portcullis scan [flags] [path]\n\nScan a directory (default \".\") for malicious agent context.\n\nFlags:\n")
+		fmt.Fprint(stderr, "Usage: portcullis scan [flags] [path]\n\nScan a directory (default \".\") for malicious or risky AI agent context.\nExit codes: 0 clean, 1 findings at or above the threshold, 2 error or incomplete analysis.\n\nFlags:\n")
 		fs.PrintDefaults()
 	}
-
 	pos, err := parseArgs(fs, args)
 	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -83,64 +90,60 @@ func runScan(args []string, stdout, stderr io.Writer) int {
 		}
 		return ExitError
 	}
-	if len(pos) > 1 {
-		fmt.Fprintf(stderr, "portcullis scan: expected one path, got %d\n", len(pos))
-		return ExitError
-	}
-	root := "."
-	if len(pos) == 1 {
-		root = pos[0]
-	}
-
-	meta := report.Meta{Version: version.Get().Version, Ruleset: version.Get().Ruleset, Mode: "untrusted", Inventory: !*noInventory}
-	if strings.EqualFold(*failOn, "none") {
-		meta.NoFail = true
-	} else if meta.FailOn, err = finding.ParseSeverity(*failOn); err != nil {
-		fmt.Fprintf(stderr, "portcullis scan: -fail-on: %v\n", err)
-		return ExitError
-	}
-	write := report.WriteText
-	switch *format {
-	case "text":
-	case "json":
-		write = report.WriteJSON
-	default:
-		fmt.Fprintf(stderr, "portcullis scan: unknown format %q (want text or json)\n", *format)
-		return ExitError
-	}
-	size, err := parseSize(*maxSize)
-	if err != nil {
-		fmt.Fprintf(stderr, "portcullis scan: -max-file-size: %v\n", err)
-		return ExitError
-	}
-
-	eng, err := engine.Default()
-	if err != nil {
-		fmt.Fprintf(stderr, "portcullis scan: loading rules: %v\n", err)
-		return ExitError
-	}
-	res, err := eng.Scan(root, engine.Options{
-		MaxFileSize: size,
-		SkipDirs:    append(append([]string{}, discover.DefaultSkipDirs...), excludes...),
-	})
-	if err != nil {
+	fail := func(err error) int {
 		fmt.Fprintf(stderr, "portcullis scan: %v\n", err)
 		return ExitError
 	}
-
+	path, err := onePath(pos)
+	if err != nil {
+		return fail(err)
+	}
+	write, ok := writers[*format]
+	if !ok {
+		return fail(fmt.Errorf("unknown format %q (want text, json, sarif, github or markdown)", *format))
+	}
 	out := stdout
+	var outFile *os.File
 	if *output != "" {
-		f, err := os.Create(*output)
-		if err != nil {
-			fmt.Fprintf(stderr, "portcullis scan: %v\n", err)
-			return ExitError
+		if outFile, err = os.Create(*output); err != nil {
+			return fail(err)
 		}
-		defer f.Close()
-		out = f
+		defer outFile.Close()
+		out = outFile
+	}
+	colored, err := useColor(*color, out)
+	if err != nil {
+		return fail(err)
+	}
+
+	s, err := c.open(path, visited(fs))
+	if err != nil {
+		return fail(err)
+	}
+	for _, w := range s.warnings {
+		fmt.Fprintln(stderr, w)
+	}
+	res, suppressed, err := s.scan(true)
+	if err != nil {
+		return fail(err)
+	}
+	meta := report.Meta{
+		Version: version.Get().Version, Ruleset: version.Get().Ruleset, Mode: s.mode,
+		FailOn: s.settings.FailOn, NoFail: s.settings.NoFail, Inventory: !*noInventory,
+		Color: colored && *format == "text", Suppressed: suppressed, PathPrefix: *prefix, Rules: s.engine.Rules.Rules(),
 	}
 	if err := write(out, res, meta); err != nil {
-		fmt.Fprintf(stderr, "portcullis scan: writing report: %v\n", err)
-		return ExitError
+		return fail(fmt.Errorf("writing report: %w", err))
+	}
+	if *sarifOut != "" {
+		if err := writeFile(*sarifOut, false, func(w io.Writer) error { return report.WriteSARIF(w, res, meta) }); err != nil {
+			return fail(fmt.Errorf("writing SARIF: %w", err))
+		}
+	}
+	if *summaryOut != "" {
+		if err := writeFile(*summaryOut, true, func(w io.Writer) error { return report.WriteMarkdown(w, res, meta) }); err != nil {
+			return fail(fmt.Errorf("writing summary: %w", err))
+		}
 	}
 	return report.ExitCode(res, meta)
 }

@@ -112,6 +112,11 @@ func Generate(fs []finding.Finding, reason string) ([]byte, error) {
 		seen[x.Fingerprint] = true
 		f.Suppressions = append(f.Suppressions, Entry{Fingerprint: x.Fingerprint, Rule: x.RuleID, Path: x.Path, Reason: reason})
 	}
+	return Encode(&f)
+}
+
+// Encode renders a baseline file with its explanatory header.
+func Encode(f *File) ([]byte, error) {
 	var b bytes.Buffer
 	b.WriteString("# Portcullis baseline: reviewed findings that are accepted. Every entry needs a reason.\n")
 	b.WriteString("# Matching is by fingerprint; rule and path are for reviewers. Remove entries that are reported as stale.\n")

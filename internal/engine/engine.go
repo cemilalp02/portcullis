@@ -111,7 +111,12 @@ func New(ts *target.Set, rs *ruleset.Set) (*Engine, error) {
 }
 
 // Default builds an engine from the embedded targets and rules.
-func Default() (*Engine, error) {
+func Default() (*Engine, error) { return Load() }
+
+// Load builds an engine from the embedded targets and rules plus the custom
+// rules in ruleDirs (each a directory of <ID>.yaml files, optionally one
+// level of sub-directories; IDs must not use the PCL- prefix).
+func Load(ruleDirs ...string) (*Engine, error) {
 	data, err := rules.FS.ReadFile("targets.yaml")
 	if err != nil {
 		return nil, err
@@ -120,9 +125,27 @@ func Default() (*Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	rs, err := ruleset.Load(rules.FS, ruleset.Options{Targets: ts, Builtins: Builtins()})
+	opts := ruleset.Options{Targets: ts, Builtins: Builtins()}
+	rs, err := ruleset.Load(rules.FS, opts)
 	if err != nil {
 		return nil, err
+	}
+	opts.Custom = true
+	for _, dir := range ruleDirs {
+		fi, err := os.Stat(dir)
+		if err != nil {
+			return nil, fmt.Errorf("rules directory: %w", err)
+		}
+		if !fi.IsDir() {
+			return nil, fmt.Errorf("rules directory %s is not a directory", dir)
+		}
+		extra, err := ruleset.Load(os.DirFS(dir), opts)
+		if err != nil {
+			return nil, fmt.Errorf("rules directory %s: %w", dir, err)
+		}
+		if err := rs.Merge(extra); err != nil {
+			return nil, fmt.Errorf("rules directory %s: %w", dir, err)
+		}
 	}
 	return New(ts, rs)
 }

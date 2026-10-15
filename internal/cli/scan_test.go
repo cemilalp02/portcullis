@@ -102,25 +102,6 @@ func TestScanJSONToFile(t *testing.T) {
 	}
 }
 
-func TestParseSize(t *testing.T) {
-	tests := []struct {
-		in   string
-		want int64
-	}{
-		{"10MiB", 10 << 20}, {"512kib", 512 << 10}, {"2MB", 2e6}, {"1048576", 1 << 20}, {"7 b", 7}, {"1GiB", 1 << 30}, {"1073741824", 1 << 30},
-	}
-	for _, tt := range tests {
-		if got, err := parseSize(tt.in); err != nil || got != tt.want {
-			t.Errorf("parseSize(%q) = %d, %v; want %d", tt.in, got, err, tt.want)
-		}
-	}
-	for _, bad := range []string{"", "0", "-1", "ten", "10XB", "2GiB", "1073741825"} {
-		if _, err := parseSize(bad); err == nil {
-			t.Errorf("parseSize(%q) succeeded", bad)
-		}
-	}
-}
-
 func TestRulesCommand(t *testing.T) {
 	tests := []struct {
 		name       string
