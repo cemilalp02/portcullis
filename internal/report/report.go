@@ -15,6 +15,7 @@ import (
 	"github.com/cemilalp02/portcullis/internal/engine"
 	"github.com/cemilalp02/portcullis/internal/escape"
 	"github.com/cemilalp02/portcullis/internal/finding"
+	"github.com/cemilalp02/portcullis/internal/ruleset"
 )
 
 // Exit codes (docs/CLI.md §2).
@@ -35,6 +36,11 @@ type Meta struct {
 	FailOn    finding.Severity // threshold for exit code 1
 	NoFail    bool             // --fail-on none
 	Inventory bool             // show the auto-execution inventory in text output
+	Color     bool             // ANSI colours in text output
+
+	Suppressed int                 // findings removed by the baseline
+	PathPrefix string              // scan root relative to the repository root (SARIF, GitHub annotations)
+	Rules      []*ruleset.Compiled // rule metadata (SARIF)
 }
 
 // Above returns how many findings are at or above the threshold.
@@ -73,7 +79,11 @@ func WriteText(w io.Writer, res *engine.Result, m Meta) error {
 		b.WriteString("No findings.\n\n")
 	}
 	for _, f := range res.Findings {
-		fmt.Fprintf(&b, "%-9s %s  %s:%d:%d\n", strings.ToUpper(f.Severity.String()), f.RuleID, escape.String(f.Path, 0), f.Line, f.Column)
+		label := fmt.Sprintf("%-9s", strings.ToUpper(f.Severity.String()))
+		if m.Color {
+			label = ansi[f.Severity] + label + ansiReset
+		}
+		fmt.Fprintf(&b, "%s %s  %s:%d:%d\n", label, f.RuleID, escape.String(f.Path, 0), f.Line, f.Column)
 		fmt.Fprintf(&b, "          %s\n", f.Message)
 		if f.Excerpt != "" {
 			fmt.Fprintf(&b, "          > %s\n", f.Excerpt)
@@ -103,15 +113,32 @@ func WriteText(w io.Writer, res *engine.Result, m Meta) error {
 		b.WriteString("\n")
 	}
 
+	b.WriteString(summaryLine(res, m) + "\n")
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
+// ANSI colours for severity labels. Scanned content is always escaped, so
+// these are the only control sequences Portcullis ever prints.
+var ansi = map[finding.Severity]string{
+	finding.Critical: "\x1b[1;31m", finding.High: "\x1b[31m", finding.Medium: "\x1b[33m", finding.Low: "\x1b[34m", finding.Info: "\x1b[2m",
+}
+
+const ansiReset = "\x1b[0m"
+
+// summaryLine is the closing line shared by all human-readable formats.
+func summaryLine(res *engine.Result, m Meta) string {
 	above := Above(res, m)
 	threshold := "'" + m.FailOn.String() + "'"
 	if m.NoFail {
 		threshold = "the threshold (none)"
 	}
-	fmt.Fprintf(&b, "%d %s at or above %s%s · %d below · exit %d\n",
-		above, plural(above, "finding", "findings"), threshold, breakdown(res, m), len(res.Findings)-above, ExitCode(res, m))
-	_, err := io.WriteString(w, b.String())
-	return err
+	s := fmt.Sprintf("%d %s at or above %s%s · %d below", above, plural(above, "finding", "findings"), threshold,
+		breakdown(res, m), len(res.Findings)-above)
+	if m.Suppressed > 0 {
+		s += fmt.Sprintf(" · %d suppressed by baseline", m.Suppressed)
+	}
+	return s + fmt.Sprintf(" · exit %d", ExitCode(res, m))
 }
 
 func breakdown(res *engine.Result, m Meta) string {
@@ -167,6 +194,7 @@ type jsonStats struct {
 	Targets        int `json:"targets"`
 	Findings       int `json:"findings"`
 	AboveThreshold int `json:"aboveThreshold"`
+	Suppressed     int `json:"suppressed"`
 }
 
 // WriteJSON writes the machine-readable report.
@@ -182,7 +210,7 @@ func WriteJSON(w io.Writer, res *engine.Result, m Meta) error {
 		FailOn:    failOn,
 		Complete:  res.Complete,
 		ExitCode:  ExitCode(res, m),
-		Stats:     jsonStats{Files: res.Files, Targets: res.Targets, Findings: len(res.Findings), AboveThreshold: Above(res, m)},
+		Stats:     jsonStats{Files: res.Files, Targets: res.Targets, Findings: len(res.Findings), AboveThreshold: Above(res, m), Suppressed: m.Suppressed},
 		Findings:  nonNil(res.Findings),
 		Inventory: nonNil(res.Inventory),
 		Errors:    nonNil(res.Errors),
