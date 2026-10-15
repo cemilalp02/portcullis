@@ -129,6 +129,18 @@ type Options struct {
 	MaxFileSize int64    // 0 means discover.DefaultMaxFileSize
 	SkipDirs    []string // nil means discover.DefaultSkipDirs
 	Workers     int      // 0 means GOMAXPROCS
+	// Disabled rule IDs are dropped from the result; Severity overrides the
+	// severity of the given rule IDs (from a trusted configuration).
+	Disabled map[string]bool
+	Severity map[string]finding.Severity
+}
+
+// TargetFile is an agent context file found by a scan, whether or not it
+// could be analysed (oversize files are included, so context.lock covers
+// every target).
+type TargetFile struct {
+	Path     string // as found
+	ReadPath string // where to read it, relative to the root
 }
 
 // InventoryItem is one command that would run automatically. All strings
@@ -151,6 +163,8 @@ type Result struct {
 	Inventory []InventoryItem
 	Errors    []string // what could not be analysed
 	Complete  bool     // false means exit code 2 (fail closed)
+	// TargetFiles lists every agent context file, sorted by path.
+	TargetFiles []TargetFile
 }
 
 // Scan scans the directory root.
@@ -161,12 +175,19 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		return nil, err
 	}
 	res := &Result{Root: dr.Root, Files: dr.Files, Targets: len(dr.Candidates), Complete: true}
+	for _, c := range dr.Candidates {
+		res.TargetFiles = append(res.TargetFiles, TargetFile{Path: c.Path, ReadPath: c.ReadPath})
+	}
 	for _, ev := range dr.Events {
 		res.Findings = append(res.Findings, e.eventFinding(ev))
-		if ev.Kind == discover.ReadError {
+		switch ev.Kind {
+		case discover.ReadError:
 			res.fail(ev.Path, ev.Detail)
+		case discover.Oversize:
+			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath})
 		}
 	}
+	slices.SortFunc(res.TargetFiles, func(a, b TargetFile) int { return strings.Compare(a.Path, b.Path) })
 
 	r, err := os.OpenRoot(dr.Root)
 	if err != nil {
@@ -203,6 +224,19 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		}
 	}
 
+	if len(opts.Disabled) > 0 || len(opts.Severity) > 0 {
+		kept := res.Findings[:0]
+		for _, f := range res.Findings {
+			if opts.Disabled[f.RuleID] {
+				continue
+			}
+			if s, ok := opts.Severity[f.RuleID]; ok {
+				f.Severity = s
+			}
+			kept = append(kept, f)
+		}
+		res.Findings = kept
+	}
 	finding.Sort(res.Findings)
 	slices.SortFunc(res.Inventory, func(a, b InventoryItem) int {
 		return cmp.Or(strings.Compare(a.Path, b.Path), cmp.Compare(a.Line, b.Line), strings.Compare(a.Command, b.Command))
@@ -329,6 +363,13 @@ func (e *Engine) eventFinding(ev discover.Event) finding.Finding {
 
 // fileFinding reports a rule against a whole file (line 1, column 1).
 func (e *Engine) fileFinding(id, path string, vars map[string]string) finding.Finding {
+	return e.RuleFinding(id, path, vars)
+}
+
+// RuleFinding builds a whole-file finding (line 1, column 1) for the rule
+// with the given ID, for checks done outside the engine such as baseline and
+// base-snapshot comparisons. vars fill the rule's message placeholders.
+func (e *Engine) RuleFinding(id, path string, vars map[string]string) finding.Finding {
 	r := e.Rules.Get(id)
 	return newFinding(r, path, 1, 1, 1, 1, "", expand(r.Message, vars), fingerprint(id, path, "", 0))
 }
