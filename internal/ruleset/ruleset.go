@@ -44,11 +44,12 @@ type Rule struct {
 // Match selects what a rule looks at and how it matches.
 type Match struct {
 	Scope      string   `yaml:"scope"`    // "text" (default) or "exec"
-	View       string   `yaml:"view"`     // "normalized" (default) or "raw"; text scope
+	View       string   `yaml:"view"`     // "normalized" (default), "prose" or "raw"; text scope
 	Unit       string   `yaml:"unit"`     // "line" (default) or "document"; text scope
 	Kinds      []string `yaml:"kinds"`    // exec scope; empty means all kinds
 	Triggers   []string `yaml:"triggers"` // exec scope; regexes on the normalised trigger, any must match
 	Codepoints []string `yaml:"codepoints"`
+	MinRun     int      `yaml:"min_run"` // codepoints: shortest run reported (default 1)
 	Any        []string `yaml:"any"`
 	All        []string `yaml:"all"`
 	None       []string `yaml:"none"`
@@ -87,6 +88,7 @@ const (
 	ScopeText      = "text"
 	ScopeExec      = "exec"
 	ViewNormalized = "normalized"
+	ViewProse      = "prose"
 	ViewRaw        = "raw"
 	UnitLine       = "line"
 	UnitDocument   = "document"
@@ -326,7 +328,7 @@ func compileMatch(c *Compiled, opts Options) []error {
 	default:
 		fail("unknown scope %q", m.Scope)
 	}
-	if m.View != ViewNormalized && m.View != ViewRaw {
+	if m.View != ViewNormalized && m.View != ViewProse && m.View != ViewRaw {
 		fail("unknown view %q", m.View)
 	}
 	if m.Unit != UnitLine && m.Unit != UnitDocument {
@@ -334,6 +336,9 @@ func compileMatch(c *Compiled, opts Options) []error {
 	}
 	if len(m.Codepoints) > 0 && m.View != ViewRaw {
 		fail("codepoints need view: raw (invisible characters are removed from the normalised view)")
+	}
+	if m.MinRun < 0 || (m.MinRun > 0 && len(m.Codepoints) == 0) {
+		fail("min_run must be positive and needs codepoints")
 	}
 	if len(m.None) > 0 && len(m.Any)+len(m.All) == 0 {
 		fail("none needs any or all")

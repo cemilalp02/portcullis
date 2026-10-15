@@ -339,7 +339,7 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 		}
 	}
 
-	var view *textview.View
+	var view, prose *textview.View
 	for _, r := range e.rules {
 		if r.Match.Builtin == builtinEngine || !r.AppliesTo(def) {
 			continue
@@ -353,6 +353,14 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 			col.exec(r, points)
 		case r.Match.View == ruleset.ViewRaw:
 			col.text(r, doc.Text, nil)
+		case r.Match.View == ruleset.ViewProse:
+			if view == nil {
+				view = textview.Normalize(doc.Text)
+			}
+			if prose == nil {
+				prose = textview.Prose(view)
+			}
+			col.text(r, prose.Text, prose)
 		default:
 			if view == nil {
 				view = textview.Normalize(doc.Text)
@@ -444,7 +452,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 	text := c.doc.Text
 	start, n := -1, 0
 	report := func(end int) {
-		if n > 0 {
+		if n > 0 && n >= r.Match.MinRun {
 			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end], "decoded": decodeTags(text[start:end])})
 		}
 		start, n = -1, 0
