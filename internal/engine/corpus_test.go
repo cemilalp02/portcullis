@@ -131,6 +131,55 @@ func TestCleanCorpus(t *testing.T) {
 	}
 }
 
+// heldoutRecallGate is the Phase 6 gate for corpus/heldout (REQUIREMENTS §8).
+const heldoutRecallGate = 0.80
+
+// TestHeldoutCorpus reports recall on evasion variants written after the
+// rules were frozen. A sample counts as detected when the scan raises at
+// least one finding at or above the severity its header names ("alert:"),
+// that is, when a user with that threshold would be warned. Misses are
+// logged, not failed: the number is reported honestly and only the overall
+// recall is a gate.
+func TestHeldoutCorpus(t *testing.T) {
+	e := defaultEngine(t)
+	var missed []string
+	paths := corpus(t, "heldout")
+	for _, path := range paths {
+		comment, files := parseTxtar(mustRead(t, path))
+		alert := finding.High
+		for _, line := range strings.Split(comment, "\n") {
+			if rest, ok := strings.CutPrefix(line, "alert:"); ok {
+				s, err := finding.ParseSeverity(strings.TrimSpace(rest))
+				if err != nil {
+					t.Fatalf("%s: %v", path, err)
+				}
+				alert = s
+			}
+		}
+		res, err := e.Scan(unpack(t, files), Options{})
+		if err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		hit := false
+		var got []string
+		for _, f := range res.Findings {
+			got = append(got, f.RuleID+"/"+f.Severity.String())
+			if f.Severity >= alert {
+				hit = true
+			}
+		}
+		if !hit {
+			missed = append(missed, filepath.Base(path))
+			t.Logf("missed %s (alert %s): got %v", filepath.Base(path), alert, got)
+		}
+	}
+	recall := float64(len(paths)-len(missed)) / float64(len(paths))
+	t.Logf("held-out corpus: %d/%d detected (recall %.1f%%)", len(paths)-len(missed), len(paths), 100*recall)
+	if recall < heldoutRecallGate {
+		t.Errorf("held-out recall %.1f%% is below the %.0f%% gate", 100*recall, 100*heldoutRecallGate)
+	}
+}
+
 func TestParseTxtar(t *testing.T) {
 	comment, files := parseTxtar([]byte("desc\nexpect: A B\n-- a/x.md --\nline1\n-- y --\n\x00\x01\n"))
 	if comment != "desc\nexpect: A B\n" || string(files["a/x.md"]) != "line1\n" || !bytes.Equal(files["y"], []byte{0, 1, '\n'}) {
