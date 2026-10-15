@@ -1,6 +1,5 @@
 # Portcullis
 
-[![CI](https://github.com/cemilalp02/portcullis/actions/workflows/ci.yml/badge.svg)](https://github.com/cemilalp02/portcullis/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 A *portcullis* is the iron grille dropped in front of a castle gate: nothing passes until it
