@@ -339,7 +339,6 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 		}
 	}
 
-	var view, prose *textview.View
 	for _, r := range e.rules {
 		if r.Match.Builtin == builtinEngine || !r.AppliesTo(def) {
 			continue
@@ -354,18 +353,11 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 		case r.Match.View == ruleset.ViewRaw:
 			col.text(r, doc.Text, nil)
 		case r.Match.View == ruleset.ViewProse:
-			if view == nil {
-				view = textview.Normalize(doc.Text)
-			}
-			if prose == nil {
-				prose = textview.Prose(view)
-			}
-			col.text(r, prose.Text, prose)
+			v := col.prose()
+			col.text(r, v.Text, v)
 		default:
-			if view == nil {
-				view = textview.Normalize(doc.Text)
-			}
-			col.text(r, view.Text, view)
+			v := col.normalized()
+			col.text(r, v.Text, v)
 		}
 	}
 	col.flush()
@@ -421,6 +413,24 @@ type collector struct {
 	perRule  map[string]int
 	seen     map[string]int
 	dropped  int
+	norm     *textview.View // built on first use
+	prosev   *textview.View
+}
+
+// normalized returns the document's normalised view, building it once.
+func (c *collector) normalized() *textview.View {
+	if c.norm == nil {
+		c.norm = textview.Normalize(c.doc.Text)
+	}
+	return c.norm
+}
+
+// prose returns the document's prose view, building it once.
+func (c *collector) prose() *textview.View {
+	if c.prosev == nil {
+		c.prosev = textview.Prose(c.normalized())
+	}
+	return c.prosev
 }
 
 func (c *collector) add(r *ruleset.Compiled, start, end int, match string, vars map[string]string) {
