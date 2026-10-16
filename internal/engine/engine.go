@@ -229,6 +229,7 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 	defer r.Close()
 
 	workers := cmp.Or(opts.Workers, runtime.GOMAXPROCS(0))
+	budget := newByteBudget(analysisBudget)
 	jobs := make(chan discover.Candidate)
 	results := make(chan fileResult)
 	var wg sync.WaitGroup
@@ -237,7 +238,11 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		go func() {
 			defer wg.Done()
 			for c := range jobs {
-				results <- e.scanCandidate(r, c, maxSize)
+				n := min(max(c.Size, 1), analysisBudget)
+				budget.acquire(n)
+				fr := e.scanCandidate(r, c, maxSize)
+				budget.release(n)
+				results <- fr
 			}
 		}()
 	}
@@ -281,6 +286,42 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 func (res *Result) fail(path, detail string) {
 	res.Complete = false
 	res.Errors = append(res.Errors, escape.String(path, 0)+": "+escape.String(detail, excerptLimit))
+}
+
+// analysisBudget bounds the bytes of the files being analysed at once.
+// Analysis holds about 25 bytes per input byte (decoded text, the normalised
+// and prose views with their offset maps), so without a bound a repository of
+// many large files needs workers x 25 x file size: 64 files of 10 MB took
+// 9.5 GB with 32 workers. A file larger than the budget is analysed alone.
+const analysisBudget = 32 << 20
+
+// byteBudget is a counting semaphore over bytes.
+type byteBudget struct {
+	mu   sync.Mutex
+	cond *sync.Cond
+	free int64
+}
+
+func newByteBudget(n int64) *byteBudget {
+	b := &byteBudget{free: n}
+	b.cond = sync.NewCond(&b.mu)
+	return b
+}
+
+func (b *byteBudget) acquire(n int64) {
+	b.mu.Lock()
+	for b.free < n {
+		b.cond.Wait()
+	}
+	b.free -= n
+	b.mu.Unlock()
+}
+
+func (b *byteBudget) release(n int64) {
+	b.mu.Lock()
+	b.free += n
+	b.mu.Unlock()
+	b.cond.Broadcast()
 }
 
 type fileResult struct {
