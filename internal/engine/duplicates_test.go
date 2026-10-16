@@ -14,6 +14,8 @@ func TestDuplicateKeysBySetting(t *testing.T) {
 		{"repeated script name", `{"scripts": {"test": "jest", "test": "node x.js"}}`, RuleDuplicateKey},
 		{"repeated dependency", `{"dependencies": {"left-pad": "1.3.0", "left-pad": "file:../x"}}`, RuleDuplicateKey},
 		{"metadata", `{"name": "x", "nonNpm": true, "nonNpm": true}`, RuleDuplicateInert},
+		// "commands" decides what runs in Claude settings, not in an extension manifest
+		{"extension command metadata", `{"commands": [{"name": "index", "subtitle": "A", "subtitle": "B"}]}`, RuleDuplicateInert},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -22,5 +24,16 @@ func TestDuplicateKeysBySetting(t *testing.T) {
 				t.Errorf("want one %s, got %+v", tt.want, got)
 			}
 		})
+	}
+}
+
+// Every configuration format needs its own set of executing keys, or every
+// duplicate in it would be reported as inert.
+func TestExecutingKeysCoverEveryConfigFormat(t *testing.T) {
+	e := defaultEngine(t)
+	for _, d := range e.Targets.Defs() {
+		if d.Format == "jsonc" && len(executingKeys[d.Extractor]) == 0 {
+			t.Errorf("target %s: no executing keys for extractor %q", d.ID, d.Extractor)
+		}
 	}
 }

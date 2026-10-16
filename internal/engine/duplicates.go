@@ -6,29 +6,40 @@ import (
 	"github.com/cemilalp02/portcullis/internal/jsonc"
 )
 
-// executingKeys are the configuration keys that decide what runs. A key
-// repeated there, or anywhere below them, can show reviewers one command
-// while a tool runs the other.
-var executingKeys = map[string]bool{
-	"scripts": true, "hooks": true, "command": true, "commands": true, "args": true, "statusline": true,
-	"apikeyhelper": true, "env": true, "permissions": true, "allow": true, "deny": true, "defaultmode": true,
-	"enableallprojectmcpservers": true, "mcpservers": true, "servers": true, "url": true,
-	"tasks": true, "runoptions": true, "runon": true, "dependson": true, "label": true,
-	"windows": true, "linux": true, "osx": true,
-	"initializecommand": true, "oncreatecommand": true, "updatecontentcommand": true,
-	"postcreatecommand": true, "poststartcommand": true, "postattachcommand": true,
-	"dependencies": true, "devdependencies": true, "optionaldependencies": true, "overrides": true,
-	"resolutions": true, "bin": true, "main": true, "exports": true,
+// executingKeys are, per configuration format (the target's extractor), the
+// keys that decide what runs. A key repeated there, or anywhere below them,
+// can show reviewers one command while a tool runs the other. The sets are
+// per format because the same name means different things: "commands" runs
+// nothing in an extension manifest.
+var executingKeys = map[string]map[string]bool{
+	"claude_settings": keySet("hooks", "command", "statusline", "apikeyhelper", "env", "permissions", "allow", "deny",
+		"defaultmode", "enableallprojectmcpservers", "mcpservers"),
+	"vscode_tasks": keySet("tasks", "command", "args", "runoptions", "runon", "dependson", "label",
+		"windows", "linux", "osx"),
+	"devcontainer": keySet("initializecommand", "oncreatecommand", "updatecontentcommand", "postcreatecommand",
+		"poststartcommand", "postattachcommand"),
+	"mcp_config": keySet("mcpservers", "servers", "command", "args", "env", "url"),
+	"npm_package": keySet("scripts", "dependencies", "devdependencies", "optionaldependencies", "overrides",
+		"resolutions", "bin", "main", "exports"),
+}
+
+func keySet(keys ...string) map[string]bool {
+	m := make(map[string]bool, len(keys))
+	for _, k := range keys {
+		m[k] = true
+	}
+	return m
 }
 
 // executes reports whether a repeated key, or one of the keys above it,
-// decides what runs.
-func executes(key string, path []string) bool {
-	if executingKeys[strings.ToLower(key)] {
+// decides what runs in a file of the given format.
+func executes(format, key string, path []string) bool {
+	keys := executingKeys[format]
+	if keys[strings.ToLower(key)] {
 		return true
 	}
 	for _, k := range path {
-		if executingKeys[strings.ToLower(k)] {
+		if keys[strings.ToLower(k)] {
 			return true
 		}
 	}

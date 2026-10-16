@@ -329,7 +329,7 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 		root, dups, err := jsonc.Parse(doc.Text)
 		for _, d := range dups {
 			id := RuleDuplicateKey
-			if root != nil && !executes(d.Key, keyPath(root, d.Offset)) {
+			if root != nil && !executes(def.Extractor, d.Key, keyPath(root, d.Offset)) {
 				id = RuleDuplicateInert
 			}
 			col.add(e.Rules.Get(id), d.Offset, d.Offset+len(d.Key)+2, d.Key, map[string]string{"name": d.Key})
