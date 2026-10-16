@@ -73,6 +73,13 @@ func Normalize(s string) *View {
 	return v
 }
 
+// caseless reports whether r belongs to a category without case (other
+// letters, symbols, punctuation, decimal digits) and has no case mapping.
+func caseless(r rune) bool {
+	return unicode.In(r, unicode.Lo, unicode.So, unicode.Sm, unicode.Sc, unicode.Sk, unicode.P, unicode.Nd) &&
+		unicode.SimpleFold(r) == r && unicode.ToLower(r) == r
+}
+
 // hasMarkRun reports whether s contains two combining marks in a row.
 func hasMarkRun(s string) bool {
 	prev := false
@@ -157,11 +164,20 @@ func normalizeOnce(s string) *View {
 		it.Init(norm.NFKC, filtered[i:j])
 		for !it.Done() {
 			raw := fmap[i+it.Pos()]
+			seg := it.Next()
+			// A segment of one caseless character (CJK and other letters
+			// without case, symbols, emoji, punctuation, digits) that NFKC
+			// leaves alone is already in its final form. Letters with case
+			// can fold to several characters (U+0130 becomes "i" and a dot).
+			if r, n := utf8.DecodeRune(seg); n == len(seg) && caseless(r) && norm.NFKC.IsNormal(seg) {
+				emit(r, raw)
+				continue
+			}
 			// Full case folding is not idempotent for every script (Cherokee
 			// folds lower->upper while upper folds back to lower) and can emit
 			// combining marks out of canonical order (Turkish dotted I followed
 			// by a mark). Lower-casing and re-normalising gives one stable form.
-			for _, r := range norm.NFKC.String(lower(fold.String(string(it.Next())))) {
+			for _, r := range norm.NFKC.String(lower(fold.String(string(seg)))) {
 				emit(r, raw)
 			}
 		}
