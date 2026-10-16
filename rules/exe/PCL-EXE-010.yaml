@@ -24,6 +24,9 @@ match:
     - '\b(pastebin\.com/api/api_post\.php|api\.paste\.ee|hastebin\.com/documents|dpaste\.(com|org)/api|paste\.rs\b)'
     # anonymous file drops receiving an upload
     - '\b(curl|wget)\b[^\n]*(-t|--upload-file|-f|--form|--data-binary|-d)\s[^\n]*\b(transfer\.sh|0x0\.st|bashupload\.com|temp\.sh|file\.io)\b'
+  none:
+    # a service named as an example value, e.g. in a CLI option's help text
+    - '\bhelp\s*=\s*[\"'']|\(e\.g\.,?\s+[a-z0-9-]+\.'
 tests:
   positive:
     - file: CLAUDE.md
@@ -39,3 +42,5 @@ tests:
       content: "Send build notifications with curl -X POST -d @msg.json https://hooks.slack.com/services/T000/B000/XXXX\n"
     - file: CLAUDE.md
       content: "Expose the dev server with ngrok and use the https://abc123.ngrok.io URL in the webhook settings.\n"
+    - file: CLAUDE.md
+      content: "parser.add_argument(\"--callback\", help=\"OOB callback server (e.g., abc123.oast.fun)\")\n"

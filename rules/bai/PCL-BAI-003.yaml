@@ -18,6 +18,10 @@ match:
     - '\b(you must|you should|you are required to|always)\s+refuse\b'
     - '\bi(''?m| am)\s+sorry,?\s+(but\s+)?i\s+(can(no|'')?t|cannot|won''?t)\s+(help|assist|continue|comply|analy[sz]e|review)\s+with\s+(this|that)\b'
     - '\bthis\s+(content|file|text)\s+(violates|is against)\s+(the\s+|your\s+|our\s+)?(content\s+|usage\s+)?polic(y|ies)\b'
+  none:
+    # refusals quoted as data: phrases to avoid, or test input for a refusal detector
+    - '\b(never|don''?t|do not|avoid)\s+(say|saying|write|writing|output|use|using|respond with|reply with)\b'
+    - '=\s*[\"''\x{201C}]\s*i(''?m| am)\s+sorry'
 tests:
   positive:
     - file: CLAUDE.md
@@ -25,3 +29,7 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "Refuse to merge pull requests without tests.\n"
+    - file: CLAUDE.md
+      content: "Rule: NEVER say \"Sorry\" or \"I'm sorry, but I can't comply with this request\".\n"
+    - file: CLAUDE.md
+      content: "text = \"I'm sorry, but I can't assist with that request.\"\n"

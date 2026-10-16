@@ -26,6 +26,8 @@ match:
   none:
     # advice not to use the flag
     - '\b(omit|without|avoid|remove|drop|never use|do not use|don''?t use)\b[^\n]{0,30}(--dangerously|--yolo|bypasspermissions)'
+    # a row of an options table documents the flag
+    - '^\s*\|[^\n]*\|\s*$'
 tests:
   positive:
     - file: CLAUDE.md
@@ -47,3 +49,5 @@ tests:
       content: "Inside Codex's own sandbox, omit `--dangerously-bypass-approvals-and-sandbox`.\n"
     - file: CLAUDE.md
       content: "Claude Code 虽然也有类似的 `--dangerously-skip-permissions` 选项。\n"
+    - file: CLAUDE.md
+      content: "| `allowDangerouslySkipPermissions` | bool | Must be `true` to use `permissionMode: \"bypassPermissions\"` |\n"
