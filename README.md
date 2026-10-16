@@ -98,7 +98,10 @@ something it could not read.
 
 Portcullis is a pattern and structure scanner. A malicious instruction written in ordinary,
 polite language without known markers can get past it; it reduces risk, it does not remove it.
-The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly.
+The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly, and
+[validation](docs/VALIDATION.md) publishes how often it is wrong: on 1,000 popular repositories
+it was tuned on and two held-out sets of 500 it was not, 0.2%, 1.6% and 1.4% of repositories had
+a false finding at or above `high`.
 
 ## Documentation
 
@@ -108,6 +111,7 @@ The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly.
 | [Rule catalogue](docs/RULES.md) | All rules: what each detects, severity and fix |
 | [CLI](docs/CLI.md) · [File formats](docs/FILE_FORMATS.md) | Commands, flags, exit codes, outputs, configuration |
 | [Threat model](docs/THREAT_MODEL.md) | What Portcullis protects against — and what it does not |
+| [Validation](docs/VALIDATION.md) | False-positive benchmark, recall, performance and fuzzing results |
 | [Requirements](docs/REQUIREMENTS.md) · [Architecture](docs/ARCHITECTURE.md) | Scope, design, trust model |
 | [Rule schema](docs/RULE_SCHEMA.md) | Writing and testing rules, custom rules |
 | [Decision records](docs/adr/) | Why things are the way they are |
