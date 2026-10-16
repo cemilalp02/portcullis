@@ -15,15 +15,20 @@ uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Brand identity: the Portcullis mark (a pointed gateway with its grille lowered) in two
-  optical sizes, logo lockups, app icon and favicon, generated from exact geometry by
-  `scripts/brand`; guide in `docs/BRAND.md`.
+- Brand identity: the Portcullis mark (a pointed gateway with its grille lowered), two-tone
+  with a verdigris grille, in two optical sizes; logo lockups for light and dark backgrounds,
+  app icon, favicon and a social card, generated from exact geometry by `scripts/brand`; guide
+  in `docs/BRAND.md`.
 - Self-contained HTML report (`--format html`, `--html FILE`): one offline file with severity
   filters, search, the auto-execution inventory and every scanned agent file; light and dark
   themes; no network access, guarded by a hash-based Content Security Policy. The GitHub Action
-  uploads it as a workflow artifact. Report design: ink masthead with the verdict, severity
-  distribution bar, sticky severity filters and search (`/`), expand/collapse all, invisible
-  characters highlighted in excerpts, IBM Plex typography embedded (SIL OFL 1.1).
+  uploads it as a workflow artifact. Report design built with Tailwind CSS, the shadcn/ui
+  design tokens and Lucide icons (compiled into the page by `web/report`): sidebar navigation,
+  verdict card, severity cards that filter the findings, distribution bar, top rules, most
+  affected files and an auto-run summary, findings as cards per file with the excerpt, a
+  "How to fix" box and the fingerprint; severity filters and search (`/`), expand/collapse
+  all, invisible characters highlighted in excerpts, IBM Plex typography embedded
+  (SIL OFL 1.1).
 - `portcullis lock` / `portcullis verify`: approve agent context files in `context.lock` and fail
   when any of them is added, modified or removed without a new approval.
 - `portcullis baseline`: accept current findings by fingerprint (reasons required and kept).
