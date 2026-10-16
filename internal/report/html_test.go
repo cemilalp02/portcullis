@@ -58,7 +58,7 @@ func TestWriteHTMLEscapesScannedText(t *testing.T) {
 	}
 	for _, want := range []string{
 		`data-copy="&#34;&gt;&lt;img src=x onerror=alert(1)&gt;`,
-		`<title>&lt;b onmouseover=alert(3)&gt;repo · Portcullis report</title>`,
+		`<title>&lt;b onmouseover=alert(3)&gt;repo · Portcullis inspection report</title>`,
 		`title="1 invisible character">&lt;U&#43;200B&gt;</mark>`,
 	} {
 		if !strings.Contains(out, want) {
@@ -133,15 +133,15 @@ func TestWriteHTMLVerdicts(t *testing.T) {
 		want []string
 	}{
 		{"fails", sample(), Meta{FailOn: finding.High, Suppressed: 2},
-			[]string{`data-headline>1 finding at or above high</p>`, `data-verdict="fail" data-exit="1"`, "#i-shield-x", "2 suppressed by baseline", `aria-label="1 critical, 1 medium"`}},
+			[]string{`data-headline>1 finding at or above high</p>`, `data-verdict="fail" data-exit="1"`, ">FAIL</p>", "2 suppressed by baseline", "2 findings, 1 of them at or above high.", `aria-label="1 critical, 1 medium"`}},
 		{"below threshold", onlyMedium, Meta{FailOn: finding.High},
-			[]string{`data-headline>No findings at or above high</p>`, `data-verdict="pass" data-exit="0"`, "#i-shield-check"}},
+			[]string{`data-headline>No findings at or above high</p>`, `data-verdict="pass" data-exit="0"`, ">PASS</p>"}},
 		{"threshold disabled", sample(), Meta{NoFail: true},
 			[]string{`data-headline>2 findings, failure threshold disabled</p>`, `data-verdict="pass" data-exit="0" data-threshold="none"`}},
 		{"empty", empty, Meta{FailOn: finding.High},
 			[]string{`data-headline>No findings</p>`, "nothing matched a rule", "No agent context files were found.", `<rect class="sev-none`, `aria-label="No findings"`}},
 		{"incomplete", incomplete, Meta{FailOn: finding.High},
-			[]string{`data-headline>Some files could not be analysed</p>`, `data-verdict="incomplete" data-exit="2"`, "#i-shield-alert", `role="alert"`, "CLAUDE.md: permission denied"}},
+			[]string{`data-headline>Some files could not be analysed</p>`, `data-verdict="incomplete" data-exit="2"`, ">INCOMPLETE</p>", "Some files could not be analysed.", `role="alert"`, "CLAUDE.md: permission denied"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -241,7 +241,7 @@ func TestFormatInt(t *testing.T) {
 // assets in docs/assets/brand.
 func TestHTMLBrandMatchesAssets(t *testing.T) {
 	for embedded, published := range map[string]string{
-		"html/icon.svg":    "../../docs/assets/brand/portcullis-icon.svg",
+		"html/mark.svg":    "../../docs/assets/brand/portcullis-mark-color.svg",
 		"html/favicon.svg": "../../docs/assets/brand/favicon.svg",
 	} {
 		want, err := os.ReadFile(published)
@@ -286,9 +286,6 @@ func TestIconsAreInTheSprite(t *testing.T) {
 	for _, m := range regexp.MustCompile(`<symbol id="([^"]+)"`).FindAllStringSubmatch(htmlIcons, -1) {
 		have[m[1]] = true
 	}
-	if !have["logo"] {
-		t.Error(`sprite lacks the "logo" symbol`)
-	}
 	src := string(mustRead("html/report.tmpl"))
 	goSrc, err := os.ReadFile("html.go")
 	if err != nil {
@@ -296,7 +293,7 @@ func TestIconsAreInTheSprite(t *testing.T) {
 	}
 	want := regexp.MustCompile(`#(i-[a-z0-9-]+)"`).FindAllStringSubmatch(src, -1)
 	want = append(want, regexp.MustCompile(`"(i-[a-z0-9-]+)"`).FindAllStringSubmatch(string(goSrc), -1)...)
-	if len(want) < 20 {
+	if len(want) < 5 {
 		t.Fatalf("found only %d icon references", len(want))
 	}
 	for _, m := range want {

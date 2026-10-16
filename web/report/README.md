@@ -6,7 +6,7 @@ Portcullis needs no Node.js.
 
 | Output | Built from |
 |---|---|
-| `internal/report/html/style.css` | [`input.css`](input.css): [Tailwind CSS](https://tailwindcss.com) v4 with the design tokens and component styles of [shadcn/ui](https://ui.shadcn.com), adapted to the [Portcullis palette](../../docs/BRAND.md). Only the classes used in `report.tmpl`, `app.js` and `html.go` are generated. |
+| `internal/report/html/style.css` | [`input.css`](input.css): [Tailwind CSS](https://tailwindcss.com) v4, with semantic design tokens named after those of [shadcn/ui](https://ui.shadcn.com) and set in the [Portcullis palette](../../docs/BRAND.md). Only the classes used in `report.tmpl`, `app.js` and `html.go` are generated. |
 | `internal/report/html/icons.svg` | [Lucide](https://lucide.dev) icons: every `"#i-name"` in `report.tmpl` and `"i-name"` in `html.go` becomes a `<symbol>`. |
 
 ```bash

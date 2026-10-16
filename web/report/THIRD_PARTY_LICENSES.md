@@ -76,7 +76,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## shadcn/ui (design tokens and component styles in input.css)
+## shadcn/ui (design-token naming in input.css)
 
 ```
 MIT License
