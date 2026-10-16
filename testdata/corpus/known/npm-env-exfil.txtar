@@ -1,5 +1,5 @@
-npm postinstall sends the npm token to a tunnel.
-expect: PCL-EXE-009 PCL-EXE-010 PCL-AEX-009
+npm postinstall sends the npm token to a tunnel (a host the token does not belong to).
+expect: PCL-EXE-014 PCL-AEX-009
 -- package.json --
 {
   "name": "left-padder",

@@ -1,7 +1,7 @@
 schema: 1
 id: PCL-AUT-003
 title: Fake chat-role or system markers
-severity: high
+severity: medium
 confidence: medium
 targets: [instruction, config, script]
 owasp: [ASI01]

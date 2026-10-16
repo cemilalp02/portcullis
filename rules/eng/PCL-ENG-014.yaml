@@ -1,0 +1,18 @@
+schema: 1
+id: PCL-ENG-014
+title: Duplicate key outside settings that execute anything
+severity: low
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI04]
+since: 2026.10.1
+description: >
+  The same key appears twice in one JSON object, outside the parts that decide what runs
+  (scripts, hooks, commands, tasks, MCP servers, environment, permissions, dependencies).
+  Usually a mistake; reported so it gets fixed. PCL-ENG-003 reports duplicates in those parts,
+  where parsers that disagree on the winning value can hide a command.
+remediation: >
+  Remove the duplicate key.
+message: "Key \"{name}\" appears more than once in the same object"
+match:
+  builtin: engine

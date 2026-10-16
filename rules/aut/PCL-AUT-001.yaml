@@ -17,15 +17,17 @@ message: "Instruction override: \"{match}\""
 match:
   view: prose
   any:
-    - '\b(ignore|disregard|forget|override|bypass)\s+(all\s+|any\s+|the\s+|your\s+|of\s+|these\s+|those\s+)*(previous|prior|above|earlier|preceding|original|system|developer|existing|initial|former)\s+([a-z]+\s+){0,2}?(instructions?|directions?|rules|guidelines|guidance|prompts?|messages?|context|constraints|directives)\b'
+    - '\b(ignore|disregard|forget|bypass)\s+(all\s+|any\s+|the\s+|your\s+|of\s+|these\s+|those\s+)*(previous|prior|above|earlier|preceding|original|system|developer|existing|initial|former)\s+([a-z]+\s+){0,2}?(instructions?|directions?|rules|guidelines|guidance|prompts?|constraints|directives)\b'
+    # "override" also means CSS and config precedence, so only with instruction nouns
+    - '\boverride\s+(all\s+|any\s+|the\s+|your\s+|of\s+)*(previous|prior|above|earlier|original|system|developer)\s+([a-z]+\s+){0,2}?(instructions?|prompts?|directives|guidelines|guidance)\b'
     - '\bfrom now on,?\s+(you\s+(will|must|are|should)|ignore|act as)\b'
     # paraphrases that declare earlier instructions void
-    - '\b(supersedes?|overrides?|replaces?|invalidates?)\s+(all|any|every)\s+(of\s+)?(the\s+|your\s+)?(previous|prior|earlier|above|other|existing|original)\s+(instructions?|guidance|rules|directives)\b'
+    - '\b(supersedes?|overrides?|replaces?|invalidates?)\s+(all|any|every)\s+(of\s+)?(the\s+|your\s+)?(previous|prior|earlier|above|existing|original)\s+(instructions?|guidance|rules|directives)\b'
     - '\b(supersedes?|overrides?|replaces?)\s+(everything|anything)\s+you\s+(were|have been)\s+(told|given)\b'
     - '\beverything\s+(in|below|above|after)\s+(this|here)\b[^.\n]{0,40}\b(supersedes?|overrides?|replaces?|takes precedence)\b'
     - '\b(guidance|instructions|rules|directives)\s+(you\s+(were|have been)\s+given|above|earlier|so far|before)\b[^.\n]{0,30}\b(is|are)\s+(now\s+)?(outdated|obsolete|void|invalid|cancel+ed|revoked|no longer (valid|in effect|applicable|binding))\b'
     - '\b(safety|security|content)\s+(checks?|rules|guidelines|restrictions|filters|polic(y|ies)|guardrails)\s+(are|is|have been|has been)\s+(now\s+)?(disabled|off|lifted|removed|suspended|turned off|deactivated|bypassed)\b'
-    - '\b(system|admin|developer)\s+override\b'
+    - '\bsystem\s+override\b'
     # the classic opener in other languages
     - '\b(ignora|olvida)[a-z]*\s+(todas?\s+)?(las\s+)?(instrucciones|indicaciones|reglas)\s+(anteriores|previas)\b'
     - '\b(ignor[ae]|esque[cç]a)[a-z]*\s+(todas?\s+)?(as\s+)?(instru[cç][õo]es|regras)\s+anteriores\b'
@@ -75,3 +77,11 @@ tests:
       content: "This file supersedes the old CONTRIBUTING notes.\n"
     - file: CLAUDE.md
       content: "Prompt injection examples such as `ignore all previous instructions` are rejected.\n"
+    - file: CLAUDE.md
+      content: "Theme files may override earlier rules in the base stylesheet.\n"
+    - file: CLAUDE.md
+      content: "Merge with an admin override only when the release is blocked.\n"
+    - file: CLAUDE.md
+      content: "Ignore previous context and re-read the CI logs from scratch.\n"
+    - file: CLAUDE.md
+      content: "This section overrides all other rules in the file.\n"

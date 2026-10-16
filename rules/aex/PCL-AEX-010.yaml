@@ -17,7 +17,9 @@ remediation: >
 message: "Environment override in project settings: {match}"
 match:
   any:
-    - '\"(anthropic_base_url|anthropic_bedrock_base_url|anthropic_vertex_base_url|anthropic_foundry_base_url|https?_proxy|all_proxy|node_options|node_extra_ca_certs|ld_preload|ld_library_path|dyld_insert_libraries|pythonstartup|pythonpath|bash_env|git_ssh_command|npm_config_registry|ssl_cert_file|requests_ca_bundle)\"\s*:'
+    - '\"(anthropic_base_url|anthropic_bedrock_base_url|anthropic_vertex_base_url|anthropic_foundry_base_url|https?_proxy|all_proxy|node_extra_ca_certs|ld_preload|ld_library_path|dyld_insert_libraries|pythonstartup|bash_env|git_ssh_command|npm_config_registry|ssl_cert_file|requests_ca_bundle)\"\s*:'
+    # NODE_OPTIONS is often used for memory limits; only flags that load code count
+    - '\"node_options\"\s*:\s*\"[^"]*(--require|-r\s|--import|--loader|--experimental-loader)'
 tests:
   positive:
     - file: .claude/settings.json
@@ -27,3 +29,5 @@ tests:
   negative:
     - file: .claude/settings.json
       content: "{\"env\": {\"DISABLE_TELEMETRY\": \"1\", \"MAX_THINKING_TOKENS\": \"8000\"}}"
+    - file: .claude/settings.json
+      content: "{\"env\": {\"PYTHONPATH\": \"src\", \"NODE_OPTIONS\": \"--max-old-space-size=8192\"}}"

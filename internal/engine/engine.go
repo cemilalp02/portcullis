@@ -54,12 +54,13 @@ const (
 	RuleDirLinkEscape  = "PCL-ENG-011"
 	RuleUnresolvedLink = "PCL-ENG-012"
 	RuleStaleBaseline  = "PCL-ENG-013"
+	RuleDuplicateInert = "PCL-ENG-014"
 )
 
 var engineRules = []string{
 	RuleOversize, RuleUnparseable, RuleDuplicateKey, RuleEncoding, RuleLinkEscape, RuleReadError,
 	RuleInTreeConfig, RuleSkippedTargets, RuleProtected, RuleFindingCap, RuleDirLinkEscape, RuleUnresolvedLink,
-	RuleStaleBaseline,
+	RuleStaleBaseline, RuleDuplicateInert,
 }
 
 const builtinEngine = "engine"
@@ -327,7 +328,11 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 	if def.Format == "jsonc" {
 		root, dups, err := jsonc.Parse(doc.Text)
 		for _, d := range dups {
-			col.add(e.Rules.Get(RuleDuplicateKey), d.Offset, d.Offset+len(d.Key)+2, d.Key, map[string]string{"name": d.Key})
+			id := RuleDuplicateKey
+			if root != nil && !executes(d.Key, keyPath(root, d.Offset)) {
+				id = RuleDuplicateInert
+			}
+			col.add(e.Rules.Get(id), d.Offset, d.Offset+len(d.Key)+2, d.Key, map[string]string{"name": d.Key})
 		}
 		var se *jsonc.SyntaxError
 		switch {
