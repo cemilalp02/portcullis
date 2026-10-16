@@ -1,0 +1,16 @@
+{
+  "name": "portcullis-report-ui",
+  "private": true,
+  "description": "Build tools for the Portcullis HTML report: Tailwind CSS with the shadcn/ui design tokens, and Lucide icons. Not needed to build Portcullis; the outputs are committed.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/node": "4.3.3",
+    "@tailwindcss/oxide": "4.3.3",
+    "lucide-static": "1.58.0",
+    "tailwindcss": "4.3.3"
+  }
+}

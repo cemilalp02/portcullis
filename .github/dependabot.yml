@@ -19,3 +19,13 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /web/report
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build(deps)
+    groups:
+      report-ui:
+        patterns: ["*"]

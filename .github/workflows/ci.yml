@@ -39,6 +39,24 @@ jobs:
       - name: Lint action scripts
         run: shellcheck -s bash scripts/action/*.sh
 
+  report-assets:
+    name: HTML report assets are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/report/package-lock.json
+      - name: Build style.css and icons.svg
+        working-directory: web/report
+        run: npm ci && npm run build
+      - name: No difference to the committed files
+        run: git diff --exit-code -- internal/report/html
+
   test:
     name: Test (${{ matrix.os }}, Go ${{ matrix.go }})
     runs-on: ${{ matrix.os }}
