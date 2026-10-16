@@ -69,6 +69,7 @@ const builtinEngine = "engine"
 // itself (discovery events, decoding and parsing problems).
 var builtins = map[string]func(c *collector, r *ruleset.Compiled){
 	"skill_capability_mismatch": skillCapabilityMismatch,
+	"credential_destination":    credentialDestination,
 }
 
 // Builtins lists the built-in check names rules may reference.
