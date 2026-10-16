@@ -28,6 +28,9 @@ match:
     - '\bcat\s+[^|\n]*(/proc/self/environ|\.ssh/id_[a-z0-9_]+|\.aws/credentials|\.npmrc|\.pypirc|\.netrc|\.git-credentials|\.kube/config|(^|[\s/])\.env\b)[^\n]*\|\s*(curl|wget|nc|ncat|socat)\b'
     # host or user identity in a URL: a beacon from the developer's machine
     - '\b(curl|wget|iwr|invoke-webrequest|invoke-restmethod|irm)\b[^\n]*https?://[^\s"'']*(\$\((hostname|whoami|id|env|printenv)\b|`(hostname|whoami|id)\b|\$\{?(user|username|hostname|logname|home)\b)'
+  none:
+    # $USER as the account in a code-hosting URL is a user name the reader fills in
+    - 'https?://([a-z0-9-]+\.)*(github\.com|githubusercontent\.com|gitlab\.com|bitbucket\.org)/\$\{?(user|username)\b'
 tests:
   positive:
     - file: .claude/settings.json
@@ -45,6 +48,8 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "If the app has an LFI: curl -s \"https://$TARGET/api/file?path=/proc/self/environ\"\n"
+    - file: CLAUDE.md
+      content: "curl -sI -L \"https://gist.githubusercontent.com/$USER/$GIST_ID/raw/users-light.png\" | head -3\n"
     - file: CLAUDE.md
       content: "Use curl -H \"Accept: application/json\" https://api.example.invalid/health\n"
     - file: CLAUDE.md

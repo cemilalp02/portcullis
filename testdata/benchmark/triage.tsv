@@ -41,7 +41,6 @@ davila7/claude-code-templates	d504ac5c2bb06b6a48f0f718c71f6258	PCL-AEX-008	tp	ri
 davila7/claude-code-templates	1d7d99bafc8358117f59cd30e0517209	PCL-AEX-008	tp	risk: unrestricted Bash allowed in shared settings (cli-tool/templates/python/.claude/settings.json:3)
 davila7/claude-code-templates	18e2b494bcec06085c39e3a382cb7b00	PCL-AEX-008	tp	risk: unrestricted Bash allowed in shared settings (cli-tool/templates/ruby/.claude/settings.json:3)
 getsentry/sentry	245ac4717129dee02b28c72d033fc2d2	PCL-AEX-006	tp	risk: every project MCP server enabled without approval (.claude/settings.json:103)
-github/awesome-copilot	da068d38c22248dd3b0bcc64ded2d36e	PCL-AUT-002	tp	risk: tells the agent to hide that evidence was missing or rejected (skills/anti-ui-slop/references/uizze-reference-policy.md:9)
 github/awesome-copilot	e9a798457503d18e7fb0aa926725d76e	PCL-AUT-002	tp	benign: asks the agent not to narrate each tool call (skills/roundup/SKILL.md:38)
 gravitational/teleport	9b71f6a06eb778f78dd23cd534278774	PCL-AUT-001	tp	payload: eval fixture with an injected field (skills/teleport-access-review/evals/files/injection.json:29)
 gravitational/teleport	e3d529fe1fc61c52c9079bbd07266f20	PCL-AUT-001	tp	payload: eval fixture with an injected field (skills/teleport-session-review/evals/files/recordings-search.json:104)
