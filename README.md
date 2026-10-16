@@ -18,6 +18,14 @@ has been inspected.
 sees them. It runs fully offline, annotates pull requests, feeds GitHub code scanning, and pins
 approved agent context with `context.lock` so silent changes fail CI.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/report-dark.png">
+    <img alt="Portcullis HTML report: verdict, findings by severity, top rules, most affected files and commands that run without asking" src="docs/assets/report-light.png" width="880">
+  </picture>
+  <br><sub>The offline HTML report (<code>--html report.html</code>) of an example repository.</sub>
+</p>
+
 > **Status: pre-alpha.** Nothing is released yet; build from source. See the [roadmap](docs/ROADMAP.md).
 
 ## Why

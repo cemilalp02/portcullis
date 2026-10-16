@@ -66,6 +66,20 @@
       apply();
     });
   });
+
+  // A severity card in the overview shows only that severity.
+  each(document.querySelectorAll("a[data-filter]"), function (a) {
+    a.addEventListener("click", function () {
+      var sev = a.getAttribute("data-filter");
+      var target = document.querySelector('.chip[data-sev="' + sev + '"]');
+      if (!target || target.disabled) { return; }
+      each(chips, function (c) {
+        if (!c.disabled) { c.setAttribute("aria-pressed", c === target ? "true" : "false"); }
+      });
+      apply();
+    });
+  });
+
   if (search) {
     document.getElementById("search-box").hidden = false;
     search.addEventListener("input", apply);
@@ -112,6 +126,26 @@
       });
     });
   });
+
+  // The sidebar marks the section being read.
+  var nav = document.querySelectorAll("a[data-nav]");
+  if (nav.length > 0 && "IntersectionObserver" in window) {
+    var visible = {};
+    var observer = new IntersectionObserver(function (entries) {
+      each(entries, function (e) { visible[e.target.id] = e.isIntersecting; });
+      var current = null;
+      each(nav, function (a) {
+        if (current === null && visible[a.getAttribute("href").slice(1)]) { current = a; }
+      });
+      if (current !== null) {
+        each(nav, function (a) { a.setAttribute("aria-current", a === current ? "true" : "false"); });
+      }
+    }, { rootMargin: "-72px 0px -55% 0px" });
+    each(nav, function (a) {
+      var section = document.getElementById(a.getAttribute("href").slice(1));
+      if (section) { observer.observe(section); }
+    });
+  }
 
   window.addEventListener("beforeprint", function () {
     each(document.querySelectorAll("details"), function (d) { d.open = true; });

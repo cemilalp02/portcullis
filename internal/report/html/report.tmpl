@@ -11,208 +11,319 @@
 <link rel="icon" type="image/svg+xml" href="{{.Favicon}}">
 <style>{{.CSS}}</style>
 </head>
-<body>
-<svg class="sprite" aria-hidden="true" focusable="false">
-  <symbol id="i-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></symbol>
-  <symbol id="i-copy" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8.5" height="8.5" rx="1.6"/><path d="M10.5 3.3V3A1.5 1.5 0 0 0 9 1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.3"/></symbol>
-  <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8.5 3.2 3.2L13 4.8"/></symbol>
-  <symbol id="i-ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h6v6M12.5 3.5 4 12"/></symbol>
-  <symbol id="i-search" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.6 3.6"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.4v1.3M8 13.3v1.3M1.4 8h1.3M13.3 8h1.3M3.3 3.3l.9.9M11.8 11.8l.9.9M3.3 12.7l.9-.9M11.8 4.2l.9-.9"/></symbol>
-  <symbol id="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M13.6 9.7A5.9 5.9 0 0 1 6.3 2.4a5.9 5.9 0 1 0 7.3 7.3Z"/></symbol>
-  <symbol id="i-fail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7.5 7.5l9 9M16.5 7.5l-9 9"/></symbol>
-  <symbol id="i-pass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5.8 12.6 4 4L18.4 8"/></symbol>
-  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6.5v7.2M12 17.6v.1"/></symbol>
-  <symbol id="i-alert" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.9 14.6 13.6H1.4Z"/><path d="M8 6.4v3.2M8 11.7v.1"/></symbol>
-  <symbol id="i-ok" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.3"/><path d="m5.3 8.2 1.9 1.9 3.6-3.8"/></symbol>
-  <symbol id="mark" viewBox="0 0 64 64"><path d="{{.MarkPath}}"/></symbol>
-</svg>
+<body class="min-h-screen">
+<svg class="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">{{.Icons}}</svg>
+<div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[640px] bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-size-[44px_44px] opacity-70 [mask-image:radial-gradient(ellipse_65%_55%_at_50%_0%,#000_35%,transparent_100%)] print:hidden" aria-hidden="true"></div>
+<div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px] bg-[radial-gradient(55%_65%_at_50%_0%,var(--glow),transparent_72%)] print:hidden" aria-hidden="true"></div>
 
-<header class="mast" id="top">
-  <div class="mast-bar"><div class="wrap mast-top">
-    <a class="brand" href="#top"><svg aria-hidden="true"><use href="#mark"/></svg>Portcullis</a>
-    <span class="doc">Agent context scan report</span>
-    <span class="spacer"></span>
-    <span class="meta"><span>{{.Version}}</span><span>rules {{.Ruleset}}</span><span>{{.Mode}}</span></span>
-    <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark theme" title="Switch theme" hidden>
-      <svg class="i i-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="i i-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+<header class="sticky top-0 z-40 border-b border-border/70 bg-background/70 backdrop-blur-xl print:static">
+  <div class="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <a class="flex items-center gap-2.5 font-semibold tracking-tight" href="#overview"><svg class="size-7 shrink-0 drop-shadow-sm" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg><span>Portcullis</span></a>
+    <span class="hidden h-5 w-px bg-border sm:block"></span>
+    <span class="hidden text-sm text-muted-foreground sm:block">Agent context scan report</span>
+    <span class="flex-1"></span>
+    <div class="hidden items-center gap-1.5 md:flex">
+      <span class="inline-flex items-center gap-1.5 rounded-md border border-border bg-card/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground" title="Portcullis version"><svg class="size-3" aria-hidden="true"><use href="#i-tag"/></svg>{{.Version}}</span>
+      <span class="inline-flex items-center gap-1.5 rounded-md border border-border bg-card/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground" title="Rule set"><svg class="size-3" aria-hidden="true"><use href="#i-book-open"/></svg>{{.Ruleset}}</span>
+      <span class="inline-flex items-center gap-1.5 rounded-md border border-border bg-card/70 px-2 py-0.5 font-mono text-[11px] text-muted-foreground" title="Trust mode"><svg class="size-3" aria-hidden="true"><use href="#i-lock"/></svg>{{.Mode}}</span>
+    </div>
+    <button class="inline-flex size-8 items-center justify-center rounded-md border border-border bg-card/70 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground print:hidden" id="theme" type="button" aria-label="Switch between light and dark theme" title="Switch theme" hidden>
+      <svg class="size-4 dark:hidden" aria-hidden="true"><use href="#i-moon"/></svg><svg class="hidden size-4 dark:block" aria-hidden="true"><use href="#i-sun"/></svg>
     </button>
-  </div></div>
-  <div class="wrap hero">
-    <div>
-      <p class="eyebrow">Repository</p>
-      <h1>{{.Name}}</h1>
-      <p class="scope"><span>{{num .Targets}} agent context {{plural .Targets "file" "files"}} in {{num .Files}} {{plural .Files "file" "files"}}</span><span>{{.Mode}} mode</span></p>
-    </div>
-    <div class="verdict v-{{.Status}}">
-      <span class="v-badge"><svg aria-hidden="true"><use href="#{{.StatusIcon}}"/></svg></span>
-      <span class="v-label">{{.StatusLabel}}</span>
-      <p class="v-text">{{.Headline}}</p>
-      <p class="v-sub"><span>exit code {{.ExitCode}}</span><span>threshold {{.Threshold}}</span>{{if .Suppressed}}<span>{{.Suppressed}} suppressed by baseline</span>{{end}}</p>
-    </div>
   </div>
-  <nav class="wrap tabs" aria-label="Sections">
-    <a href="#findings">Findings<span>{{num .Total}}</span></a>
-    <a href="#inventory">Runs without asking<span>{{len .Inventory}}</span></a>
-    <a href="#files">Agent context files<span>{{num (len .TargetFiles)}}</span></a>
-    {{- if .Rules}}<a href="#rules">Rules<span>{{len .Rules}}</span></a>{{end}}
-  </nav>
 </header>
 
-<main class="wrap">
-  {{- if .Errors}}
-  <div class="notice" role="alert">
-    <svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>
-    <div>
-      <strong>Analysis incomplete</strong>
-      These files could not be analysed, so this result must not be treated as clean:
-      <ul>{{range .Errors}}<li>{{.}}</li>{{end}}</ul>
-    </div>
-  </div>
-  {{- end}}
-
-  <section class="overview" aria-labelledby="h-overview">
-    <div class="ov-head"><h2 id="h-overview">Findings by severity</h2><span>{{num .Total}} in total</span></div>
-    <svg class="dist{{if not .Total}} clean{{end}}" viewBox="0 0 1000 10" preserveAspectRatio="none" role="img" aria-label="{{.DistLabel}}">
-      {{- range .Dist}}<rect class="sev-{{.Key}}" x="{{.X}}" y="0" width="{{.W}}" height="10"/>{{end -}}
-    </svg>
-    <div class="legend">
-      {{- range .Counts}}
-      <div class="sev-{{.Key}}{{if not .N}} zero{{end}}"><b>{{num .N}}</b><span>{{.Label}}</span></div>
+<div class="mx-auto max-w-[1440px] px-4 sm:px-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 lg:px-8">
+  <aside class="hidden lg:block print:hidden">
+    <nav class="sticky top-14 flex flex-col gap-0.5 py-10" aria-label="Sections">
+      <p class="px-2.5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Report</p>
+      <a class="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=true]:bg-accent aria-[current=true]:font-medium aria-[current=true]:text-foreground" href="#overview" data-nav aria-current="true"><svg class="size-4" aria-hidden="true"><use href="#i-layout-dashboard"/></svg>Overview</a>
+      <a class="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=true]:bg-accent aria-[current=true]:font-medium aria-[current=true]:text-foreground" href="#findings" data-nav><svg class="size-4" aria-hidden="true"><use href="#i-shield-alert"/></svg>Findings<span class="ml-auto rounded-full bg-muted px-1.5 text-[11px] tabular-nums">{{num .Total}}</span></a>
+      <a class="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=true]:bg-accent aria-[current=true]:font-medium aria-[current=true]:text-foreground" href="#inventory" data-nav><svg class="size-4" aria-hidden="true"><use href="#i-zap"/></svg>Runs without asking<span class="ml-auto rounded-full bg-muted px-1.5 text-[11px] tabular-nums">{{len .Inventory}}</span></a>
+      <a class="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=true]:bg-accent aria-[current=true]:font-medium aria-[current=true]:text-foreground" href="#files" data-nav><svg class="size-4" aria-hidden="true"><use href="#i-files"/></svg>Agent files<span class="ml-auto rounded-full bg-muted px-1.5 text-[11px] tabular-nums">{{num (len .TargetFiles)}}</span></a>
+      {{- if .Rules}}
+      <a class="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-[current=true]:bg-accent aria-[current=true]:font-medium aria-[current=true]:text-foreground" href="#rules" data-nav><svg class="size-4" aria-hidden="true"><use href="#i-list-checks"/></svg>Rules<span class="ml-auto rounded-full bg-muted px-1.5 text-[11px] tabular-nums">{{len .Rules}}</span></a>
       {{- end}}
-    </div>
-  </section>
+      <div class="mx-2.5 my-5 h-px bg-border"></div>
+      <p class="px-2.5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Scan</p>
+      <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 px-2.5 text-xs">
+        <dt class="text-muted-foreground">Mode</dt><dd class="text-right font-mono">{{.Mode}}</dd>
+        <dt class="text-muted-foreground">Threshold</dt><dd class="text-right font-mono">{{.Threshold}}</dd>
+        <dt class="text-muted-foreground">Exit code</dt><dd class="text-right font-mono">{{.ExitCode}}</dd>
+        <dt class="text-muted-foreground">Rules</dt><dd class="text-right font-mono">{{.Ruleset}}</dd>
+      </dl>
+    </nav>
+  </aside>
 
-  <section class="block" id="findings" aria-labelledby="h-findings">
-    <div class="sec-head">
-      <div>
-        <h2 id="h-findings">Findings<span class="n" id="findings-count" data-total="{{.Total}}">{{.Total}}</span></h2>
-        <p>Grouped by file, most severe first. Findings at or above the threshold start expanded.</p>
+  <main class="min-w-0 pb-16 pt-6 lg:pt-10">
+    <nav class="-mx-4 mb-6 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] lg:hidden print:hidden [&::-webkit-scrollbar]:hidden" aria-label="Sections">
+      <a class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium" href="#overview">Overview</a>
+      <a class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium" href="#findings">Findings <span class="text-muted-foreground">{{num .Total}}</span></a>
+      <a class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium" href="#inventory">Runs without asking <span class="text-muted-foreground">{{len .Inventory}}</span></a>
+      <a class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium" href="#files">Agent files <span class="text-muted-foreground">{{num (len .TargetFiles)}}</span></a>
+      {{- if .Rules}}<a class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium" href="#rules">Rules <span class="text-muted-foreground">{{len .Rules}}</span></a>{{end}}
+    </nav>
+
+    <section class="scroll-mt-20" id="overview" aria-labelledby="h-repo">
+      <div class="flex flex-col gap-6 xl:flex-row xl:items-stretch xl:justify-between">
+        <div class="min-w-0 xl:pt-2">
+          <p class="flex items-center gap-2 text-sm font-medium text-muted-foreground"><svg class="size-4" aria-hidden="true"><use href="#i-folder-git-2"/></svg>Repository</p>
+          <h1 class="mt-2 break-words text-3xl font-semibold tracking-tight sm:text-4xl" id="h-repo">{{.Name}}</h1>
+          <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <span class="inline-flex items-center gap-1.5"><svg class="size-4" aria-hidden="true"><use href="#i-file-search"/></svg>{{num .Targets}} agent context {{plural .Targets "file" "files"}}</span>
+            <span class="inline-flex items-center gap-1.5"><svg class="size-4" aria-hidden="true"><use href="#i-folder-tree"/></svg>{{num .Files}} {{plural .Files "file" "files"}} in the tree</span>
+            <span class="inline-flex items-center gap-1.5"><svg class="size-4" aria-hidden="true"><use href="#i-lock"/></svg>{{.Mode}} mode</span>
+          </div>
+        </div>
+        <div data-verdict="{{.Status}}" data-exit="{{.ExitCode}}" data-threshold="{{.Threshold}}" class="st-{{.Status}} relative w-full shrink-0 overflow-hidden rounded-xl border border-(--st)/30 bg-card p-5 shadow-sm xl:w-[420px]">
+          <div class="absolute inset-x-0 top-0 h-1 bg-(--st)"></div>
+          <div class="absolute -right-12 -top-12 size-44 rounded-full bg-(--st)/15 blur-3xl" aria-hidden="true"></div>
+          <div class="relative flex items-start gap-4">
+            <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-(--st)/12 text-(--st) ring-1 ring-(--st)/25"><svg class="size-6" aria-hidden="true"><use href="#{{.StatusIcon}}"/></svg></span>
+            <div class="min-w-0">
+              <p class="text-xs font-semibold uppercase tracking-wider text-(--st)">{{.StatusLabel}}</p>
+              <p class="mt-1 text-lg font-semibold leading-snug" data-headline>{{.Headline}}</p>
+              <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"><span>exit code <b class="font-mono font-medium text-foreground">{{.ExitCode}}</b></span><span>threshold <b class="font-mono font-medium text-foreground">{{.Threshold}}</b></span>{{if .Suppressed}}<span>{{.Suppressed}} suppressed by baseline</span>{{end}}</p>
+            </div>
+          </div>
+        </div>
       </div>
-      {{- if .Groups}}<button type="button" class="btn side" id="toggle-all" hidden>Expand all</button>{{end}}
-    </div>
-    {{- if .Groups}}
-    <div class="toolbar">
-      <div class="chips" role="group" aria-label="Filter findings by severity">
+
+      {{- if .Errors}}
+      <div class="mt-6 flex gap-3 rounded-xl border border-(--crit)/30 bg-(--crit)/8 p-4 text-sm" role="alert">
+        <svg class="mt-0.5 size-4 shrink-0 text-(--crit)" aria-hidden="true"><use href="#i-triangle-alert"/></svg>
+        <div class="min-w-0">
+          <p class="font-semibold text-(--crit)">Analysis incomplete</p>
+          <p class="mt-1 text-foreground/90">These files could not be analysed, so this result must not be treated as clean:</p>
+          <ul class="mt-2 list-disc space-y-0.5 pl-5 font-mono text-xs">{{range .Errors}}<li class="break-all">{{.}}</li>{{end}}</ul>
+        </div>
+      </div>
+      {{- end}}
+
+      <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" role="list" aria-label="Findings by severity">
         {{- range .Counts}}
-        <button type="button" class="chip sev-{{.Key}}{{if not .N}} zero{{end}}" data-sev="{{.Key}}" aria-pressed="true" disabled><b>{{num .N}}</b>{{.Label}}</button>
+        <a class="sev-{{.Key}} group relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-xs transition last:col-span-2 sm:last:col-span-1 hover:-translate-y-0.5 hover:border-(--sev)/40 hover:shadow-md{{if not .N}} opacity-55{{end}}" href="#findings" data-filter="{{.Key}}" role="listitem">
+          <div class="absolute inset-x-0 top-0 h-0.5 bg-(--sev)"></div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-medium text-muted-foreground">{{.Label}}</span>
+            <span class="flex size-8 items-center justify-center rounded-lg bg-(--sev)/10 text-(--sev)"><svg class="size-4" aria-hidden="true"><use href="#{{.Icon}}"/></svg></span>
+          </div>
+          <p class="mt-3 text-3xl font-semibold tabular-nums tracking-tight">{{num .N}}</p>
+          <p class="mt-1 text-xs text-muted-foreground">{{if .N}}{{.Pct}}% of findings{{else}}none{{end}}</p>
+        </a>
         {{- end}}
       </div>
-      <label class="search" id="search-box" hidden><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Filter by rule, file or text" aria-label="Filter findings" autocomplete="off" spellcheck="false"><kbd>/</kbd></label>
-    </div>
-    {{- else}}
-    <div class="empty"><svg class="i" aria-hidden="true"><use href="#i-ok"/></svg>No findings. Every agent context file was analysed and nothing matched a rule.</div>
-    {{- end}}
-    <div class="empty" id="no-match" hidden>No findings match the current filter.</div>
-    {{- range .Groups}}
-    <div class="file">
-      <div class="file-head"><span class="path">{{.Path}}</span>{{if .Kind}}<span class="kind">{{.Kind}}</span>{{end}}<span class="tally">{{range .Tally}}<span class="sev-{{.Key}}">{{.N}} {{.Key}}</span>{{end}}</span></div>
-      {{- range .Findings}}
-      <details class="finding sev-{{.SevKey}}{{if not .Above}} below{{end}}" data-sev="{{.SevKey}}" data-text="{{.Text}}"{{if .Above}} open{{end}}>
-        <summary>
-          <span class="sev">{{.SevKey}}</span>
-          <span class="rule">{{.RuleID}}</span>
-          <span class="headline"><span class="title">{{.Title}}</span><span class="msg">{{.Message}}</span></span>
-          <span class="loc">Ln {{.Line}}, Col {{.Column}}</span>
-          <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
-        </summary>
-        <div class="detail">
-          {{- if .Excerpt}}
-          <pre class="code"><span class="gutter">{{.Line}}</span><code>{{range .Spans}}{{if .Hidden}}<mark class="esc" title="{{.Title}}">{{.Text}}{{if .More}}<span class="more">+{{.More}} more</span>{{end}}</mark>{{else}}{{.Text}}{{end}}{{end}}</code></pre>
-          {{- end}}
-          <div class="fix"><span class="fix-label">Fix</span><span>{{.Remediation}}</span></div>
-          <dl class="facts">
-            <div><dt>Confidence</dt><dd>{{.Confidence}}</dd></div>
-            {{- if .OWASP}}<div><dt>OWASP</dt><dd>{{range .OWASP}}<span class="tag">{{.}}</span>{{end}}</dd></div>{{end}}
-            <div><dt>Fingerprint</dt><dd><span class="fp">{{.Fingerprint}}</span><button class="copy" type="button" data-copy="{{.Fingerprint}}" aria-label="Copy fingerprint" title="Copy fingerprint" hidden><svg class="i i-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i i-check" aria-hidden="true"><use href="#i-check"/></svg></button></dd></div>
-            {{- if .DocURL}}<div><a class="doc-link" href="{{.DocURL}}" rel="noreferrer noopener" target="_blank">Rule documentation<svg class="i" aria-hidden="true"><use href="#i-ext"/></svg></a></div>{{end}}
-          </dl>
+
+      <div class="mt-4 rounded-xl border border-border bg-card p-5 shadow-xs">
+        <div class="flex items-center justify-between gap-4"><h2 class="text-sm font-semibold">Findings by severity</h2><span class="text-xs text-muted-foreground">{{num .Total}} in total</span></div>
+        <div class="mt-4 overflow-hidden rounded-full bg-muted">
+          <svg class="block h-2.5 w-full" viewBox="0 0 1000 10" preserveAspectRatio="none" role="img" aria-label="{{.DistLabel}}">
+            {{- range .Dist}}<rect class="sev-{{.Key}} fill-(--sev)" x="{{.X}}" y="0" width="{{.W}}" height="10"/>{{end -}}
+          </svg>
         </div>
+        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs">
+          {{- range .Counts}}
+          <span class="sev-{{.Key}} inline-flex items-center gap-2{{if not .N}} opacity-50{{end}}"><span class="size-2 rounded-full bg-(--sev)"></span><span class="text-muted-foreground">{{.Label}}</span><b class="font-semibold tabular-nums">{{num .N}}</b></span>
+          {{- end}}
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div class="flex flex-col rounded-xl border border-border bg-card shadow-xs">
+          <div class="flex items-center gap-2 border-b border-border px-5 py-3.5"><svg class="size-4 text-muted-foreground" aria-hidden="true"><use href="#i-flame"/></svg><h2 class="text-sm font-semibold">Top rules</h2></div>
+          {{- if .TopRules}}
+          <ul class="flex-1 divide-y divide-border">
+            {{- range .TopRules}}
+            <li class="sev-{{.SevKey}} px-5 py-3">
+              <div class="flex items-center gap-3 text-sm"><span class="size-2 shrink-0 rounded-full bg-(--sev)"></span><span class="shrink-0 font-mono text-xs text-muted-foreground">{{.ID}}</span><span class="min-w-0 flex-1 truncate">{{.Title}}</span><b class="font-semibold tabular-nums">{{.Count}}</b></div>
+              <div class="mt-2 overflow-hidden rounded-full bg-muted"><svg class="block h-1 w-full" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><rect class="fill-(--sev)" width="{{.W}}" height="4"/></svg></div>
+            </li>
+            {{- end}}
+          </ul>
+          {{- else}}
+          <p class="flex flex-1 items-center gap-2 px-5 py-6 text-sm text-muted-foreground"><svg class="size-4 text-(--pass)" aria-hidden="true"><use href="#i-circle-check"/></svg>No rule matched.</p>
+          {{- end}}
+        </div>
+        <div class="flex flex-col rounded-xl border border-border bg-card shadow-xs">
+          <div class="flex items-center gap-2 border-b border-border px-5 py-3.5"><svg class="size-4 text-muted-foreground" aria-hidden="true"><use href="#i-file-warning"/></svg><h2 class="text-sm font-semibold">Most affected files</h2></div>
+          {{- if .TopFiles}}
+          <ul class="flex-1 divide-y divide-border">
+            {{- range .TopFiles}}
+            <li class="flex items-center gap-3 px-5 py-3 text-sm">
+              <svg class="size-4 shrink-0 text-muted-foreground" aria-hidden="true"><use href="#{{.Icon}}"/></svg>
+              <span class="min-w-0 flex-1 truncate font-mono text-xs" title="{{.Path}}">{{.Path}}</span>
+              <span class="flex shrink-0 items-center gap-1">{{range .Tally}}<span class="sev-{{.Key}} size-2 rounded-full bg-(--sev)" title="{{.N}} {{.Key}}"></span>{{end}}</span>
+              <b class="w-8 shrink-0 text-right font-semibold tabular-nums">{{.Count}}</b>
+            </li>
+            {{- end}}
+          </ul>
+          {{- else}}
+          <p class="flex flex-1 items-center gap-2 px-5 py-6 text-sm text-muted-foreground"><svg class="size-4 text-(--pass)" aria-hidden="true"><use href="#i-circle-check"/></svg>No file has findings.</p>
+          {{- end}}
+        </div>
+        <div class="flex flex-col rounded-xl border border-border bg-card shadow-xs">
+          <div class="flex items-center gap-2 border-b border-border px-5 py-3.5"><svg class="size-4 text-muted-foreground" aria-hidden="true"><use href="#i-zap"/></svg><h2 class="text-sm font-semibold">Runs without asking</h2><span class="ml-auto text-xs text-muted-foreground">{{len .Inventory}} {{plural (len .Inventory) "command" "commands"}}</span></div>
+          {{- if .AutoRun}}
+          <ul class="flex-1 divide-y divide-border">
+            {{- range .AutoRun}}
+            <li class="flex items-center gap-3 px-5 py-3 text-sm"><span class="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--med)/10 text-(--med)"><svg class="size-3.5" aria-hidden="true"><use href="#{{.Icon}}"/></svg></span><span class="min-w-0 flex-1">{{.Label}}</span><b class="font-semibold tabular-nums">{{.N}}</b></li>
+            {{- end}}
+          </ul>
+          <a class="flex items-center gap-1 border-t border-border px-5 py-3 text-xs font-medium text-primary hover:underline" href="#inventory">See every command<svg class="size-3.5" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+          {{- else}}
+          <p class="flex flex-1 items-center gap-2 px-5 py-6 text-sm text-muted-foreground"><svg class="size-4 text-(--pass)" aria-hidden="true"><use href="#i-circle-check"/></svg>Nothing runs automatically.</p>
+          {{- end}}
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-14 scroll-mt-20" id="findings" aria-labelledby="h-findings">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 class="flex items-center gap-2.5 text-xl font-semibold tracking-tight" id="h-findings"><svg class="size-5 text-muted-foreground" aria-hidden="true"><use href="#i-shield-alert"/></svg>Findings<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground" id="findings-count" data-total="{{.Total}}">{{.Total}}</span></h2>
+          <p class="mt-1.5 text-sm text-muted-foreground">Grouped by file, most severe first. Findings at or above the threshold start expanded.</p>
+        </div>
+        {{- if .Groups}}<button class="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium shadow-xs transition-colors hover:bg-accent print:hidden" id="toggle-all" type="button" hidden>Expand all</button>{{end}}
+      </div>
+      {{- if .Groups}}
+      <div class="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between print:hidden">
+        <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter findings by severity">
+          {{- range .Counts}}
+          <button class="chip sev-{{.Key}}{{if not .N}} zero{{end}} inline-flex h-8 items-center gap-2 rounded-full border border-border bg-card px-3 text-xs font-medium text-muted-foreground shadow-xs transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-40 aria-pressed:border-(--sev)/40 aria-pressed:bg-(--sev)/10 aria-pressed:text-foreground" type="button" data-sev="{{.Key}}" aria-pressed="true" disabled><span class="size-2 rounded-full bg-(--sev)"></span>{{.Label}}<b class="tabular-nums">{{num .N}}</b></button>
+          {{- end}}
+        </div>
+        <label class="relative flex w-full items-center md:w-80" id="search-box" hidden>
+          <svg class="pointer-events-none absolute left-3 size-4 text-muted-foreground" aria-hidden="true"><use href="#i-search"/></svg>
+          <input class="h-9 w-full rounded-md border border-input bg-card pl-9 pr-10 text-sm shadow-xs outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25" id="search" type="search" placeholder="Filter by rule, file or text" aria-label="Filter findings" autocomplete="off" spellcheck="false">
+          <kbd class="pointer-events-none absolute right-2.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] leading-4 text-muted-foreground">/</kbd>
+        </label>
+      </div>
+      {{- else}}
+      <div class="mt-5 flex flex-col items-center rounded-xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
+        <span class="flex size-12 items-center justify-center rounded-full bg-(--pass)/10 text-(--pass) ring-1 ring-(--pass)/25"><svg class="size-6" aria-hidden="true"><use href="#i-shield-check"/></svg></span>
+        <p class="mt-4 font-semibold">No findings</p>
+        <p class="mt-1 max-w-md text-sm text-muted-foreground">Every agent context file was analysed and nothing matched a rule.</p>
+      </div>
+      {{- end}}
+      <div class="mt-4 rounded-xl border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground" id="no-match" hidden>No findings match the current filter.</div>
+      <div class="mt-4 space-y-4">
+        {{- range .Groups}}
+        <div class="file overflow-hidden rounded-xl border border-border bg-card shadow-xs" data-file="{{.Path}}">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border bg-muted/50 px-4 py-2.5">
+            <svg class="size-4 shrink-0 text-muted-foreground" aria-hidden="true"><use href="#{{.Icon}}"/></svg>
+            <span class="min-w-0 break-all font-mono text-[13px] font-medium">{{.Path}}</span>
+            {{- if .Kind}}<span class="rounded-md border border-border bg-card px-1.5 py-0.5 text-[11px] text-muted-foreground" data-kind>{{.Kind}}</span>{{end}}
+            <span class="ml-auto flex flex-wrap items-center gap-3">{{range .Tally}}<span class="sev-{{.Key}} inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-tally="{{.Key}}"><span class="size-1.5 rounded-full bg-(--sev)"></span>{{.N}} {{.Key}}</span>{{end}}</span>
+          </div>
+          {{- range .Findings}}
+          <details class="finding group sev-{{.SevKey}} border-b border-border last:border-b-0{{if .Above}} shadow-[inset_3px_0_0_var(--sev)]{{end}}" data-sev="{{.SevKey}}" data-above="{{.Above}}" data-text="{{.Text}}"{{if .Above}} open{{end}}>
+            <summary class="flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
+              <span class="inline-flex w-[78px] shrink-0 items-center gap-1.5 rounded-md border border-(--sev)/25 bg-(--sev)/10 px-2 py-0.5 text-[11px] font-semibold capitalize text-(--sev)"><span class="size-1.5 rounded-full bg-(--sev)"></span>{{.SevKey}}</span>
+              <span class="hidden w-[100px] shrink-0 pt-0.5 font-mono text-xs text-muted-foreground sm:block">{{.RuleID}}</span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-medium leading-5">{{.Title}}</span>
+                <span class="mt-0.5 block break-words text-sm text-muted-foreground">{{.Message}}</span>
+                <span class="mt-1 block font-mono text-[11px] text-muted-foreground sm:hidden">{{.RuleID}} · Ln {{.Line}}</span>
+              </span>
+              <span class="hidden shrink-0 pt-0.5 font-mono text-xs text-muted-foreground md:block">Ln {{.Line}}, Col {{.Column}}</span>
+              <svg class="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+            </summary>
+            <div class="space-y-3 px-4 pb-4 sm:pl-[214px]">
+              {{- if .Excerpt}}
+              <pre class="flex overflow-x-auto rounded-lg border border-border bg-(--code) font-mono text-[12.5px] leading-6"><span class="select-none border-r border-border px-3 py-2 text-right text-muted-foreground/70">{{.Line}}</span><code class="min-w-0 flex-1 whitespace-pre-wrap break-all px-4 py-2">{{range .Spans}}{{if .Hidden}}<mark class="rounded bg-(--crit)/15 px-0.5 text-(--crit) ring-1 ring-(--crit)/30" title="{{.Title}}">{{.Text}}{{if .More}}<span class="ml-1 font-sans text-[11px] font-semibold">+{{.More}} more</span>{{end}}</mark>{{else}}{{.Text}}{{end}}{{end}}</code></pre>
+              {{- end}}
+              <div class="flex gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-3 text-sm">
+                <svg class="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true"><use href="#i-wrench"/></svg>
+                <div><p class="font-medium text-primary">How to fix</p><p class="mt-0.5 text-foreground/90">{{.Remediation}}</p></div>
+              </div>
+              <dl class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+                <div class="flex items-center gap-1.5"><dt class="text-muted-foreground">Confidence</dt><dd class="rounded-md bg-muted px-1.5 py-0.5 font-medium">{{.Confidence}}</dd></div>
+                {{- if .OWASP}}<div class="flex items-center gap-1.5"><dt class="text-muted-foreground">OWASP</dt><dd class="flex gap-1">{{range .OWASP}}<span class="rounded-md border border-border px-1.5 py-0.5 font-mono text-[11px]">{{.}}</span>{{end}}</dd></div>{{end}}
+                <div class="flex items-center gap-1.5"><dt class="text-muted-foreground">Fingerprint</dt><dd class="flex items-center gap-1"><span class="fp font-mono text-muted-foreground">{{.Fingerprint}}</span><button class="copy inline-flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" type="button" data-copy="{{.Fingerprint}}" aria-label="Copy fingerprint" title="Copy fingerprint" hidden><svg class="size-3.5 [.done_&]:hidden" aria-hidden="true"><use href="#i-copy"/></svg><svg class="hidden size-3.5 text-(--pass) [.done_&]:block" aria-hidden="true"><use href="#i-check"/></svg></button></dd></div>
+                {{- if .DocURL}}<div><a class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline" href="{{.DocURL}}" rel="noreferrer noopener" target="_blank"><svg class="size-3.5" aria-hidden="true"><use href="#i-book-open"/></svg>Rule documentation<svg class="size-3" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a></div>{{end}}
+              </dl>
+            </div>
+          </details>
+          {{- end}}
+        </div>
+        {{- end}}
+      </div>
+    </section>
+
+    <section class="mt-14 scroll-mt-20" id="inventory" aria-labelledby="h-inventory">
+      <h2 class="flex items-center gap-2.5 text-xl font-semibold tracking-tight" id="h-inventory"><svg class="size-5 text-muted-foreground" aria-hidden="true"><use href="#i-zap"/></svg>Runs without asking<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">{{len .Inventory}}</span></h2>
+      <p class="mt-1.5 text-sm text-muted-foreground">Commands that agents, editors or package managers start on their own: hooks, tasks, install scripts and MCP servers.</p>
+      {{- if .Inventory}}
+      <div class="mt-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground"><tr><th class="h-10 px-4 font-medium">Trigger</th><th class="h-10 px-4 font-medium">Source</th><th class="h-10 px-4 font-medium">Name</th><th class="h-10 px-4 font-medium">Location</th><th class="h-10 px-4 font-medium">Command</th></tr></thead>
+            <tbody class="divide-y divide-border">
+            {{- range .Inventory}}
+              <tr class="align-top transition-colors hover:bg-muted/30"><td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-(--med)/25 bg-(--med)/10 px-2 py-0.5 text-xs font-medium text-(--med)"><svg class="size-3" aria-hidden="true"><use href="#i-zap"/></svg>{{.Trigger}}</span></td><td class="whitespace-nowrap px-4 py-3 font-mono text-xs">{{.Kind}}</td><td class="px-4 py-3 font-mono text-xs">{{if .Name}}{{.Name}}{{else}}<span class="text-muted-foreground">—</span>{{end}}</td><td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-muted-foreground">{{.Path}}:{{.Line}}</td><td class="px-4 py-3"><code class="block min-w-[240px] whitespace-pre-wrap break-all rounded-md bg-(--code) px-2.5 py-1.5 font-mono text-xs ring-1 ring-border">{{.Command}}</code></td></tr>
+            {{- end}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {{- else}}
+      <div class="mt-5 flex items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-sm text-muted-foreground"><svg class="size-5 text-(--pass)" aria-hidden="true"><use href="#i-circle-check"/></svg>Nothing in this repository runs automatically.</div>
+      {{- end}}
+    </section>
+
+    <section class="mt-14 scroll-mt-20" id="files" aria-labelledby="h-files">
+      <h2 class="flex items-center gap-2.5 text-xl font-semibold tracking-tight" id="h-files"><svg class="size-5 text-muted-foreground" aria-hidden="true"><use href="#i-files"/></svg>Agent context files<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">{{num (len .TargetFiles)}}</span></h2>
+      <p class="mt-1.5 text-sm text-muted-foreground">Every file an agent reads or runs that was scanned.</p>
+      {{- if .TargetFiles}}
+      {{- if .FoldFiles}}
+      <details class="fold group/fold mt-5" data-fold>
+        <summary class="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium shadow-xs transition-colors hover:bg-accent"><svg class="size-3.5 transition-transform group-open/fold:rotate-90" aria-hidden="true"><use href="#i-chevron-right"/></svg><span class="group-open/fold:hidden">Show all {{num (len .TargetFiles)}} files</span><span class="hidden group-open/fold:inline">Hide the file list</span></summary>
+      {{- end}}
+      <div class="mt-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground"><tr><th class="h-10 px-4 font-medium">File</th><th class="h-10 px-4 font-medium">Type</th><th class="h-10 px-4 text-right font-medium">Findings</th></tr></thead>
+            <tbody class="divide-y divide-border">
+            {{- range .TargetFiles}}
+              <tr class="transition-colors hover:bg-muted/30"><td class="px-4 py-2.5"><span class="flex items-center gap-2.5"><svg class="size-4 shrink-0 text-muted-foreground" aria-hidden="true"><use href="#{{.Icon}}"/></svg><span class="break-all font-mono text-xs">{{.Path}}</span></span></td><td class="px-4 py-2.5 text-muted-foreground">{{.Kind}}</td><td class="px-4 py-2.5 text-right">{{if .Findings}}<span class="inline-flex items-center gap-2"><span class="flex gap-1">{{range .Severities}}<span class="sev-{{.}} size-2 rounded-full bg-(--sev)"></span>{{end}}</span><b class="font-semibold tabular-nums">{{.Findings}}</b></span>{{else}}<span class="text-muted-foreground">0</span>{{end}}</td></tr>
+            {{- end}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {{- if .FoldFiles}}
       </details>
       {{- end}}
-    </div>
-    {{- end}}
-  </section>
+      {{- else}}
+      <div class="mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-sm text-muted-foreground">No agent context files were found.</div>
+      {{- end}}
+    </section>
 
-  <section class="block" id="inventory" aria-labelledby="h-inventory">
-    <div class="sec-head">
-      <div>
-        <h2 id="h-inventory">Runs without asking<span class="n">{{len .Inventory}}</span></h2>
-        <p>Commands that agents, editors or package managers start on their own: hooks, tasks, install scripts and MCP servers.</p>
+    {{- if .Rules}}
+    <section class="mt-14 scroll-mt-20" id="rules" aria-labelledby="h-rules">
+      <h2 class="flex items-center gap-2.5 text-xl font-semibold tracking-tight" id="h-rules"><svg class="size-5 text-muted-foreground" aria-hidden="true"><use href="#i-list-checks"/></svg>Rules triggered<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">{{len .Rules}}</span></h2>
+      <p class="mt-1.5 text-sm text-muted-foreground">Each rule's documentation explains what it detects and why it matters.</p>
+      <div class="mt-5 overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground"><tr><th class="h-10 px-4 font-medium">Rule</th><th class="h-10 px-4 font-medium">Title</th><th class="h-10 px-4 font-medium">Severity</th><th class="h-10 px-4 text-right font-medium">Findings</th></tr></thead>
+            <tbody class="divide-y divide-border">
+            {{- range .Rules}}
+              <tr class="sev-{{.SevKey}} transition-colors hover:bg-muted/30"><td class="whitespace-nowrap px-4 py-2.5 font-mono text-xs">{{if .DocURL}}<a class="text-primary hover:underline" href="{{.DocURL}}" rel="noreferrer noopener" target="_blank">{{.ID}}</a>{{else}}{{.ID}}{{end}}</td><td class="px-4 py-2.5">{{.Title}}</td><td class="px-4 py-2.5"><span class="inline-flex items-center gap-1.5 rounded-md border border-(--sev)/25 bg-(--sev)/10 px-2 py-0.5 text-[11px] font-semibold capitalize text-(--sev)"><span class="size-1.5 rounded-full bg-(--sev)"></span>{{.SevKey}}</span></td><td class="px-4 py-2.5 text-right font-semibold tabular-nums">{{.Count}}</td></tr>
+            {{- end}}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-    {{- if .Inventory}}
-    <div class="table">
-      <table>
-        <thead><tr><th>Trigger</th><th>Source</th><th>Name</th><th>Location</th><th>Command</th></tr></thead>
-        <tbody>
-        {{- range .Inventory}}
-          <tr><td><span class="trigger">{{.Trigger}}</span></td><td class="mono">{{.Kind}}</td><td class="mono">{{if .Name}}{{.Name}}{{else}}<span class="muted">—</span>{{end}}</td><td class="mono">{{.Path}}:{{.Line}}</td><td class="cmd"><code>{{.Command}}</code></td></tr>
-        {{- end}}
-        </tbody>
-      </table>
-    </div>
-    {{- else}}
-    <div class="empty"><svg class="i" aria-hidden="true"><use href="#i-ok"/></svg>Nothing in this repository runs automatically.</div>
+    </section>
     {{- end}}
-  </section>
+  </main>
+</div>
 
-  <section class="block" id="files" aria-labelledby="h-files">
-    <div class="sec-head">
-      <div>
-        <h2 id="h-files">Agent context files<span class="n">{{num (len .TargetFiles)}}</span></h2>
-        <p>Every file an agent reads or runs that was scanned.</p>
-      </div>
-    </div>
-    {{- if .TargetFiles}}
-    {{- if .FoldFiles}}
-    <details class="fold">
-      <summary><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg><span class="when-closed">Show all {{num (len .TargetFiles)}} files</span><span class="when-open">Hide the file list</span></summary>
-    {{- end}}
-    <div class="table">
-      <table>
-        <thead><tr><th>File</th><th>Type</th><th class="num">Findings</th></tr></thead>
-        <tbody>
-        {{- range .TargetFiles}}
-          <tr><td class="mono">{{.Path}}</td><td>{{.Kind}}</td><td class="num">{{if .Findings}}<span class="dots">{{range .Severities}}<span class="dot sev-{{.}}"></span>{{end}}</span>{{.Findings}}{{else}}<span class="muted">0</span>{{end}}</td></tr>
-        {{- end}}
-        </tbody>
-      </table>
-    </div>
-    {{- if .FoldFiles}}
-    </details>
-    {{- end}}
-    {{- else}}
-    <div class="empty">No agent context files were found.</div>
-    {{- end}}
-  </section>
-
-  {{- if .Rules}}
-  <section class="block" id="rules" aria-labelledby="h-rules">
-    <div class="sec-head">
-      <div>
-        <h2 id="h-rules">Rules triggered<span class="n">{{len .Rules}}</span></h2>
-        <p>Each rule's documentation explains what it detects and why it matters.</p>
-      </div>
-    </div>
-    <div class="table">
-      <table>
-        <thead><tr><th>Rule</th><th>Title</th><th>Severity</th><th class="num">Findings</th></tr></thead>
-        <tbody>
-        {{- range .Rules}}
-          <tr class="sev-{{.SevKey}}"><td class="mono">{{if .DocURL}}<a href="{{.DocURL}}" rel="noreferrer noopener" target="_blank">{{.ID}}</a>{{else}}{{.ID}}{{end}}</td><td>{{.Title}}</td><td><span class="sev">{{.SevKey}}</span></td><td class="num">{{.Count}}</td></tr>
-        {{- end}}
-        </tbody>
-      </table>
-    </div>
-  </section>
-  {{- end}}
-</main>
-
-<footer>
-  <div class="wrap">
-    <svg aria-hidden="true"><use href="#mark"/></svg>
-    <div>
+<footer class="border-t border-border">
+  <div class="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-start sm:gap-10 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-2 text-sm font-semibold text-foreground"><svg class="size-5" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg>Portcullis</div>
+    <div class="space-y-1.5 sm:ml-auto sm:max-w-2xl sm:text-right">
       <p>Generated offline by Portcullis {{.Version}} with rule set {{.Ruleset}}. This report loads nothing from the network; text taken from scanned files is escaped and cannot run.</p>
       <p>Portcullis detects known patterns and structures. A report without findings lowers the risk; it does not prove that a repository is safe.</p>
     </div>

@@ -8,9 +8,10 @@ coverage.out
 *.prof
 /testdata/fuzz-cache/
 
-# Brand tooling (scripts/brand)
+# Brand tooling (scripts/brand) and report build tools (web/report)
 __pycache__/
 /.venv/
+node_modules/
 
 # Editors and OS
 /.idea/

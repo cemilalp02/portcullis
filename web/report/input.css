@@ -1,0 +1,178 @@
+/*
+ * Portcullis HTML report. Tailwind CSS v4 with the design tokens and
+ * component recipes of shadcn/ui (MIT, https://ui.shadcn.com), adapted to the
+ * Portcullis palette (docs/BRAND.md). `npm run build` writes the minified
+ * result to internal/report/html/style.css; Go embeds that file.
+ */
+@import "tailwindcss" source(none);
+@source "../../internal/report/html/report.tmpl";
+@source "../../internal/report/html/app.js";
+@source "../../internal/report/html.go";
+
+/* Dark mode follows the system unless the reader picks a theme, which the
+   report stores as data-theme on <html>. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #f6f7f9;
+  --foreground: #14181e;
+  --card: #ffffff;
+  --card-foreground: #14181e;
+  --primary: #0f766e;
+  --primary-foreground: #f0fdfa;
+  --secondary: #eef0f3;
+  --secondary-foreground: #14181e;
+  --muted: #f1f3f5;
+  --muted-foreground: #5b6472;
+  --accent: #eceff2;
+  --accent-foreground: #14181e;
+  --border: #e2e5ea;
+  --input: #d9dde3;
+  --ring: #14b8a6;
+  --code: #f7f8fa;
+  --glow: rgb(20 184 166 / 0.13);
+  /* Severity colours, reserved for findings */
+  --crit: #dc2626;
+  --high: #ea580c;
+  --med: #c27c0e;
+  --low: #2563eb;
+  --info: #64748b;
+  --pass: #059669;
+  color-scheme: light;
+}
+
+/* The dark tokens appear twice: for an explicit choice and for the system
+   preference when there is none. */
+:root[data-theme="dark"] {
+  --background: #08090c;
+  --foreground: #ecebe6;
+  --card: #0e1116;
+  --card-foreground: #ecebe6;
+  --primary: #2dd4bf;
+  --primary-foreground: #042f2e;
+  --secondary: #161a21;
+  --secondary-foreground: #ecebe6;
+  --muted: #13171d;
+  --muted-foreground: #9099a6;
+  --accent: #181d25;
+  --accent-foreground: #ecebe6;
+  --border: rgb(255 255 255 / 0.08);
+  --input: rgb(255 255 255 / 0.13);
+  --ring: #2dd4bf;
+  --code: #0a0c10;
+  --glow: rgb(45 212 191 / 0.14);
+  --crit: #f87171;
+  --high: #fb923c;
+  --med: #fbbf24;
+  --low: #60a5fa;
+  --info: #94a3b8;
+  --pass: #34d399;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #08090c;
+    --foreground: #ecebe6;
+    --card: #0e1116;
+    --card-foreground: #ecebe6;
+    --primary: #2dd4bf;
+    --primary-foreground: #042f2e;
+    --secondary: #161a21;
+    --secondary-foreground: #ecebe6;
+    --muted: #13171d;
+    --muted-foreground: #9099a6;
+    --accent: #181d25;
+    --accent-foreground: #ecebe6;
+    --border: rgb(255 255 255 / 0.08);
+    --input: rgb(255 255 255 / 0.13);
+    --ring: #2dd4bf;
+    --code: #0a0c10;
+    --glow: rgb(45 212 191 / 0.14);
+    --crit: #f87171;
+    --high: #fb923c;
+    --med: #fbbf24;
+    --low: #60a5fa;
+    --info: #94a3b8;
+    --pass: #34d399;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* A finding's severity, or the verdict, sets one variable that the
+   utilities read: bg-(--sev)/10, text-(--sev), border-(--sev)/25 ... */
+.sev-critical { --sev: var(--crit); }
+.sev-high { --sev: var(--high); }
+.sev-medium { --sev: var(--med); }
+.sev-low { --sev: var(--low); }
+.sev-info { --sev: var(--info); }
+.sev-none { --sev: var(--border); }
+.st-fail { --st: var(--crit); }
+.st-pass { --st: var(--pass); }
+.st-incomplete { --st: var(--med); }
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "kern";
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 28%, transparent);
+  }
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+@media print {
+  details > *:not(summary) {
+    display: block !important;
+  }
+}

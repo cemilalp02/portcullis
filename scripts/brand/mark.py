@@ -75,10 +75,19 @@ def _union(paths):
     return out
 
 
-def mark(half=27, spring=31, apex=2, ground=62, t=6.5, g=2.2, w=3.6, bars=1, bar=3.6,
-         crossbars=(26, 38.5), cross=3.6, tooth=7):
-    """Frame of thickness t, a gap g, then a grille with rails of width w,
-    `bars` inner bars, horizontal crossbars and pointed teeth."""
+def mark(**kw):
+    """The whole mark as one path."""
+    frame, grille = parts(**kw)
+    out = _union([frame, grille])
+    out.simplify(fix_winding=True)
+    return out
+
+
+def parts(half=27, spring=31, apex=2, ground=62, t=6.5, g=2.2, w=3.6, bars=1, bar=3.6,
+          crossbars=(26, 38.5), cross=3.6, tooth=7):
+    """The arch frame of thickness t and, after a gap g, the grille with rails
+    of width w, `bars` inner bars, horizontal crossbars and pointed teeth.
+    The two-tone mark colours them separately."""
     big = ground + 10
     frame = pathops.op(arch(half, spring, apex, 0, ground), arch(half, spring, apex, t, big), pathops.PathOp.DIFFERENCE)
     gx0, gx1 = MID - half + t + g, MID + half - t - g
@@ -101,9 +110,10 @@ def mark(half=27, spring=31, apex=2, ground=62, t=6.5, g=2.2, w=3.6, bars=1, bar
     grille = pathops.op(body, holes, pathops.PathOp.DIFFERENCE)
     teeth = _union(_poly((a, last - 0.5), (b, last - 0.5), (b, last + tooth - (b - a) * 0.9),
                          ((a + b) / 2, last + tooth), (a, last + tooth - (b - a) * 0.9)) for a, b in xs)
-    out = _union([frame, grille, teeth])
-    out.simplify(fix_winding=True)
-    return out
+    grille = _union([grille, teeth])
+    frame.simplify(fix_winding=True)
+    grille.simplify(fix_winding=True)
+    return frame, grille
 
 
 def fmt(v):
