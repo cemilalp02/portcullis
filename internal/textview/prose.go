@@ -1,6 +1,7 @@
 package textview
 
 import (
+	"bytes"
 	"strconv"
 	"strings"
 	"unicode"
@@ -21,6 +22,7 @@ import (
 // Offsets map back to the raw text like those of the normalised view.
 func Prose(v *View) *View {
 	toks := decode(v.Text)
+	code := fencedNewlines(v.Text)
 	out := make([]byte, 0, len(v.Text))
 	offs := make([]int32, 0, len(v.Text)+1)
 	emit := func(r rune, src int) {
@@ -55,7 +57,7 @@ func Prose(v *View) *View {
 			i = j
 			continue
 		case t.r == '\n':
-			if joinLine(out, toks, i) {
+			if !code[t.src] && joinLine(out, toks, i) {
 				space(t.src)
 			} else {
 				trimSpace(&out, &offs)
@@ -83,6 +85,34 @@ func Prose(v *View) *View {
 type tok struct {
 	r   rune
 	src int // byte offset in the normalised text
+}
+
+// fencedNewlines returns the offsets of line breaks that belong to fenced
+// code blocks (``` or ~~~). Lines of code are never joined: one command per
+// line is not a sentence that wraps.
+func fencedNewlines(s string) map[int]bool {
+	if !strings.Contains(s, "```") && !strings.Contains(s, "~~~") {
+		return nil
+	}
+	keep := map[int]bool{}
+	in := false
+	for start := 0; start < len(s); {
+		end := strings.IndexByte(s[start:], '\n')
+		if end < 0 {
+			break
+		}
+		end += start
+		line := strings.TrimLeft(s[start:end], " \t")
+		fence := strings.HasPrefix(line, "```") || strings.HasPrefix(line, "~~~")
+		if fence {
+			in = !in
+		}
+		if fence || in {
+			keep[end] = true
+		}
+		start = end + 1
+	}
+	return keep
 }
 
 // decode splits s into runes, replacing HTML character references by the
@@ -210,6 +240,10 @@ func joinLine(out []byte, toks []tok, i int) bool {
 	}
 	prev, _ := utf8.DecodeLastRune(out[:k])
 	if prev == utf8.RuneError || prev == '\n' || strings.ContainsRune(".!?:;。！？", prev) {
+		return false
+	}
+	// A thematic break or front-matter fence ("---") ends a block.
+	if line := bytes.TrimSpace(out[bytes.LastIndexByte(out[:k], '\n')+1 : k]); len(line) >= 3 && len(bytes.Trim(line, "-=")) == 0 {
 		return false
 	}
 	j := i + 1

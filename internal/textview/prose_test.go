@@ -29,6 +29,7 @@ func TestProse(t *testing.T) {
 		{"list kept", "intro\n- item\n1. first", "intro\n- item\n1. first"},
 		{"heading kept", "text\n# Title", "text\n# title"},
 		{"spaces collapse", "a   *   b", "a b"},
+		{"code block lines kept", "run:\n```\nPOST /login\ncurl -d x\n```\nthen go on\nwith this", "run:\n```\npost /login\ncurl -d x\n```\nthen go on with this"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
