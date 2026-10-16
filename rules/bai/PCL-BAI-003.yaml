@@ -15,7 +15,8 @@ message: "Refusal bait \"{match}\""
 match:
   view: prose
   any:
-    - '\b(you must|you should|you are required to|always)\s+refuse\b'
+    # refusing to look at the content itself; "refuse to begin work" is a policy
+    - '\b(you must|you should|you are required to|always)\s+refuse\s+to\s+(analy[sz]e|review|read|process|scan|summari[sz]e|inspect|look at|discuss|describe|explain|audit)\s+(it|this|these|that|the\s+(file|files|content|code|text|repository|repo|package|skill))\b'
     - '\bi(''?m| am)\s+sorry,?\s+(but\s+)?i\s+(can(no|'')?t|cannot|won''?t)\s+(help|assist|continue|comply|analy[sz]e|review)\s+with\s+(this|that)\b'
     - '\bthis\s+(content|file|text)\s+(violates|is against)\s+(the\s+|your\s+|our\s+)?(content\s+|usage\s+)?polic(y|ies)\b'
   none:
@@ -33,3 +34,7 @@ tests:
       content: "Rule: NEVER say \"Sorry\" or \"I'm sorry, but I can't comply with this request\".\n"
     - file: CLAUDE.md
       content: "text = \"I'm sorry, but I can't assist with that request.\"\n"
+    - file: AGENTS.md
+      content: "If you cannot follow the guidelines, you must refuse to begin work.\n"
+    - file: CLAUDE.md
+      content: "- WCAG pass/fail claims beyond audited scope (never default; always refuse).\n"
