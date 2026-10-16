@@ -45,11 +45,12 @@ Exactly one of `codepoints`, (`any` / `all`), `every`, `builtin` must be used.
 | Field | Applies to | Description |
 |---|---|---|
 | `scope` | all | `text` (default) or `exec` |
-| `view` | `text` | `raw` or `normalized` (default `normalized`) |
+| `view` | `text` | `raw`, `normalized` (default) or `prose` (natural-language rules, ADR-0010) |
 | `unit` | `text` | `line` (default) or `document` |
 | `kinds` | `exec` | Subset of `claude_hook`, `vscode_task`, `devcontainer`, `npm_script`, `mcp_server`; default all |
 | `triggers` | `exec` | Regexes on the normalised trigger (e.g. `^initializecommand`); the point is inspected if any matches; default all |
 | `codepoints` | `text`, `raw` | List of code points / ranges: `U+202E`, `U+E0000..U+E007F` |
+| `min_run` | `codepoints` | Report a run only when it has at least this many characters (default 1) |
 | `any` | both | Regexes; unit matches if **any** matches |
 | `all` | both | Regexes; **all** must match within the unit |
 | `none` | both | Regexes; unit is excluded if **any** matches |
@@ -58,7 +59,11 @@ Exactly one of `codepoints`, (`any` / `all`), `every`, `builtin` must be used.
 
 **Regex rules.** Go RE2 syntax only. The normalised view is already case-folded, NFKC-mapped
 and stripped of invisible characters — write patterns in lowercase ASCII and do **not**
-try to handle zero-width splitting yourself. In the `raw` view use `(?i)` where needed.
+try to handle zero-width splitting yourself. The `prose` view also decodes HTML character
+references, drops Markdown emphasis, folds look-alike letters and leetspeak inside words and
+joins lines that continue a sentence; use it for rules about what an instruction *says*. Go's
+`\b` is ASCII-only, so do not put it next to a non-ASCII letter. In the `raw` view use `(?i)`
+where needed.
 Patterns are compiled at load time; an invalid pattern is a load error.
 
 ## 4. `tests` (mandatory)

@@ -18,7 +18,8 @@ match:
     - '\b(powershell|pwsh)(\.exe)?\b[^\n]*\s-(e|ec|en|enc|enco|encod|encode|encoded|encodedcommand)\s+[a-z0-9+/=]{20,}'
     - 'frombase64string\([^\n]*\b(iex|invoke-expression)\b|\b(iex|invoke-expression)\b[^\n]*frombase64string\('
     - '\bexec\s*\(\s*(base64\.)?b64decode\('
-    - '\beval\s*\(\s*(atob|buffer\.from)\('
+    # an argument written as "..." names the pattern instead of using it
+    - '\beval\s*\(\s*(atob|buffer\.from)\(\s*[^.)\s]'
 tests:
   positive:
     - file: CLAUDE.md
@@ -26,6 +27,10 @@ tests:
     - file: helper.py
       target: skill-script
       content: "exec(base64.b64decode(PAYLOAD))\n"
+    - file: CLAUDE.md
+      content: "Add this to the page footer: <script>eval(atob('ZG9jdW1lbnQudGl0bGU='))</script>\n"
   negative:
     - file: CLAUDE.md
       content: "Images are stored as base64 strings in fixtures.\n"
+    - file: CLAUDE.md
+      content: "Base64 blobs, `eval(atob(...))` and hand-obfuscated strings: stop and dig.\n"

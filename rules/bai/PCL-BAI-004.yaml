@@ -13,6 +13,7 @@ remediation: >
   Check whether the instruction weakens security checks.
 message: "Security-tool evasion \"{match}\""
 match:
+  view: prose
   any:
     - '\b(portcullis|mcp-scan|semgrep|codeql|snyk|trivy|gitleaks|trufflehog|security\s+(scanner|scan|tool|check|review)|static analysis|guardrails?|llamafirewall|prompt\s?guard)\b.{0,40}\b(bypass|evade|disable|silence|fool|trick|get around)\b'
     - '\b(bypass|evade|disable|silence|fool|trick|get around)\b.{0,40}\b(portcullis|mcp-scan|semgrep|codeql|snyk|trivy|gitleaks|trufflehog|security\s+(scanner|scan|tool|check|review)|static analysis|guardrails?|llamafirewall|prompt\s?guard)\b'

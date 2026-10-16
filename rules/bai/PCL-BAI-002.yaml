@@ -13,9 +13,12 @@ remediation: >
   Review the file manually; such text is a reason for more scrutiny, not less.
 message: "Self-clearing text \"{match}\""
 match:
+  view: prose
   any:
-    - '\b(classify|mark|report|label|treat|consider|rate)\s+(this|it|the)(\s+(file|code|repository|repo|project|package|skill|content))?\s+as\s+(safe|benign|harmless|clean|trusted|legitimate|not malicious|verified)\b'
-    - '\b(do not|don''?t|never)\s+(flag|report|mention|surface)\s+(this|it|these|anything)\s+(file|code|content|issue|finding|as)\b'
+    # the content vouches for itself to whoever reviews it
+    - '\b(classify|mark|report|label|treat|consider|rate)\s+(this|the)\s+(file|code|repository|repo|project|package|skill|content|extension|script|plugin)\s+as\s+(safe|benign|harmless|clean|trusted|legitimate|not malicious|verified)\b'
+    - '\b(do not|don''?t|never)\s+(flag|report|mark|classify)\s+(this|these|the)\s+(file|code|repository|repo|project|package|skill|content|extension|script|plugin)s?\s+as\s+(malicious|suspicious|unsafe|dangerous|a\s+(vulnerability|threat|security\s+(issue|risk|problem)))\b'
+    - '\b(classify|label|rate)\s+(it|this)\s+as\s+(safe|benign|harmless|not malicious|non-malicious)\b'
 tests:
   positive:
     - file: AGENTS.md
@@ -25,3 +28,9 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "Mark the issue as resolved after merging.\n"
+    - file: CLAUDE.md
+      content: "Do not report it as a bug unless it reproduces on main.\n"
+    - file: CLAUDE.md
+      content: "Never mark the file done before review, and do not mark the skill complete early.\n"
+    - file: CLAUDE.md
+      content: "Report it as verified once the tests pass; treat it as trusted input afterwards.\n"

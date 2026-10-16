@@ -22,7 +22,7 @@ func opts(t *testing.T) Options {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Options{Targets: ts, Builtins: []string{"engine", "skill_capability_mismatch"}}
+	return Options{Targets: ts, Builtins: []string{"credential_destination", "engine", "skill_capability_mismatch"}}
 }
 
 func TestLoadEmbedded(t *testing.T) {
@@ -38,7 +38,7 @@ func TestLoadEmbedded(t *testing.T) {
 		t.Error("UNI-001 ranges")
 	}
 	exe := s.Get("PCL-EXE-001")
-	if exe == nil || exe.Match.Scope != ScopeExec || len(exe.Any) != 2 || !exe.HasKind(extract.NPMScript) {
+	if exe == nil || exe.Match.Scope != ScopeExec || len(exe.Any) != 4 || !exe.HasKind(extract.NPMScript) {
 		t.Fatalf("PCL-EXE-001 = %+v", exe)
 	}
 	ids := []string{}

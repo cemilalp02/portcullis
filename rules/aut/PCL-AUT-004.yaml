@@ -13,6 +13,7 @@ remediation: >
   Remove the text.
 message: "Jailbreak phrasing \"{match}\""
 match:
+  view: prose
   any:
     - '\b(developer|god|jailbreak|unrestricted|dan)\s+mode\b.{0,20}\b(enabled|activated|on|unlocked)\b'
     - '\byou\s+are\s+(now\s+)?(in\s+)?(an?\s+)?(unrestricted|jailbroken|unfiltered|uncensored)\b'

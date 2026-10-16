@@ -19,8 +19,15 @@ match:
   any:
     - '^(npx|bunx|pnpx)\s+(-y\s+|--yes\s+)*(@[a-z0-9._-]+/)?[a-z0-9_][a-z0-9._-]*(\s|$)'
     - '^(uvx|pipx\s+run)\s+[a-z0-9_][a-z0-9._-]*(\s|$)'
+    # installed from a git URL or package name without a pinned ref or version
+    - '^(uvx|pipx\s+run)\s+(--?[a-z-]+(\s+[^-\s]\S*)?\s+)*--(from|spec)\s+(git\+[^@\s]+|[a-z0-9_][a-z0-9._-]*)(\s|$)'
+    - '^(npx|bunx|pnpx)\s+(-y\s+|--yes\s+)*(github:|git\+|https?://)[^#@\s]+(\s|$)'
 tests:
   positive:
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tools\": {\"command\": \"uvx\", \"args\": [\"--from\", \"git+https://example.invalid/tools.git\", \"tools-server\"]}}}"
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tools\": {\"command\": \"npx\", \"args\": [\"-y\", \"github:example/tools\"]}}}"
     - file: .mcp.json
       content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server-files\", \".\"]}}}"
     - file: .mcp.json
@@ -30,3 +37,5 @@ tests:
       content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server-files@1.4.0\", \".\"]}}}"
     - file: .mcp.json
       content: "{\"mcpServers\": {\"tool\": {\"command\": \"uvx\", \"args\": [\"mcp-server-fetch==2025.4.7\"]}}}"
+    - file: .mcp.json
+      content: "{\"mcpServers\": {\"tools\": {\"command\": \"uvx\", \"args\": [\"--from\", \"git+https://example.invalid/tools.git@4f2a9c1\", \"tools-server\"]}}}"

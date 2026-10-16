@@ -54,12 +54,13 @@ const (
 	RuleDirLinkEscape  = "PCL-ENG-011"
 	RuleUnresolvedLink = "PCL-ENG-012"
 	RuleStaleBaseline  = "PCL-ENG-013"
+	RuleDuplicateInert = "PCL-ENG-014"
 )
 
 var engineRules = []string{
 	RuleOversize, RuleUnparseable, RuleDuplicateKey, RuleEncoding, RuleLinkEscape, RuleReadError,
 	RuleInTreeConfig, RuleSkippedTargets, RuleProtected, RuleFindingCap, RuleDirLinkEscape, RuleUnresolvedLink,
-	RuleStaleBaseline,
+	RuleStaleBaseline, RuleDuplicateInert,
 }
 
 const builtinEngine = "engine"
@@ -69,6 +70,7 @@ const builtinEngine = "engine"
 // itself (discovery events, decoding and parsing problems).
 var builtins = map[string]func(c *collector, r *ruleset.Compiled){
 	"skill_capability_mismatch": skillCapabilityMismatch,
+	"credential_destination":    credentialDestination,
 }
 
 // Builtins lists the built-in check names rules may reference.
@@ -227,6 +229,7 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 	defer r.Close()
 
 	workers := cmp.Or(opts.Workers, runtime.GOMAXPROCS(0))
+	budget := newByteBudget(analysisBudget)
 	jobs := make(chan discover.Candidate)
 	results := make(chan fileResult)
 	var wg sync.WaitGroup
@@ -235,7 +238,11 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		go func() {
 			defer wg.Done()
 			for c := range jobs {
-				results <- e.scanCandidate(r, c, maxSize)
+				n := min(max(c.Size, 1), analysisBudget)
+				budget.acquire(n)
+				fr := e.scanCandidate(r, c, maxSize)
+				budget.release(n)
+				results <- fr
 			}
 		}()
 	}
@@ -279,6 +286,42 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 func (res *Result) fail(path, detail string) {
 	res.Complete = false
 	res.Errors = append(res.Errors, escape.String(path, 0)+": "+escape.String(detail, excerptLimit))
+}
+
+// analysisBudget bounds the bytes of the files being analysed at once.
+// Analysis holds about 25 bytes per input byte (decoded text, the normalised
+// and prose views with their offset maps), so without a bound a repository of
+// many large files needs workers x 25 x file size: 64 files of 10 MB took
+// 9.5 GB with 32 workers. A file larger than the budget is analysed alone.
+const analysisBudget = 32 << 20
+
+// byteBudget is a counting semaphore over bytes.
+type byteBudget struct {
+	mu   sync.Mutex
+	cond *sync.Cond
+	free int64
+}
+
+func newByteBudget(n int64) *byteBudget {
+	b := &byteBudget{free: n}
+	b.cond = sync.NewCond(&b.mu)
+	return b
+}
+
+func (b *byteBudget) acquire(n int64) {
+	b.mu.Lock()
+	for b.free < n {
+		b.cond.Wait()
+	}
+	b.free -= n
+	b.mu.Unlock()
+}
+
+func (b *byteBudget) release(n int64) {
+	b.mu.Lock()
+	b.free += n
+	b.mu.Unlock()
+	b.cond.Broadcast()
 }
 
 type fileResult struct {
@@ -326,7 +369,11 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 	if def.Format == "jsonc" {
 		root, dups, err := jsonc.Parse(doc.Text)
 		for _, d := range dups {
-			col.add(e.Rules.Get(RuleDuplicateKey), d.Offset, d.Offset+len(d.Key)+2, d.Key, map[string]string{"name": d.Key})
+			id := RuleDuplicateKey
+			if root != nil && !executes(def.Extractor, d.Key, keyPath(root, d.Offset)) {
+				id = RuleDuplicateInert
+			}
+			col.add(e.Rules.Get(id), d.Offset, d.Offset+len(d.Key)+2, d.Key, map[string]string{"name": d.Key})
 		}
 		var se *jsonc.SyntaxError
 		switch {
@@ -339,7 +386,6 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 		}
 	}
 
-	var view *textview.View
 	for _, r := range e.rules {
 		if r.Match.Builtin == builtinEngine || !r.AppliesTo(def) {
 			continue
@@ -353,11 +399,12 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 			col.exec(r, points)
 		case r.Match.View == ruleset.ViewRaw:
 			col.text(r, doc.Text, nil)
+		case r.Match.View == ruleset.ViewProse:
+			v := col.prose()
+			col.text(r, v.Text, v)
 		default:
-			if view == nil {
-				view = textview.Normalize(doc.Text)
-			}
-			col.text(r, view.Text, view)
+			v := col.normalized()
+			col.text(r, v.Text, v)
 		}
 	}
 	col.flush()
@@ -413,6 +460,24 @@ type collector struct {
 	perRule  map[string]int
 	seen     map[string]int
 	dropped  int
+	norm     *textview.View // built on first use
+	prosev   *textview.View
+}
+
+// normalized returns the document's normalised view, building it once.
+func (c *collector) normalized() *textview.View {
+	if c.norm == nil {
+		c.norm = textview.Normalize(c.doc.Text)
+	}
+	return c.norm
+}
+
+// prose returns the document's prose view, building it once.
+func (c *collector) prose() *textview.View {
+	if c.prosev == nil {
+		c.prosev = textview.Prose(c.normalized())
+	}
+	return c.prosev
 }
 
 func (c *collector) add(r *ruleset.Compiled, start, end int, match string, vars map[string]string) {
@@ -444,7 +509,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 	text := c.doc.Text
 	start, n := -1, 0
 	report := func(end int) {
-		if n > 0 {
+		if n > 0 && n >= r.Match.MinRun && !emojiTagSequence(text, start, end) {
 			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end], "decoded": decodeTags(text[start:end])})
 		}
 		start, n = -1, 0
@@ -468,7 +533,7 @@ func (c *collector) exec(r *ruleset.Compiled, points []extract.ExecPoint) {
 		if !r.HasKind(p.Kind) || !r.MatchTrigger(textview.Normalize(p.Trigger).Text) {
 			continue
 		}
-		if !r.Match.Every && r.MatchUnit(textview.Normalize(p.Command).Text) == nil {
+		if !r.Match.Every && r.MatchUnit(shellView(textview.Normalize(p.Command).Text)) == nil {
 			continue
 		}
 		c.add(r, p.Start, p.End, p.Command, map[string]string{
@@ -490,6 +555,9 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 			c.add(r, start, end, c.doc.Text[start:end], map[string]string{"match": c.doc.Text[start:end]})
 		}
 	}
+	if !r.MayMatch(s) {
+		return
+	}
 	if r.Match.Unit == ruleset.UnitDocument {
 		report(0, s)
 		return
@@ -497,10 +565,11 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 	for base := 0; base <= len(s); {
 		end := strings.IndexByte(s[base:], '\n')
 		if end < 0 {
-			report(base, s[base:])
-			break
+			end = len(s) - base
 		}
-		report(base, s[base:base+end])
+		if line := s[base : base+end]; r.MayMatch(line) {
+			report(base, line)
+		}
 		base += end + 1
 	}
 }

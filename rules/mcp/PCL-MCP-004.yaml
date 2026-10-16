@@ -17,10 +17,15 @@ match:
   any:
     - '\"[a-z_]*(api[_-]?key|token|secret|password|passwd|bearer)[a-z_]*\"\s*:\s*\"[a-z0-9_\-]{20,}\"'
     - '\"authorization\"\s*:\s*\"bearer\s+[a-z0-9._\-]{20,}\"'
+  none:
+    # placeholders in example configurations
+    - ':\s*\"[^"]*(_here|here_|your_|your-|xxx|placeholder|changeme|change_me|replace_me|replace-me|insert_|dummy|sample|todo|<)[^"]*\"'
 tests:
   positive:
     - file: .mcp.json
       content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server@1.0.0\"], \"env\": {\"API_KEY\": \"test0000000000000000000000000000\"}}}}"
   negative:
+    - file: .cursor/mcp.json
+      content: "{\"mcpServers\": {\"tm\": {\"command\": \"npx\", \"args\": [\"-y\", \"task-master-ai@1.0.0\"], \"env\": {\"ANTHROPIC_API_KEY\": \"ANTHROPIC_API_KEY_HERE\", \"OPENAI_API_KEY\": \"your_openai_api_key_here\"}}}}"
     - file: .mcp.json
       content: "{\"mcpServers\": {\"tool\": {\"command\": \"npx\", \"args\": [\"-y\", \"@example/server@1.0.0\"], \"env\": {\"API_KEY\": \"${env:EXAMPLE_API_KEY}\"}}}}"

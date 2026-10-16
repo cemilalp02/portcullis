@@ -1,7 +1,7 @@
 schema: 1
 id: PCL-AUT-007
 title: Instruction to install persistence
-severity: high
+severity: medium
 confidence: medium
 targets: [instruction, config, script]
 owasp: [ASI05]

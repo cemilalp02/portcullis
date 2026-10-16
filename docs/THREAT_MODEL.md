@@ -75,12 +75,17 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 - **L6 — Indirection.** Scripts bundled with a skill are analysed (companion targets), but a
   benign-looking hook that runs another repository script (`./scripts/setup.sh`)
   is reported as `medium`, but the script's own content is not deeply analysed in v0.1.
+- **L7 — Wording with a harmless twin.** To keep false positives under 2%, rules skip text
+  that reads as documentation: short quoted phrases, descriptions of an attack class,
+  negations, options tables, "do not tell the user that …" (which usually forbids a false
+  claim). An attacker who phrases an instruction that way can fall into an exclusion. Every
+  exclusion is a `none` pattern in the rule file, so the gap is visible and reviewable.
 
 ## 7. Threats against Portcullis itself
 
 | ID | Threat | Mitigation |
 |---|---|---|
-| S1 | Malicious input crashes or hangs the scanner (fail-open in CI) | Fuzzing; size limits; any incomplete analysis ⇒ exit `2`, never "clean" (FR-09, FR-32) |
+| S1 | Malicious input crashes or hangs the scanner (fail-open in CI) | Fuzzing, including every rule of every target type on arbitrary bytes (`FuzzAnalyze`); size limits; any incomplete analysis ⇒ exit `2`, never "clean" (FR-09, FR-32) |
 | S2 | Regex denial of service | RE2 linear-time engine only (FR-22) |
 | S3 | Symlink / junction / path traversal outside the repo | Links never followed; resolved component by component (junctions included, which `EvalSymlinks` misses) and reported; all reads through `os.Root` (FR-03) |
 | S4 | Terminal / log injection via file names or excerpts | All echoed content escaped (FR-34) |
@@ -104,6 +109,8 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S22 | Script injection through action inputs | Inputs reach `scripts/action/*.sh` only as environment variables; scripts pass shellcheck |
 | S23 | Attack samples in Portcullis's own repository are loaded by agents working on it | Samples are stored inside `.txtar` archives, never as real agent files |
 | S24 | Scanned text runs script or loads content in the HTML report (stored XSS, tracking requests when the report is opened) | Contextual escaping by `html/template`; Content Security Policy `default-src 'none'` that allows only the report's own style and script by SHA-256 hash, plus `data:` fonts and icon embedded by Portcullis; no event-handler attributes; no external resources or links other than rule documentation (tested, including a mutation check of the hashes) |
+| S25 | **Memory exhaustion** — many agent files near the size limit, analysed in parallel (64 files of 10 MB took 9.5 GB on 32 threads) | Workers share a 32 MiB budget of bytes under analysis; the same input peaks at 1.7 GB (`docs/VALIDATION.md`) |
+| S26 | Hidden text in an emoji tag sequence, which UNI-001 exempts so that the flags of Scotland or Wales are not reported | Only U+1F3F4 followed by three to six lowercase tag letters or digits and CANCEL TAG is exempt; longer runs or any other tag character are reported |
 
 ## 8. Review cadence
 

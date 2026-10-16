@@ -134,17 +134,29 @@ func claudeSettings(root *jsonc.Node) []ExecPoint {
 
 // vscodeTasks: tasks with runOptions.runOn == "folderOpen", including the
 // platform-specific variants (windows / linux / osx) that override command
-// and args.
+// and args, and every task they depend on (dependsOn), which VS Code runs
+// first.
 func vscodeTasks(root *jsonc.Node) []ExecPoint {
 	tasks := root.Get("tasks")
 	if tasks == nil || tasks.Kind != jsonc.Array {
 		return nil
 	}
-	var out []ExecPoint
+	byLabel := map[string]*jsonc.Node{}
 	for _, t := range tasks.Elems {
-		if on, _ := t.Get("runOptions").Get("runOn").StringValue(); on != "folderOpen" {
-			continue
+		if l, ok := t.Get("label").StringValue(); ok && l != "" {
+			if _, dup := byLabel[l]; !dup {
+				byLabel[l] = t
+			}
 		}
+	}
+	var out []ExecPoint
+	seen := map[*jsonc.Node]bool{}
+	var visit func(t *jsonc.Node, trigger string)
+	visit = func(t *jsonc.Node, trigger string) {
+		if t == nil || seen[t] {
+			return
+		}
+		seen[t] = true
 		label, _ := t.Get("label").StringValue()
 		for _, v := range []*jsonc.Node{t, t.Get("windows"), t.Get("linux"), t.Get("osx")} {
 			c := v.Get("command")
@@ -158,7 +170,36 @@ func vscodeTasks(root *jsonc.Node) []ExecPoint {
 			if args, ok := commandLine(v.Get("args")); ok && args != "" {
 				cmd += " " + args
 			}
-			out = append(out, point(VSCodeTask, "folderOpen", label, c, cmd))
+			out = append(out, point(VSCodeTask, trigger, label, c, cmd))
+		}
+		for _, dep := range dependsOn(t.Get("dependsOn")) {
+			visit(byLabel[dep], "folderOpen (dependency of "+label+")")
+		}
+	}
+	for _, t := range tasks.Elems {
+		if on, _ := t.Get("runOptions").Get("runOn").StringValue(); on == "folderOpen" {
+			visit(t, "folderOpen")
+		}
+	}
+	return out
+}
+
+// dependsOn returns the task labels of a dependsOn value: a label, a
+// {"task": label} object, or an array of either.
+func dependsOn(n *jsonc.Node) []string {
+	if n == nil {
+		return nil
+	}
+	if s, ok := n.StringValue(); ok {
+		return []string{s}
+	}
+	if s, ok := n.Get("task").StringValue(); ok {
+		return []string{s}
+	}
+	var out []string
+	if n.Kind == jsonc.Array {
+		for _, e := range n.Elems {
+			out = append(out, dependsOn(e)...)
 		}
 	}
 	return out

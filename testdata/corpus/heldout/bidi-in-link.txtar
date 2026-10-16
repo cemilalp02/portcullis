@@ -1,0 +1,4 @@
+Right-to-left override disguising a link target.
+alert: high
+-- CLAUDE.md --
+See the [setup guide](https://example.invalid/‮hs.llatsni‬) before contributing.
