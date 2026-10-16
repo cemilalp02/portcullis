@@ -38,6 +38,8 @@ jobs:
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
       - name: Lint action scripts
         run: shellcheck -s bash scripts/action/*.sh scripts/release/*.sh
+      - name: Test the action installer
+        run: bash scripts/action/install_test.sh
 
   release-config:
     name: Release build (snapshot, unsigned)

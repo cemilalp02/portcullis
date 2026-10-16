@@ -27,8 +27,11 @@ inputs:
   upload-report:
     description: Upload the self-contained HTML report as a workflow artifact named <sarif-category>-report.html.
     default: "true"
+  from-source:
+    description: Build Portcullis from the action's source even at a release tag, instead of downloading the verified release binary.
+    default: "false"
   go-version:
-    description: Go version used to build Portcullis.
+    description: Go version used when Portcullis is built from source.
     default: stable
 
 outputs:
@@ -48,12 +51,24 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+    - name: Install Portcullis
+      id: install
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        ACTION_REF: ${{ github.action_ref }}
+        INPUT_FROM_SOURCE: ${{ inputs.from-source }}
+        GH_TOKEN: ${{ github.token }}
+      run: bash "$ACTION_PATH/scripts/action/install.sh"
+
+    - if: steps.install.outputs.build == 'true'
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version: ${{ inputs.go-version }}
         cache: false
 
     - name: Build Portcullis
+      if: steps.install.outputs.build == 'true'
       shell: bash
       env:
         ACTION_PATH: ${{ github.action_path }}

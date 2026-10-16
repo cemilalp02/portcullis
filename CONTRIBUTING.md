@@ -19,8 +19,11 @@ Requirements: Go ≥ 1.26.9, git. Optional: GNU make, [golangci-lint v2](https:/
 ```bash
 go build ./cmd/portcullis     # build
 go test ./...            # unit tests
-make check               # everything CI runs: tidy, lint, test, govulncheck, actionlint
+make check               # everything CI runs: tidy, lint, test, govulncheck, actionlint, shellcheck, the action installer test
+make release-snapshot    # the release archives in ./dist, unsigned (needs GoReleaser and syft)
 ```
+
+Releases are cut by maintainers with a version tag; see [docs/RELEASING.md](docs/RELEASING.md).
 
 Without make, run the commands listed in the [`Makefile`](Makefile) directly — they are
 plain `go` invocations.

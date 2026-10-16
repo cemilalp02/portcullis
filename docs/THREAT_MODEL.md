@@ -100,7 +100,7 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S13 | **Case tricks** — `claude.md` instead of `CLAUDE.md` on case-insensitive file systems | Case-insensitive target matching (§5) |
 | S14 | **Output flooding** to bury a real finding | Per-file finding cap with summary (FR-14); severity-sorted output |
 | S15 | Portcullis executes scanned content | Never: no exec, no templating, no network (NFR-01, NFR-02) |
-| S16 | Compromised Portcullis release, dependency or Action | Minimal deps, Dependabot, `govulncheck`, cosign-signed releases, SLSA provenance, SHA-pinned actions, OpenSSF Scorecard |
+| S16 | Compromised Portcullis release, dependency or Action | Two runtime dependencies, Dependabot, `govulncheck`; releases built only by the release workflow, `checksums.txt` signed keylessly with Sigstore, SLSA build provenance for every archive and SBOM, published only after the provenance exists; reproducible builds so anyone can rebuild a tag and compare; SHA-pinned actions; OpenSSF Scorecard (`docs/RELEASING.md`) |
 | S17 | Malicious samples in Portcullis's own corpus harm contributors | Corpus is defanged: no working payloads, reserved domains only |
 | S18 | Unstable normalisation (same text normalises differently on a second pass) lets a pattern match only sometimes | Fuzz-tested idempotency; two real cases (Cherokee folding, dotted İ + combining mark) found and fixed |
 | S19 | Hidden characters in Portcullis's own sources or docs (Trojan Source) | Repository hygiene test fails on any format/bidi/Tag/filler character outside `testdata/` |
@@ -111,6 +111,7 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S24 | Scanned text runs script or loads content in the HTML report (stored XSS, tracking requests when the report is opened) | Contextual escaping by `html/template`; Content Security Policy `default-src 'none'` that allows only the report's own style and script by SHA-256 hash, plus `data:` fonts and icon embedded by Portcullis; no event-handler attributes; no external resources or links other than rule documentation (tested, including a mutation check of the hashes) |
 | S25 | **Memory exhaustion** — many agent files near the size limit, analysed in parallel (64 files of 10 MB took 9.5 GB on 32 threads) | Workers share a 32 MiB budget of bytes under analysis; the same input peaks at 1.7 GB (`docs/VALIDATION.md`) |
 | S26 | Hidden text in an emoji tag sequence, which UNI-001 exempts so that the flags of Scotland or Wales are not reported | Only U+1F3F4 followed by three to six lowercase tag letters or digits and CANCEL TAG is exempt; longer runs or any other tag character are reported |
+| S27 | The GitHub Action runs a replaced or tampered release archive (compromised release asset, download redirect) | The action runs a downloaded binary only if `gh attestation verify` proves it was built by `release.yml` for that exact tag on a GitHub-hosted runner and its SHA-256 matches `checksums.txt`; any failure stops the job instead of falling back. Without a release archive it builds from its own source at the pinned ref (tested offline by `scripts/action/install_test.sh`) |
 
 ## 8. Review cadence
 
