@@ -72,8 +72,8 @@ func ExitCode(res *engine.Result, m Meta) int {
 // WriteText writes the human-readable report.
 func WriteText(w io.Writer, res *engine.Result, m Meta) error {
 	var b strings.Builder
-	fmt.Fprintf(&b, "portcullis %s · ruleset %s · mode: %s · %d agent files in %d files\n\n",
-		m.Version, m.Ruleset, m.Mode, res.Targets, res.Files)
+	fmt.Fprintf(&b, "portcullis %s · ruleset %s · mode: %s · %d agent %s in %d %s\n\n",
+		m.Version, m.Ruleset, m.Mode, res.Targets, plural(res.Targets, "file", "files"), res.Files, plural(res.Files, "file", "files"))
 
 	if len(res.Findings) == 0 {
 		b.WriteString("No findings.\n\n")

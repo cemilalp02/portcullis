@@ -66,12 +66,13 @@ func WriteMarkdown(w io.Writer, res *engine.Result, m Meta) error {
 		b.WriteString("No findings at or above the threshold.\n\n")
 	}
 	if len(below) > 0 {
-		fmt.Fprintf(&b, "<details><summary>%d findings below the threshold</summary>\n\n", len(below))
+		fmt.Fprintf(&b, "<details><summary>%d %s below the threshold</summary>\n\n", len(below), plural(len(below), "finding", "findings"))
 		table(below)
 		b.WriteString("</details>\n\n")
 	}
 	if len(res.Inventory) > 0 {
-		fmt.Fprintf(&b, "<details><summary>Auto-execution inventory: %d commands run without asking</summary>\n\n", len(res.Inventory))
+		fmt.Fprintf(&b, "<details><summary>Auto-execution inventory: %d %s without asking</summary>\n\n",
+			len(res.Inventory), plural(len(res.Inventory), "command runs", "commands run"))
 		b.WriteString("| Kind | Trigger | Location | Command |\n|---|---|---|---|\n")
 		for _, it := range res.Inventory {
 			fmt.Fprintf(&b, "| %s | %s | %s:%d | %s |\n", it.Kind, mdText(it.Trigger), mdText(repoPath(m, it.Path)), it.Line, mdText(it.Command))
