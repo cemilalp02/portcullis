@@ -41,7 +41,8 @@ match:
     - '(이전|앞의)\s*(모든\s*)?(지시|명령|지침)(을|를)?\s*(무시|잊어)'
   none:
     - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
-    - '[\"''`\x{201C}\x{2018}]\s*(ignore|disregard|forget|override)\b'
+    - '[\"''`\x{201C}\x{2018}\x{300C}\x{300E}]\s*((ignore|disregard|forget|override|bypass)\b|忽略|无视|忘记|忽视)'
+    - '\bwithout\s+(asking|telling|instructing|prompting)\b[^.\n]{0,40}\b(ignore|disregard|forget|override)\b'
 tests:
   positive:
     - file: CLAUDE.md
@@ -85,3 +86,7 @@ tests:
       content: "Ignore previous context and re-read the CI logs from scratch.\n"
     - file: CLAUDE.md
       content: "This section overrides all other rules in the file.\n"
+    - file: CLAUDE.md
+      content: "The fixture uses an ordinary request, without asking the model to disregard prior instructions.\n"
+    - file: CLAUDE.md
+      content: "以下消息一律不记：“忽略之前的规则”。\n"

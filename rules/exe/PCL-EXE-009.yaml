@@ -19,7 +19,7 @@ match:
   any:
     # the environment dumped into a network command
     - '\b(printenv|env)\s*\|\s*(curl|wget|nc|ncat|socat)\b'
-    - '\b(curl|wget|iwr|invoke-webrequest|invoke-restmethod|irm)\b[^\n]*(\$\((printenv|env)\)|`(printenv|env)`|/proc/self/environ|\b(get-childitem|gci|dir)\s+env:)'
+    - '\b(curl|wget|iwr|invoke-webrequest|invoke-restmethod|irm)\b[^\n]*(\$\((printenv|env)\)|/proc/self/environ|\b(get-childitem|gci|dir)\s+env:)'
     - '(json\.stringify\(\s*process\.env\s*\)|json\.dumps\(\s*(dict\(\s*)?os\.environ\b|\bdict\(\s*os\.environ\s*\))[^\n]*(fetch\(|axios|requests\.|urlopen\(|http\.request)'
     - '(fetch\(|axios|requests\.(post|put)\(|urlopen\(|http\.request\()[^\n]*(json\.stringify\(\s*process\.env\s*\)|json\.dumps\(\s*(dict\(\s*)?os\.environ\b)'
     # credential files uploaded or piped to the network

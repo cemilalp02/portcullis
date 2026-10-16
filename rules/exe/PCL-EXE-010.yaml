@@ -21,7 +21,7 @@ match:
     - '\b(curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod|nc|ncat|nslookup|dig|ping|fetch\(|axios|requests\.|urlopen\(|send|post|upload|exfiltrate|beacon|ping back|callback)\b[^\n]*\b(webhook\.site|requestbin\.(com|net)|[a-z0-9-]+\.pipedream\.net|[a-z0-9-]+\.(oast\.(fun|me|pro|live|site|online)|interact\.sh|burpcollaborator\.net|oastify\.com)|canarytokens\.com)'
     - '\b(webhook\.site|requestbin\.(com|net)|[a-z0-9-]+\.pipedream\.net|[a-z0-9-]+\.(oast\.(fun|me|pro|live|site|online)|interact\.sh|burpcollaborator\.net|oastify\.com))[^\n]*\b(-d|--data|-f|--form|-t|--upload-file|\$\()'
     # paste services' upload APIs
-    - '\b(pastebin\.com/api|api\.paste\.ee|hastebin\.com/documents|dpaste\.(com|org)/api|paste\.rs\b)'
+    - '\b(pastebin\.com/api/api_post\.php|api\.paste\.ee|hastebin\.com/documents|dpaste\.(com|org)/api|paste\.rs\b)'
     # anonymous file drops receiving an upload
     - '\b(curl|wget)\b[^\n]*(-t|--upload-file|-f|--form|--data-binary|-d)\s[^\n]*\b(transfer\.sh|0x0\.st|bashupload\.com|temp\.sh|file\.io)\b'
 tests:

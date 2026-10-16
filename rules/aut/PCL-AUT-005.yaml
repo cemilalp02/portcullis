@@ -16,13 +16,16 @@ remediation: >
 message: "Permission bypass \"{match}\""
 match:
   any:
-    # an agent command line with the flag
-    - '\b(claude|codex|gemini|qwen|cursor-agent|opencode|aider|amp|crush|droid|kimi|copilot)\b[^\n]*(--dangerously-skip-permissions|--allow-dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|\s--yolo)\b'
+    # an agent command line with the flag: only arguments between the program and the flag
+    - '\b(claude|codex|gemini|qwen|cursor-agent|opencode|aider|amp|crush|droid|kimi|copilot)(\s+(-{1,2}[a-z0-9][a-z0-9-]*(=[^\s]+)?|"[^"\n]*"|''[^''\n]*''|[a-z0-9_./{}:=@-]+))*?\s+(--dangerously-skip-permissions|--allow-dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|--yolo)\b'
     # the flag as an argument in code that spawns an agent
     - '["''](--dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|--yolo)["'']'
     # SDK or settings option set to bypass
     - '\b(permission_?mode|defaultmode)["'']?\s*[:=]\s*["'']bypasspermissions["'']'
     - '--permission-mode[\s=]+["'']?bypasspermissions\b'
+  none:
+    # advice not to use the flag
+    - '\b(omit|without|avoid|remove|drop|never use|do not use|don''?t use)\b[^\n]{0,30}(--dangerously|--yolo|bypasspermissions)'
 tests:
   positive:
     - file: CLAUDE.md
@@ -40,3 +43,7 @@ tests:
       content: "Permission modes are default, acceptEdits, plan and bypassPermissions.\n"
     - file: CLAUDE.md
       content: "Changelog: documented the --dangerously-skip-permissions flag.\n"
+    - file: CLAUDE.md
+      content: "Inside Codex's own sandbox, omit `--dangerously-bypass-approvals-and-sandbox`.\n"
+    - file: CLAUDE.md
+      content: "Claude Code 虽然也有类似的 `--dangerously-skip-permissions` 选项。\n"

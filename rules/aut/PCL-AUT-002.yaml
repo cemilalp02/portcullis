@@ -24,7 +24,7 @@ match:
     - '\bkeep\s+(this|it)\s+(a\s+)?(secret|hidden|confidential)\s+from\s+(the\s+)?(user|developer|human)\b'
     - '\b(keep|leave|omit|exclude|hide)\s+(this|these|that)\s+(step|action|change|command|part)s?\s+(out\s+of|from)\s+(your|the)\s+(summary|reply|response|answer|report|output|explanation)\b'
     # an order to act silently, not a description of something that happens silently
-    - '(^\s*(-\s+|[0-9]+\.\s+)?|[.!?;:]\s+|\b(then|and|also|first|please)\s+)(silently|quietly|secretly|covertly)\s+(run|execute|send|upload|copy|delete|install|modify|post)\b'
+    - '(^\s*|[.!?;:]\s+|\b(then|and|also|first|please)\s+)(silently|quietly|secretly|covertly)\s+(run|execute|send|upload|copy|delete|install|modify|post)\b'
     # other languages
     - '\bno\s+(le\s+)?(digas|menciones|informes|cuentes)\s+(nada\s+)?(al|a\s+el)\s+usuario\b'
     - '\bsin\s+(decirle|avisarle|avisar|informar)[a-z]*\s+al\s+usuario\b'
@@ -36,7 +36,7 @@ match:
     - '\bkullaniciya\s+((bir\s+)?(sey|şey)\s+)?(söyleme|bahsetme|haber\s+verme|gösterme|bildirme)'
     - '\bkullaniciya\s+(söylemeden|haber\s+vermeden|bildirmeden|sormadan|göstermeden)'
     - 'не\s+(говори|сообщай|рассказывай|упоминай)[^\s]*\s+(об\s+этом\s+|ничего\s+)?пользовател'
-    - '(不要|别|不准|切勿)(告诉|通知|提醒)用户'
+    - '(不要|别|不准|切勿)(告诉|通知|提醒)用户(你|这|此|任何|有关|关于)'
     - '(不要|别|不准|切勿)让用户(知道|发现|察觉|看到)'
     - '(瞒着|背着)用户'
   none:
@@ -44,6 +44,8 @@ match:
     # rules that forbid acting behind the user's back
     - '\b(never|do not|don''?t|must not|should not|avoid|not)\b[^.!?\n]{0,80}\bwithout\s+(telling|informing|notifying|alerting|asking)\s+the\s+user\b'
     - '\b(do not|don''?t|never|must not|should not|not)\s+(silently|quietly|secretly|covertly)\b'
+    # descriptions of what software does, not orders
+    - '^\s*(some|many|most|it|they|this|that|these|those|which|users?|people|tools?|apps?|services?)\b[^.!?\n]*\bwithout\s+(telling|informing|notifying|alerting)\s+the\s+user'
 tests:
   positive:
     - file: CLAUDE.md
@@ -81,3 +83,9 @@ tests:
       content: "If a metric has no data, omit it from the report.\n"
     - file: CLAUDE.md
       content: "Never show the API token to the user in plain text.\n"
+    - file: CLAUDE.md
+      content: "Some tools require minimum character counts without telling the user.\n"
+    - file: CLAUDE.md
+      content: "Avoid these:\n- silently modify the procedure and still call it standard.\n"
+    - file: CLAUDE.md
+      content: "字段缺失时不要告诉用户“已保留为参与人”。\n"
