@@ -6,6 +6,8 @@
 | `triage.tsv` | One line per finding at or above `high`: repository, fingerprint, rule, verdict (`tp` or `fp`) and a note. |
 | `heldout1-repos.tsv` | 500 further repositories, selected on 2026-10-16 with `--exclude repos.tsv` after the rules were frozen at commit `0e1e487`. |
 | `heldout1-triage.tsv` | Triage of that scan, same format. |
+| `heldout2-repos.tsv` | 500 further repositories, selected on 2026-10-16 with `--exclude` for both lists above after the rules were frozen at commit `e6ffee8`. |
+| `heldout2-triage.tsv` | Triage of that scan, same format. |
 
 `repos.tsv` is the development set: rules were changed after reading its findings, so its
 false-positive rate is optimistic. A held-out set gives an independent rate exactly once:
