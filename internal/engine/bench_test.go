@@ -66,6 +66,24 @@ func BenchmarkScan5000Files(b *testing.B) {
 	}
 }
 
+// BenchmarkScan100000Files measures the second NFR-04 bound (100,000 files in
+// under 10 s). Building the tree takes longer than the scan; run it with
+// -run '^$' -bench Scan100000Files -benchtime 3x.
+func BenchmarkScan100000Files(b *testing.B) {
+	e, err := Default()
+	if err != nil {
+		b.Fatal(err)
+	}
+	root := makeTree(b, 100000)
+	b.ResetTimer()
+	for b.Loop() {
+		res, err := e.Scan(root, Options{})
+		if err != nil || res.Files != 100000 {
+			b.Fatalf("scan: %v, %d files", err, res.Files)
+		}
+	}
+}
+
 // TestScan5000FilesUnderOneSecond guards NFR-04 in the normal test run, with
 // a generous margin for slow CI machines.
 func TestScan5000FilesUnderOneSecond(t *testing.T) {
