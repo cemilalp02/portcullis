@@ -468,7 +468,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 	text := c.doc.Text
 	start, n := -1, 0
 	report := func(end int) {
-		if n > 0 && n >= r.Match.MinRun {
+		if n > 0 && n >= r.Match.MinRun && !emojiTagSequence(text, start, end) {
 			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end], "decoded": decodeTags(text[start:end])})
 		}
 		start, n = -1, 0

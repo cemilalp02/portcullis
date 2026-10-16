@@ -3,6 +3,7 @@ package engine
 import (
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/cemilalp02/portcullis/internal/ruleset"
 )
@@ -22,6 +23,26 @@ func decodeTags(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// emojiTagSequence reports whether text[start:end] is the tag sequence of an
+// emoji subdivision flag: after U+1F3F4, three to six lowercase tag letters or
+// digits and a CANCEL TAG, as in the flags of England, Scotland and Wales
+// (Unicode TS #51). Six lowercase characters cannot carry an instruction.
+func emojiTagSequence(text string, start, end int) bool {
+	if prev, _ := utf8.DecodeLastRuneInString(text[:start]); prev != 0x1F3F4 {
+		return false
+	}
+	runes := []rune(text[start:end])
+	if len(runes) < 4 || len(runes) > 7 || runes[len(runes)-1] != 0xE007F {
+		return false
+	}
+	for _, r := range runes[:len(runes)-1] {
+		if (r < 0xE0030 || r > 0xE0039) && (r < 0xE0061 || r > 0xE007A) {
+			return false
+		}
+	}
+	return true
 }
 
 // frontMatter splits a Markdown file with YAML front-matter ("---" lines)
