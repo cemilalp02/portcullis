@@ -4,6 +4,7 @@
 |---|---|---|---|
 | `known/` | Defanged samples of known attacks; each lists the rules that must fire | `TestKnownCorpus` | 100% recall (REQUIREMENTS §8, Phase 4 gate) |
 | `clean/` | Realistic legitimate repositories | `TestCleanCorpus` | No finding at or above `high` |
+| `heldout/` | Evasion variants written in Phase 6 without looking at the rules; each header names the severity a finding must reach (`alert:`) | `TestHeldoutCorpus` | At least 80% recall (REQUIREMENTS §8) |
 
 ## Format
 
@@ -33,4 +34,6 @@ files means no agent ever reads them as instructions, and no editor runs them as
   is excluded from the repository hygiene test and is stored byte-exact (`.gitattributes`).
 - Every detection rule should be exercised by at least one known sample; `TestKnownCorpus` logs
   the rules that are not.
-- Held-out evasion samples (REQUIREMENTS §8) are added in Phase 6, after rules are frozen.
+- `heldout/` was measured once before any rule changed (19 of 46, 41.3%) and then used to
+  improve the rules, so its current recall is a development figure, not an independent one
+  (see `docs/VALIDATION.md`).
