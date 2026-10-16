@@ -59,7 +59,7 @@ func TestWriteHTMLEscapesScannedText(t *testing.T) {
 	for _, want := range []string{
 		`data-copy="&#34;&gt;&lt;img src=x onerror=alert(1)&gt;`,
 		`<title>&lt;b onmouseover=alert(3)&gt;repo · Portcullis report</title>`,
-		`<mark class="esc" title="1 invisible character">&lt;U&#43;200B&gt;</mark>`,
+		`title="1 invisible character">&lt;U&#43;200B&gt;</mark>`,
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output lacks %q", want)
@@ -106,7 +106,8 @@ func TestHTMLPolicyCoversOnlyInlineAssets(t *testing.T) {
 			t.Errorf("page loads or redirects: found %q", bad)
 		}
 	}
-	if n, fonts := strings.Count(out, "url("), strings.Count(out, "url(data:font/woff2;base64,"); n != fonts || fonts != len(fontFaces) {
+	// url(#id) are the icon's own gradients.
+	if n, fonts := strings.Count(out, "url(")-strings.Count(out, "url(#"), strings.Count(out, "url(data:font/woff2;base64,"); n != fonts || fonts != len(fontFaces) {
 		t.Errorf("%d url() references, %d of them embedded fonts; want exactly the %d fonts", n, fonts, len(fontFaces))
 	}
 	for _, h := range regexp.MustCompile(`href="([^"]*)"`).FindAllStringSubmatch(out, -1) {
@@ -132,15 +133,15 @@ func TestWriteHTMLVerdicts(t *testing.T) {
 		want []string
 	}{
 		{"fails", sample(), Meta{FailOn: finding.High, Suppressed: 2},
-			[]string{`<p class="v-text">1 finding at or above high</p>`, `class="verdict v-fail"`, "#i-fail", "2 suppressed by baseline", "exit code 1", `aria-label="1 critical, 1 medium"`}},
+			[]string{`data-headline>1 finding at or above high</p>`, `data-verdict="fail" data-exit="1"`, "#i-shield-x", "2 suppressed by baseline", `aria-label="1 critical, 1 medium"`}},
 		{"below threshold", onlyMedium, Meta{FailOn: finding.High},
-			[]string{`<p class="v-text">No findings at or above high</p>`, `class="verdict v-pass"`, "#i-pass", "exit code 0"}},
+			[]string{`data-headline>No findings at or above high</p>`, `data-verdict="pass" data-exit="0"`, "#i-shield-check"}},
 		{"threshold disabled", sample(), Meta{NoFail: true},
-			[]string{`<p class="v-text">2 findings, failure threshold disabled</p>`, "threshold none", `class="verdict v-pass"`}},
+			[]string{`data-headline>2 findings, failure threshold disabled</p>`, `data-verdict="pass" data-exit="0" data-threshold="none"`}},
 		{"empty", empty, Meta{FailOn: finding.High},
-			[]string{`<p class="v-text">No findings</p>`, "nothing matched a rule", "No agent context files were found.", `class="dist clean"`, `aria-label="No findings"`}},
+			[]string{`data-headline>No findings</p>`, "nothing matched a rule", "No agent context files were found.", `<rect class="sev-none`, `aria-label="No findings"`}},
 		{"incomplete", incomplete, Meta{FailOn: finding.High},
-			[]string{`<p class="v-text">Some files could not be analysed</p>`, `class="verdict v-incomplete"`, "#i-warn", `role="alert"`, "CLAUDE.md: permission denied", "exit code 2"}},
+			[]string{`data-headline>Some files could not be analysed</p>`, `data-verdict="incomplete" data-exit="2"`, "#i-shield-alert", `role="alert"`, "CLAUDE.md: permission denied"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -162,23 +163,24 @@ func TestWriteHTMLGroupsAndFolds(t *testing.T) {
 	res.TargetFiles = append(res.TargetFiles, engine.TargetFile{Path: "CLAUDE.md", Kind: "Claude memory file"})
 	out := renderHTML(t, res, Meta{FailOn: finding.High})
 
-	if !strings.Contains(out, `<details class="fold">`) || !strings.Contains(out, "Show all 27 files") {
+	if !strings.Contains(out, `data-fold>`) || !strings.Contains(out, "Show all 27 files") {
 		t.Error("a long file list must start folded")
 	}
 	// Groups follow severity order and carry the file type and a tally.
-	if i, j := strings.Index(out, `<span class="path">CLAUDE.md</span>`), strings.Index(out, `<span class="path">AGENTS.md</span>`); i < 0 || j < i {
+	if i, j := strings.Index(out, `data-file="CLAUDE.md"`), strings.Index(out, `data-file="AGENTS.md"`); i < 0 || j < i {
 		t.Errorf("critical file must come first (CLAUDE.md at %d, AGENTS.md at %d)", i, j)
 	}
-	if !strings.Contains(out, `<span class="kind">Claude memory file</span><span class="tally"><span class="sev-critical">1 critical</span></span>`) {
+	if !regexp.MustCompile(`data-file="CLAUDE.md">(?s:.*?)data-kind>Claude memory file</span>(?s:.*?)data-tally="critical"><span[^>]*></span>1 critical</span>`).MatchString(out) {
 		t.Error("group header lacks kind or tally")
 	}
 	// Findings at or above the threshold start open, the rest closed.
-	if !strings.Contains(out, `<details class="finding sev-critical" data-sev="critical"`) || !strings.Contains(out, `<details class="finding sev-medium below"`) {
+	if !regexp.MustCompile(`data-sev="critical" data-above="true" data-text="[^"]*" open>`).MatchString(out) ||
+		!regexp.MustCompile(`data-sev="medium" data-above="false" data-text="[^"]*">`).MatchString(out) {
 		t.Error("threshold classes missing")
 	}
 
 	res.TargetFiles = res.TargetFiles[:3]
-	if strings.Contains(renderHTML(t, res, Meta{FailOn: finding.High}), `class="fold"`) {
+	if strings.Contains(renderHTML(t, res, Meta{FailOn: finding.High}), `data-fold`) {
 		t.Error("a short file list must not be folded")
 	}
 }
@@ -238,19 +240,17 @@ func TestFormatInt(t *testing.T) {
 // The report's logo and icon must stay identical to the published brand
 // assets in docs/assets/brand.
 func TestHTMLBrandMatchesAssets(t *testing.T) {
-	mark, err := os.ReadFile("../../docs/assets/brand/portcullis-mark-small.svg")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(string(mark), `d="`+markPath+`"`) {
-		t.Error("markPath differs from docs/assets/brand/portcullis-mark-small.svg")
-	}
-	icon, err := os.ReadFile("../../docs/assets/brand/favicon.svg")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(icon, mustRead("html/favicon.svg")) {
-		t.Error("html/favicon.svg differs from docs/assets/brand/favicon.svg")
+	for embedded, published := range map[string]string{
+		"html/icon.svg":    "../../docs/assets/brand/portcullis-icon.svg",
+		"html/favicon.svg": "../../docs/assets/brand/favicon.svg",
+	} {
+		want, err := os.ReadFile(published)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(want, mustRead(embedded)) {
+			t.Errorf("%s differs from %s", embedded, published)
+		}
 	}
 	if n := strings.Count(htmlCSS, "@font-face"); n != len(fontFaces) {
 		t.Errorf("%d @font-face rules, want %d", n, len(fontFaces))
@@ -275,6 +275,33 @@ func TestEmbeddedFontsMatchPublishedChecksums(t *testing.T) {
 		}
 		if !found {
 			t.Errorf("%s: SHA-256 %x is not the one listed in html/fonts/README.md", f.file, sum)
+		}
+	}
+}
+
+// Every icon the template or this package refers to must be in the sprite
+// that web/report/build.mjs generates; a missing symbol renders as nothing.
+func TestIconsAreInTheSprite(t *testing.T) {
+	have := map[string]bool{}
+	for _, m := range regexp.MustCompile(`<symbol id="([^"]+)"`).FindAllStringSubmatch(htmlIcons, -1) {
+		have[m[1]] = true
+	}
+	if !have["logo"] {
+		t.Error(`sprite lacks the "logo" symbol`)
+	}
+	src := string(mustRead("html/report.tmpl"))
+	goSrc, err := os.ReadFile("html.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := regexp.MustCompile(`#(i-[a-z0-9-]+)"`).FindAllStringSubmatch(src, -1)
+	want = append(want, regexp.MustCompile(`"(i-[a-z0-9-]+)"`).FindAllStringSubmatch(string(goSrc), -1)...)
+	if len(want) < 20 {
+		t.Fatalf("found only %d icon references", len(want))
+	}
+	for _, m := range want {
+		if !have[m[1]] {
+			t.Errorf("icon %q is not in html/icons.svg; run npm run build in web/report", m[1])
 		}
 	}
 }
