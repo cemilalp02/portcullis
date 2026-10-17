@@ -3,7 +3,7 @@ id: PCL-EXE-008
 title: Credential files mentioned in instructions or skill scripts
 severity: medium
 confidence: medium
-targets: [instruction, script]
+targets: [instruction, skill-script]
 owasp: [ASI03]
 since: 2026.10.0
 description: >

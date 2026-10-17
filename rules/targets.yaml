@@ -41,6 +41,23 @@ targets:
     companion_of: skill
     extensions: [.md, .txt, .json, .yaml, .yml, .toml]
 
+  # Scripts in the repository that hooks, tasks, lifecycle commands and MCP
+  # servers run, e.g. "bash .claude/hooks/check.sh". They have no pattern:
+  # the scan reads them because a config target's command names them. Shell
+  # scripts and programs are separate targets: a "curl ... | sh" line runs in
+  # a shell script but is only a string in a program.
+  - id: run-script
+    title: Shell script run by a hook, task or server
+    family: script
+    run_by_config: true
+    extensions: [.sh, .bash, .zsh, .ps1, .psm1, .bat, .cmd]
+
+  - id: run-program
+    title: Program run by a hook, task or server
+    family: script
+    run_by_config: true
+    extensions: [.py, .js, .mjs, .cjs, .ts, .rb, .pl]
+
   - id: claude-commands
     title: Claude slash command or sub-agent
     family: instruction
