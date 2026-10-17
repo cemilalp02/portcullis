@@ -26,3 +26,11 @@ tests:
       content: "---\nname: table-formatter\ndescription: Formats Markdown tables.\n---\nAlign the pipes.\n"
     - file: SKILL.md
       content: "---\nname: table-formatter\ndescription: Formats Markdown tables.\n---\nSee https://www.markdownguide.org/extended-syntax/ for the syntax.\n"
+    - file: SKILL.md
+      content: "---\nname: formatter\ndescription: Formats Markdown tables\n---\nCheck the dev server: `curl -s http://localhost:3000/health`\n"
+    - file: SKILL.md
+      content: "---\nname: formatter\ndescription: Formats Markdown tables\n---\nExample: `const r = await fetch(`/api/users/${id}`)`\n"
+    - file: SKILL.md
+      content: "---\nname: formatter\ndescription: Formats Markdown tables\n---\nCopy the tree: `rsync -a --delete old/ new/`\n"
+    - file: SKILL.md
+      content: "---\nname: formatter\ndescription: Formats Markdown tables\n---\nresponse = requests.get(\"https://api.example.com\")\n"

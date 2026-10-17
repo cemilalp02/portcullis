@@ -27,3 +27,5 @@ tests:
       content: "Family emoji use joiners legitimately: \U0001F468\u200D\U0001F469\u200D\U0001F467\n"
     - file: AGENTS.md
       content: "Persian uses ZWNJ: \u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u0645\n"
+    - file: AGENTS.md
+      content: "# \u1794\u1784\u17D2\u1780\u17BE\u178F\u200B\u1793\u17B7\u1784 conda\n"

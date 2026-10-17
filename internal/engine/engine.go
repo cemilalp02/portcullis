@@ -525,7 +525,7 @@ func (c *collector) codepoints(r *ruleset.Compiled) {
 	text := c.doc.Text
 	start, n := -1, 0
 	report := func(end int) {
-		if n > 0 && n >= r.Match.MinRun && !emojiTagSequence(text, start, end) {
+		if n > 0 && n >= r.Match.MinRun && !emojiTagSequence(text, start, end) && !wordSeparator(text, start, end) {
 			c.add(r, start, end, text[start:end], map[string]string{"count": strconv.Itoa(n), "match": text[start:end], "decoded": decodeTags(text[start:end])})
 		}
 		start, n = -1, 0
@@ -568,7 +568,7 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 	report := func(base int, unit string) {
 		for _, loc := range r.MatchUnit(unit) {
 			start, end := toRaw(base+loc[0]), toRaw(base+loc[1])
-			c.add(r, start, end, c.doc.Text[start:end], map[string]string{"match": c.doc.Text[start:end]})
+			c.add(r, start, end, c.doc.Text[start:end], map[string]string{"match": oneLine(c.doc.Text[start:end])})
 		}
 	}
 	if !r.MayMatch(s) {
@@ -583,7 +583,9 @@ func (c *collector) text(r *ruleset.Compiled, s string, view *textview.View) {
 		if end < 0 {
 			end = len(s) - base
 		}
-		if line := s[base : base+end]; r.MayMatch(line) {
+		// A CRLF file leaves "\r" at the end of each line; it is not part of
+		// the text a rule matches or a message quotes.
+		if line := strings.TrimSuffix(s[base:base+end], "\r"); r.MayMatch(line) {
 			report(base, line)
 		}
 		base += end + 1
@@ -608,6 +610,13 @@ func newFinding(r *ruleset.Compiled, path string, line, col, endLine, endCol int
 		Fingerprint: fp,
 	}
 }
+
+// oneLine joins a match that spans lines (prose rules) for its message.
+func oneLine(s string) string {
+	return lineBreaks.ReplaceAllString(s, " ")
+}
+
+var lineBreaks = regexp.MustCompile(`[ \t]*[\r\n]+[ \t]*`)
 
 // excerpt returns the escaped source line of a finding; long lines are cut
 // to a window around the column.
