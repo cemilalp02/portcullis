@@ -69,13 +69,13 @@ func TestWriteText(t *testing.T) {
 }
 
 func TestWriteTextVariants(t *testing.T) {
-	res := &engine.Result{Complete: false, Errors: []string{"CLAUDE.md: permission denied"}, Inventory: sample().Inventory}
+	res := &engine.Result{Files: 1, Targets: 1, Complete: false, Errors: []string{"CLAUDE.md: permission denied"}, Inventory: sample().Inventory}
 	var b bytes.Buffer
 	if err := WriteText(&b, res, Meta{NoFail: true, Inventory: false}); err != nil {
 		t.Fatal(err)
 	}
 	out := b.String()
-	for _, want := range []string{"No findings.", "Analysis incomplete", "  CLAUDE.md: permission denied", "0 findings at or above the threshold (none) · 0 below · exit 2"} {
+	for _, want := range []string{"· 1 agent file in 1 file\n", "No findings.", "Analysis incomplete", "  CLAUDE.md: permission denied", "0 findings at or above the threshold (none) · 0 below · exit 2"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output lacks %q:\n%s", want, out)
 		}

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Builds Portcullis from the action's own source tree (until signed release
-# binaries exist) and exports PORTCULLIS_BIN for the following steps.
+# Builds Portcullis from the action's own source tree when install.sh did not
+# install a verified release binary, and exports PORTCULLIS_BIN for the
+# following steps.
 set -euo pipefail
 
 : "${ACTION_PATH:?}"

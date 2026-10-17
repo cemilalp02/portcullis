@@ -7,10 +7,12 @@
 
 <p align="center">Inspect what your AI coding agent will read and run, before it does.</p>
 
-<p align="center"><a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a></p>
+<p align="center">
+  <a href="https://github.com/cemilalp02/portcullis/releases"><img alt="Release" src="https://img.shields.io/github/v/release/cemilalp02/portcullis?sort=semver"></a>
+  <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+</p>
 
-A *portcullis* is the iron grille dropped in front of a castle gate: nothing passes until it
-has been inspected.
+<p align="center"><b>English</b> · <a href="README.tr.md">Türkçe</a></p>
 
 **Portcullis** scans the files an AI coding agent reads or runs automatically — `CLAUDE.md`,
 `AGENTS.md`, `SKILL.md`, `.cursorrules`, Copilot instructions, `.claude/settings.json` hooks,
@@ -19,14 +21,11 @@ sees them. It runs fully offline, annotates pull requests, feeds GitHub code sca
 approved agent context with `context.lock` so silent changes fail CI.
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/report-dark.png">
-    <img alt="Portcullis HTML report: verdict, findings by severity, top rules, most affected files and commands that run without asking" src="docs/assets/report-light.png" width="880">
-  </picture>
-  <br><sub>The offline HTML report (<code>--html report.html</code>) of an example repository.</sub>
+  <img alt="Terminal: portcullis scan finds a hook that pipes a download into bash and 30 invisible Unicode Tag characters hiding a command, exits 1; a scan of a clean repository finds nothing and exits 0" src="docs/assets/demo.gif" width="880">
 </p>
 
-> **Status: pre-alpha.** Nothing is released yet; build from source. See the [roadmap](docs/ROADMAP.md).
+> **First release, v0.1.0.** Reports of missed detections and false alarms are very welcome —
+> see the issue templates and [SECURITY.md](SECURITY.md).
 
 ## Why
 
@@ -36,11 +35,27 @@ download and run code when the agent starts, register MCP servers that launch sh
 embed text that tells LLM-based scanners to stop looking. Portcullis checks all of that
 locally, without sending anything anywhere, and never executes what it scans.
 
+## Install
+
+**Release binaries** for Linux, macOS and Windows on amd64 and arm64 are on the
+[releases page](https://github.com/cemilalp02/portcullis/releases). Every archive has SLSA build
+provenance and the checksums are signed with Sigstore, so you can check that a download was
+built by this repository's release workflow before you run it:
+
+```bash
+gh attestation verify portcullis_0.1.0_linux_amd64.tar.gz --repo cemilalp02/portcullis
+```
+
+([verifying with cosign instead](docs/RELEASING.md#verifying-a-release)). Or build it with Go
+1.26.9 or newer:
+
+```bash
+go install github.com/cemilalp02/portcullis/cmd/portcullis@latest
+```
+
 ## Quick start
 
 ```bash
-go install github.com/cemilalp02/portcullis/cmd/portcullis@main
-
 portcullis scan path/to/cloned/repo   # check a repository before opening it with an agent
 portcullis scan --html report.html .  # also write an offline HTML report
 portcullis rules list                 # what is checked
@@ -58,17 +73,26 @@ In CI, add the GitHub Action ([full guide](docs/GITHUB_ACTION.md)):
 
 ```yaml
       - uses: actions/checkout@v7
-      - uses: cemilalp02/portcullis@main
+      - uses: cemilalp02/portcullis@v0.1.0
 ```
 
-Findings appear on the pull request diff, in the Security tab and in the job summary, and each
-run keeps a self-contained HTML report as an artifact. In pull requests the configuration,
-baseline and lock are read from the base commit, so a pull request cannot weaken the check that
-reviews it.
+At a release tag the action downloads the release binary and runs it only after verifying its
+provenance and checksum. Findings appear on the pull request diff, in the Security tab and in the
+job summary, and each run keeps a self-contained HTML report as an artifact. In pull requests
+the configuration, baseline and lock are read from the base commit, so a pull request cannot
+weaken the check that reviews it.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/report-dark.png">
+    <img alt="Portcullis HTML report: verdict, findings by severity, top rules, most affected files and commands that run without asking" src="docs/assets/report-light.png" width="880">
+  </picture>
+  <br><sub>The offline HTML report (<code>--html report.html</code>) of an example repository.</sub>
+</p>
 
 ## What it finds
 
-59 rules: 48 detection rules in seven groups plus 11 input-integrity rules
+70 rules: 56 detection rules in seven groups plus 14 input-integrity rules
 ([catalogue](docs/RULES.md)).
 
 | Group | Examples |
@@ -108,8 +132,8 @@ Portcullis is a pattern and structure scanner. A malicious instruction written i
 polite language without known markers can get past it; it reduces risk, it does not remove it.
 The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly, and
 [validation](docs/VALIDATION.md) publishes how often it is wrong: on 1,000 popular repositories
-it was tuned on and two held-out sets of 500 it was not, 0.2%, 1.6% and 1.4% of repositories had
-a false finding at or above `high`.
+it was tuned on and three held-out sets of 500 it was not, 0.2%, 1.6%, 1.4% and 0.8% of
+repositories had a false finding at or above `high`.
 
 ## Documentation
 
@@ -120,6 +144,7 @@ a false finding at or above `high`.
 | [CLI](docs/CLI.md) · [File formats](docs/FILE_FORMATS.md) | Commands, flags, exit codes, outputs, configuration |
 | [Threat model](docs/THREAT_MODEL.md) | What Portcullis protects against — and what it does not |
 | [Validation](docs/VALIDATION.md) | False-positive benchmark, recall, performance and fuzzing results |
+| [Releasing](docs/RELEASING.md) | How releases are built, signed and verified |
 | [Requirements](docs/REQUIREMENTS.md) · [Architecture](docs/ARCHITECTURE.md) | Scope, design, trust model |
 | [Rule schema](docs/RULE_SCHEMA.md) | Writing and testing rules, custom rules |
 | [Decision records](docs/adr/) | Why things are the way they are |

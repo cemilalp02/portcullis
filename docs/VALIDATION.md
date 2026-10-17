@@ -1,13 +1,15 @@
-# Validation (Phase 6)
+# Validation
 
 How well Portcullis works, measured against the v0.1 release gate (REQUIREMENTS §8). Every
-number here can be reproduced from the repository; the commands are at the end.
+number here can be reproduced from the repository; the commands are at the end. Phase 6 made
+the first measurements; Phase 7 added a third held-out set, measured with the rules of the
+v0.1.0 release.
 
 ## Summary
 
 | Metric | Gate | Result | Status |
 |---|---|---|---|
-| False-positive rate, held-out repositories | < 2% | **1.60%** (8 of 500, rules frozen at `0e1e487`), **1.40%** (7 of 500, rules frozen at `e6ffee8`) | ✅ |
+| False-positive rate, held-out repositories | < 2% | **1.60%** (8 of 500, rules frozen at `0e1e487`), **1.40%** (7 of 500, rules frozen at `e6ffee8`), **0.80%** (4 of 500, the v0.1.0 rules, frozen at `d4471f8`) | ✅ |
 | False-positive rate, development set | — | 0.20% (2 of 1,000); optimistic, the rules were tuned on it | — |
 | Recall, known attacks (`corpus/known`) | 100% | 63 of 63 expected detections | ✅ |
 | Recall, held-out evasions (`corpus/heldout`) | ≥ 80% | 45 of 46 (97.8%) now; **19 of 46 (41.3%) when first measured**, before the rules were improved on it | Met on a development figure; see [Recall](#recall) |
@@ -30,13 +32,14 @@ in a file an agent reads or runs, whatever the author's intent; it is a **false 
 it does not. The false-positive rate is the share of repositories with at least one false
 finding at or above `high`. Rules in `testdata/benchmark/README.md`.
 
-Three disjoint sets were used:
+Four disjoint sets were used:
 
 | Set | Repositories | Used for |
 |---|---|---|
 | `repos.tsv` | 1,000 most-starred (≥ 15.6k stars) | Development: rules were changed after reading its findings |
 | `heldout1-repos.tsv` | next 500 (9.1k–15.6k stars) | One measurement with the rules frozen at `0e1e487` |
 | `heldout2-repos.tsv` | next 500 (5.7k–9.1k stars) | One measurement with the rules frozen at `e6ffee8` |
+| `heldout3-repos.tsv` | next 500 (3.9k–5.7k stars, plus 15 more-starred repositories that added agent files after the earlier selections) | One measurement with the v0.1.0 rules, frozen at `d4471f8` |
 
 A held-out set gives an independent rate once. Reading its findings and then changing a rule
 spends it; the next measurement needs a new set (`fpbench.py select --exclude`).
@@ -47,6 +50,7 @@ spends it; the next measurement needs a new set (`fpbench.py select --exclude`).
 |---|---|---|---|---|---|
 | heldout1 | frozen `0e1e487` | 24 | 11 | 8 / 500 | **1.60%** |
 | heldout2 | frozen `e6ffee8` | 65 | 19 | 7 / 500 | **1.40%** |
+| heldout3 | v0.1.0, frozen `d4471f8` | 53 | 10 | 4 / 500 | **0.80%** |
 | development | final | 626 | 10 | 2 / 1,000 | 0.20% |
 
 True positives by kind (the note of each triage line):
@@ -56,6 +60,7 @@ True positives by kind (the note of each triage line):
 | development | 530 | 79 | 7 |
 | heldout1 | 5 | 5 | 3 |
 | heldout2 | 20 | 23 | 3 |
+| heldout3 | 31 | 10 | 2 |
 
 - `risk`: a real risky setting or instruction. Agents launched with permission checks off
   (`--dangerously-skip-permissions`, `--yolo`, `bypassPermissions`), every project MCP server
@@ -72,18 +77,29 @@ True positives by kind (the note of each triage line):
 
 Per-rule precision at or above `high`, frozen rules:
 
-| Rule | heldout1 (tp / fp) | heldout2 (tp / fp) | Cause | Fixed in |
-|---|---|---|---|---|
-| PCL-AUT-001 | 5 / 4 | 11 / 1 | Detection regexes, descriptions of the attack class, negated checklist items | `e6ffee8`, `01b50df` |
-| PCL-AUT-002 | — | 2 / 4 | "Do not tell the user that X" forbids a false claim; it hides nothing | `01b50df` |
-| PCL-AUT-009 | — | 0 / 1 | A paper title in a Markdown link | `01b50df` |
-| PCL-BAI-003 | 0 / 3 | — | "You must refuse to begin work" is policy wording | `e6ffee8` |
-| PCL-ENG-003 | — | 1 / 3 | `commands` in an extension manifest treated as executing | `84c5fac` |
-| PCL-EXE-005 | 0 / 1 | 3 / 0 | `eval(atob(...))` named as a pattern to look for | `e6ffee8` |
-| PCL-EXE-006 | 0 / 3 | 5 / 0 | `echo >/dev/tcp/host/port` is a port check | `e6ffee8` |
-| PCL-EXE-009 | — | 0 / 1 | `$USER` as the account in a GitHub URL | `01b50df` |
-| PCL-EXE-010 | — | 0 / 5 | The name paste.rs in the manifest of a paste.rs client | `01b50df` |
-| PCL-UNI-001 | — | 1 / 4 | Emoji flags of Scotland and Wales are tag sequences | `607e1df` |
+| Rule | heldout1 (tp / fp) | heldout2 (tp / fp) | heldout3 (tp / fp) | Cause | Fixed in |
+|---|---|---|---|---|---|
+| PCL-AUT-001 | 5 / 4 | 11 / 1 | 8 / 6 | Detection regexes, descriptions of the attack class, negated checklist items; in heldout3 a detector's catalogue of injection kinds that names the phrase | `e6ffee8`, `01b50df`; heldout3: open |
+| PCL-AUT-002 | — | 2 / 4 | — | "Do not tell the user that X" forbids a false claim; it hides nothing | `01b50df` |
+| PCL-AUT-005 | — | — | 4 / 3 | Documentation of what a sandbox runs; a negative test that checks a `--yolo` command is rejected | open |
+| PCL-AUT-009 | — | 0 / 1 | — | A paper title in a Markdown link | `01b50df` |
+| PCL-BAI-003 | 0 / 3 | — | — | "You must refuse to begin work" is policy wording | `e6ffee8` |
+| PCL-ENG-003 | — | 1 / 3 | — | `commands` in an extension manifest treated as executing | `84c5fac` |
+| PCL-EXE-005 | 0 / 1 | 3 / 0 | 3 / 0 | `eval(atob(...))` named as a pattern to look for | `e6ffee8` |
+| PCL-EXE-006 | 0 / 3 | 5 / 0 | — | `echo >/dev/tcp/host/port` is a port check | `e6ffee8` |
+| PCL-EXE-009 | — | 0 / 1 | 7 / 0 | `$USER` as the account in a GitHub URL | `01b50df` |
+| PCL-EXE-010 | — | 0 / 5 | 5 / 0 | The name paste.rs in the manifest of a paste.rs client | `01b50df` |
+| PCL-UNI-001 | — | 1 / 4 | 5 / 0 | Emoji flags of Scotland and Wales are tag sequences | `607e1df` |
+| PCL-UNI-006 | — | — | 0 / 1 | Random bytes of a git-crypt encrypted `CLAUDE.md` | open |
+
+heldout3 was measured with the rules of the v0.1.0 release and no rule changed afterwards, so
+0.80% is the rate the release ships with. Its false findings come from four repositories: a
+security-sweep skill whose detector catalogue and references name "ignore previous
+instructions" as a kind of injection, a documentation page that shows the command a sandbox
+runs, a test that checks a tampered `--yolo` command is rejected, and an encrypted
+`CLAUDE.md`. The last one is not simply fixed by skipping files with a git-crypt header: a
+forged header in front of plain text would then hide the text from every rule. These causes
+are recorded for v0.2.
 
 After these fixes, re-scanning the spent held-out sets leaves no false finding in heldout2
 (46 findings) and none in heldout1 (14 findings; the one line the triage still marks false is a
@@ -178,9 +194,9 @@ inputs in all.
 ```bash
 go test ./...                                     # fixtures, corpora, the 5,000-file guard
 go test ./internal/engine -run '^$' -bench . -benchmem
-python scripts/bench/fpbench.py fetch  --repos testdata/benchmark/heldout2-repos.tsv --cache /tmp/pcl-h2
-python scripts/bench/fpbench.py scan   --repos testdata/benchmark/heldout2-repos.tsv --cache /tmp/pcl-h2 --bin ./portcullis --out h2.jsonl
-python scripts/bench/fpbench.py report --results h2.jsonl --triage testdata/benchmark/heldout2-triage.tsv
+python scripts/bench/fpbench.py fetch  --repos testdata/benchmark/heldout3-repos.tsv --cache /tmp/pcl-h3
+python scripts/bench/fpbench.py scan   --repos testdata/benchmark/heldout3-repos.tsv --cache /tmp/pcl-h3 --bin ./portcullis --out h3.jsonl
+python scripts/bench/fpbench.py report --results h3.jsonl --triage testdata/benchmark/heldout3-triage.tsv
 ```
 
 Build `./portcullis` at the commit named in the triage header to reproduce a held-out

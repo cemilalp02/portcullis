@@ -14,7 +14,7 @@ LDFLAGS       := -s -w \
 EXE           := $(if $(filter windows,$(shell $(GO) env GOOS)),.exe,)
 BIN           := bin/portcullis$(EXE)
 
-.PHONY: all build test race cover lint fmt vuln tidy actionlint shellcheck check clean
+.PHONY: all build test race cover lint fmt vuln tidy actionlint shellcheck action-test check release-snapshot clean
 
 all: check build
 
@@ -47,9 +47,15 @@ actionlint: ## Lint GitHub workflow files
 	$(GO) run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
 shellcheck: ## Lint the GitHub Action scripts
-	shellcheck -s bash scripts/action/*.sh
+	shellcheck -s bash scripts/action/*.sh scripts/release/*.sh
 
-check: tidy lint test vuln actionlint shellcheck ## Everything CI runs
+action-test: ## Test the action's release installer offline
+	bash scripts/action/install_test.sh
+
+check: tidy lint test vuln actionlint shellcheck action-test ## Everything CI runs
+
+release-snapshot: ## Build every release archive into ./dist without publishing or signing
+	goreleaser release --snapshot --clean --skip=sign
 
 clean:
-	rm -rf bin coverage.out
+	rm -rf bin dist coverage.out

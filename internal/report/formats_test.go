@@ -204,6 +204,16 @@ func TestWriteMarkdown(t *testing.T) {
 	}
 
 	b.Reset()
+	res = sample()
+	res.Inventory = res.Inventory[:1]
+	_ = WriteMarkdown(&b, res, m)
+	for _, want := range []string{"<details><summary>1 finding below the threshold</summary>", "Auto-execution inventory: 1 command runs without asking"} {
+		if !strings.Contains(b.String(), want) {
+			t.Errorf("markdown lacks %q:\n%s", want, b.String())
+		}
+	}
+
+	b.Reset()
 	res = &engine.Result{Complete: false, Errors: []string{"a: denied"}}
 	_ = WriteMarkdown(&b, res, Meta{FailOn: finding.High})
 	if !strings.Contains(b.String(), "[!WARNING]") || !strings.Contains(b.String(), "No findings at or above the threshold.") {

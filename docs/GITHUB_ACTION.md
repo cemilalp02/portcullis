@@ -22,12 +22,16 @@ jobs:
       security-events: write   # upload results to code scanning
     steps:
       - uses: actions/checkout@v7
-      - uses: cemilalp02/portcullis@main   # pin a release tag or commit SHA once released
+      - uses: cemilalp02/portcullis@v0.1.0
 ```
 
 What it does on every run:
 
-1. Builds Portcullis (until signed release binaries are published, from the action's source).
+1. Installs Portcullis. At a release tag it downloads the release archive for the runner and runs
+   it only after `gh attestation verify` confirms it was built by this repository's release
+   workflow for that tag and its SHA-256 matches the signed `checksums.txt`; a failed check stops
+   the job. At a branch or commit SHA, or with `from-source: true`, it builds from the action's
+   own source.
 2. Scans the repository for malicious or risky agent context and **annotates findings on the
    pull request diff** (works for private repositories and forks; no GitHub Advanced Security needed).
 3. Uploads SARIF to **code scanning** (Security tab) when the token may do so.
@@ -49,7 +53,8 @@ What it does on every run:
 | `upload-sarif` | `true` | Upload to code scanning (skipped automatically for pull requests from forks) |
 | `sarif-category` | `portcullis` | Code scanning category, to tell several runs apart; also names the HTML report (`<category>-report.html`) |
 | `upload-report` | `true` | Upload the HTML report as a workflow artifact |
-| `go-version` | `stable` | Go version used to build Portcullis |
+| `from-source` | `false` | Build from the action's source even at a release tag |
+| `go-version` | `stable` | Go version used when Portcullis is built from source |
 
 Outputs: `exit-code` (0, 1 or 2), `sarif-file`, `html-file` and `report-url` (download link of the
 uploaded report).
@@ -105,7 +110,7 @@ lives in `.portcullis.yaml` (see [FILE_FORMATS.md](FILE_FORMATS.md)).
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/cemilalp02/portcullis
-    rev: main   # pin a release tag once released
+    rev: v0.1.0
     hooks:
       - id: portcullis          # scan agent context files before each commit
       - id: portcullis-verify   # optional: require context.lock to be up to date
