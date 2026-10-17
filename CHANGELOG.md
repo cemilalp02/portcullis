@@ -6,6 +6,12 @@ uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-17
+
+Coverage of more agents and of the scripts their hooks run, look-alike letters, fewer wrong
+findings below `high`, a VS Code extension and a website. On a fourth held-out set of 500
+repositories, 1.2% had a false finding at or above `high` (docs/VALIDATION.md).
+
 ### Added
 
 - Gemini CLI settings (`.gemini/settings.json`): its MCP servers, hooks and tool discovery and
@@ -148,5 +154,6 @@ The first release.
   architecture decision records ADR-0001 to ADR-0010, validation results, release process,
   brand guide; README in English and Turkish.
 
-[Unreleased]: https://github.com/cemilalp02/portcullis/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/cemilalp02/portcullis/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/cemilalp02/portcullis/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cemilalp02/portcullis/releases/tag/v0.1.0

@@ -25,7 +25,7 @@ request'lere not düşer, GitHub code scanning'e sonuç gönderir ve onaylanan a
   <img alt="Terminal: portcullis scan, bir indirmeyi bash'e aktaran bir hook ile bir komutu gizleyen 30 görünmez Unicode Tag karakterini buluyor ve 1 ile çıkıyor; temiz bir depoda hiçbir şey bulmuyor ve 0 ile çıkıyor" src="docs/assets/demo.gif" width="880">
 </p>
 
-> **İlk sürüm, v0.1.0.** Kaçırılan saldırı ve yanlış alarm bildirimleri çok değerli — issue
+> **v0.2.0.** Kaçırılan saldırı ve yanlış alarm bildirimleri çok değerli — issue
 > şablonlarına ve [SECURITY.md](SECURITY.md)'ye bakın.
 
 ## Neden?
@@ -45,7 +45,7 @@ derleme kanıtı var ve sağlama toplamları Sigstore ile imzalı; indirdiğiniz
 sürüm iş akışında derlendiğini çalıştırmadan önce doğrulayabilirsiniz:
 
 ```bash
-gh attestation verify portcullis_0.1.0_linux_amd64.tar.gz --repo cemilalp02/portcullis
+gh attestation verify portcullis_0.2.0_linux_amd64.tar.gz --repo cemilalp02/portcullis
 ```
 
 ([cosign ile doğrulama](docs/RELEASING.md#verifying-a-release)). Ya da Go 1.26.9 veya
@@ -75,7 +75,7 @@ CI'da GitHub Action'ı ekleyin ([ayrıntılı rehber](docs/GITHUB_ACTION.md), İ
 
 ```yaml
       - uses: actions/checkout@v7
-      - uses: cemilalp02/portcullis@v0.1.0
+      - uses: cemilalp02/portcullis@v0.2.0
 ```
 
 Bir sürüm etiketinde Action, sürümün hazır programını indirir ve yalnızca derleme kanıtını ve
@@ -139,8 +139,8 @@ Portcullis desen ve yapı tabanlı bir tarayıcıdır. Bilinen işaretler taşı
 bir dille yazılmış kötü niyetli bir talimat ondan kaçabilir; riski azaltır, ortadan kaldırmaz.
 [Tehdit modeli](docs/THREAT_MODEL.md) bu sınırları açıkça listeler,
 [doğrulama](docs/VALIDATION.md) ise ne sıklıkla yanıldığını yayımlar: üzerinde ayarlandığı 1.000
-popüler depoda ve hiç görmediği 500'er depoluk üç ayrı sette, depoların sırasıyla %0,2,
-%1,6, %1,4 ve %0,8 kadarında `high` ya da üstü bir yanlış bulgu çıktı.
+popüler depoda ve hiç görmediği 500'er depoluk dört ayrı sette, depoların sırasıyla %0,2,
+%1,6, %1,4, %0,8 ve %1,2 kadarında `high` ya da üstü bir yanlış bulgu çıktı.
 
 ## Belgeler
 

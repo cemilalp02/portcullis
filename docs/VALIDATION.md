@@ -3,13 +3,14 @@
 How well Portcullis works, measured against the v0.1 release gate (REQUIREMENTS §8). Every
 number here can be reproduced from the repository; the commands are at the end. Phase 6 made
 the first measurements; Phase 7 added a third held-out set, measured with the rules of the
-v0.1.0 release; Phase 10 estimated the precision of findings below `high`.
+v0.1.0 release; Phase 10 estimated the precision of findings below `high`; Phase 12 measured a fourth held-out set with the rules of
+the v0.2.0 release.
 
 ## Summary
 
 | Metric | Gate | Result | Status |
 |---|---|---|---|
-| False-positive rate, held-out repositories | < 2% | **1.60%** (8 of 500, rules frozen at `0e1e487`), **1.40%** (7 of 500, rules frozen at `e6ffee8`), **0.80%** (4 of 500, the v0.1.0 rules, frozen at `d4471f8`) | ✅ |
+| False-positive rate, held-out repositories | < 2% | **1.60%** (8 of 500, rules frozen at `0e1e487`), **1.40%** (7 of 500, rules frozen at `e6ffee8`), **0.80%** (4 of 500, the v0.1.0 rules, frozen at `d4471f8`), **1.20%** (6 of 500, the v0.2.0 rules, frozen at `1a31198`) | ✅ |
 | False-positive rate, development set | — | 0.20% (2 of 1,000); optimistic, the rules were tuned on it | — |
 | Recall, known attacks (`corpus/known`) | 100% | 63 of 63 expected detections | ✅ |
 | Recall, held-out evasions (`corpus/heldout`) | ≥ 80% | 45 of 46 (97.8%) now; **19 of 46 (41.3%) when first measured**, before the rules were improved on it | Met on a development figure; see [Recall](#recall) |
@@ -92,6 +93,26 @@ Per-rule precision at or above `high`, frozen rules:
 | PCL-EXE-010 | — | 0 / 5 | 5 / 0 | The name paste.rs in the manifest of a paste.rs client | `01b50df` |
 | PCL-UNI-001 | — | 1 / 4 | 5 / 0 | Emoji flags of Scotland and Wales are tag sequences | `607e1df` |
 | PCL-UNI-006 | — | — | 0 / 1 | Random bytes of a git-crypt encrypted `CLAUDE.md` | open |
+
+### The fourth held-out set (v0.2.0)
+
+heldout4 was selected after all v0.2 work was merged, excluding every earlier list, and
+scanned with the rules frozen at `1a31198`; its fetch also downloaded the scripts that hooks
+and tasks run. 6 of 500 repositories (1.20%) had a false finding at or above `high`, within
+the gate but above the 0.80% of v0.1.0 on heldout3. The new targets and rules held up: both
+findings of PCL-EXE-015 were real installers piped into a shell in dev container scripts.
+
+| Rule | tp / fp | False findings |
+|---|---|---|
+| PCL-AUT-002 | 1 / 6 | "without the user noticing" in a design reference (four copies of one file), a bug-class definition, a code comment |
+| PCL-AUT-001 | 22 / 4 | Code that filters the phrase out; a heading naming the "system override" prompt technique |
+| PCL-BAI-003 | 0 / 2 | A canned refusal returned by a guardrail example |
+| PCL-AUT-005 | 23 / 2 | A documentation page named `agents.md` that lists agent commands a user can configure |
+| PCL-ENG-003 | 0 / 1 | A duplicated key in a task that is not executed (`problemMatcher__`) |
+| PCL-EXE-007 | 0 / 1 | A host command that only creates `~/.ssh` and `~/.gnupg` directories for mounts |
+
+These causes are recorded for the next release; changing a rule because of them spends this
+set, so the next measurement needs a fifth one.
 
 heldout3 was measured with the rules of the v0.1.0 release and no rule changed afterwards, so
 0.80% is the rate the release ships with. Its false findings come from four repositories: a

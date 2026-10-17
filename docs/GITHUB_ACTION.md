@@ -22,7 +22,7 @@ jobs:
       security-events: write   # upload results to code scanning
     steps:
       - uses: actions/checkout@v7
-      - uses: cemilalp02/portcullis@v0.1.0
+      - uses: cemilalp02/portcullis@v0.2.0
 ```
 
 What it does on every run:
@@ -110,7 +110,7 @@ lives in `.portcullis.yaml` (see [FILE_FORMATS.md](FILE_FORMATS.md)).
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/cemilalp02/portcullis
-    rev: v0.1.0
+    rev: v0.2.0
     hooks:
       - id: portcullis          # scan agent context files before each commit
       - id: portcullis-verify   # optional: require context.lock to be up to date
