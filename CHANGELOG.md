@@ -36,8 +36,9 @@ uses [Semantic Versioning](https://semver.org/).
   only, so a workspace cannot choose what it runs. The `.vsix` is attached to each release and
   covered by the signed checksums; an end-to-end test runs it in an isolated VS Code.
 - Project website (`site/`, published by `.github/workflows/pages.yml` to GitHub Pages): a
-  single static page set like the HTML report, with no external resources and a strict
-  Content-Security-Policy; `scripts/site/build.sh` assembles it locally.
+  single dark static page whose opening shows a file as you see it and as your agent reads it,
+  with no external resources and a strict Content-Security-Policy; `scripts/site/build.sh`
+  assembles it locally.
 
 ### Changed
 
