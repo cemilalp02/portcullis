@@ -45,9 +45,10 @@ func TestRepositoryHasNoHiddenCharacters(t *testing.T) {
 		if !d.Type().IsRegular() || strings.HasSuffix(name, ".exe") || name == "coverage.out" {
 			return nil
 		}
-		if strings.HasSuffix(name, ".woff2") || strings.HasSuffix(name, ".png") {
+		if strings.HasSuffix(name, ".woff2") || strings.HasSuffix(name, ".png") || strings.HasSuffix(name, ".gif") {
 			// Published font binaries (internal/report/html/fonts, see its
-			// README for their checksums) and screenshots; never text.
+			// README for their checksums), screenshots and the README demo;
+			// never text.
 			return nil
 		}
 		data, err := os.ReadFile(path)
