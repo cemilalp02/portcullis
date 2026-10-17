@@ -15,7 +15,7 @@ remediation: >
 message: "Credential path \"{match}\""
 match:
   any:
-    - '(\.ssh/id_[a-z0-9_]+|\.aws/credentials|\.config/gcloud|\.azure/(accesstokens|msal)|\.kube/config|\.docker/config\.json|\.npmrc|\.pypirc|\.netrc|\.git-credentials|\.config/gh/hosts\.yml|\.claude\.json|\.claude/\.credentials\.json|\.codex/auth\.json|/etc/shadow|security\s+(find-generic-password|find-internet-password|dump-keychain))'
+    - '(\.ssh/id_[a-z0-9_]+|\.aws/credentials|\.config/gcloud|\.azure/(accesstokens|msal)|\.kube/config|\.docker/config\.json|(~|\$home|\$\{home\}|%userprofile%|/home/[^/\s]+|/root|/users/[^/\s]+)/\.npmrc|\.pypirc|\.netrc|\.git-credentials|\.config/gh/hosts\.yml|\.claude\.json|\.claude/\.credentials\.json|\.codex/auth\.json|/etc/shadow|security\s+(find-generic-password|find-internet-password|dump-keychain))'
 tests:
   positive:
     - file: CLAUDE.md
@@ -26,3 +26,5 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "Credentials come from the CI secret store.\n"
+    - file: CLAUDE.md
+      content: "Config files: `.prettierrc.json`, `.editorconfig`, `.nvmrc`, `.npmrc`\n"

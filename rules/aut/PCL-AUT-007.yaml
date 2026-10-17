@@ -16,7 +16,7 @@ match:
   any:
     - '\b(write|add|append|insert|modify|edit|overwrite|create|update|install)\b.{0,60}(authorized_keys|\bcrontab\b|\.git/hooks|launchagents|launchdaemons|currentversion\\run|startup folder|systemd/user)'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
 tests:
   positive:
     - file: AGENTS.md

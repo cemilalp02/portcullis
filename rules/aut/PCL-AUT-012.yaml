@@ -23,7 +23,7 @@ match:
     - '\b(append|add|write|insert|put)\b[^\n]*\b(curl|wget|iwr|irm)\b[^\n]*\b(to|into|in)\s+["''`]?(~|\$home)?/?\.(bashrc|zshrc|bash_profile|zprofile|profile)\b'
     - '(^|[\s`"''])(\*|[0-9][0-9,/-]*)(/[0-9]+)?(\s+(\*|[0-9][0-9,/-]*)(/[0-9]+)?){4}\s+[^\n]*\b(curl|wget)\b[^\n]*\|\s*(sudo\s+)?(ba|z|da)?sh\b'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|never (follow|obey))\b'
 tests:
   positive:
     - file: CLAUDE.md

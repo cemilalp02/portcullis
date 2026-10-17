@@ -15,12 +15,15 @@ message: "Jailbreak phrasing \"{match}\""
 match:
   view: prose
   any:
-    - '\b(developer|god|jailbreak|unrestricted|dan)\s+mode\b.{0,20}\b(enabled|activated|on|unlocked)\b'
+    - '\b(god|jailbreak|unrestricted|dan)\s+mode\b.{0,20}\b(enabled|activated|on|unlocked)\b'
+    # "Developer mode" is also a browser, phone and OS setting: only with a claim
+    # that the rules no longer apply
+    - '\bdeveloper\s+mode\b.{0,20}\b(enabled|activated|on|unlocked)\b.{0,60}\b(restrictions?|rules|guidelines|filters?|policies|censor\w*|unrestricted|unfiltered|anything)\b'
     - '\byou\s+are\s+(now\s+)?(in\s+)?(an?\s+)?(unrestricted|jailbroken|unfiltered|uncensored)\b'
     - '\bdo anything now\b'
     - '\bno\s+(longer\s+)?(bound|restricted)\s+by\s+(any|your|the)\s+(rules|guidelines|policies)\b'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
 tests:
   positive:
     - file: CLAUDE.md
@@ -28,3 +31,7 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "Enable debug mode with DEBUG=1.\n"
+    - file: CLAUDE.md
+      content: "Enable **Developer mode** on `chrome://extensions`, then load the unpacked extension.\n"
+    - file: CLAUDE.md
+      content: "- **Developer Mode** enabled in Windows Settings (for app sideloading)\n"

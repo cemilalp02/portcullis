@@ -40,7 +40,7 @@ match:
     - '(以前|前|上記)の(すべての)?(指示|命令|ルール)を(すべて)?(無視|忘れ)'
     - '(이전|앞의)\s*(모든\s*)?(지시|명령|지침)(을|를)?\s*(무시|잊어)'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|malicious|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|malicious|never (follow|obey))\b'
     # a short quoted mention of the phrase, also as a detection regex with inline flags or
     # inside an HTML comment: "(?i)ignore previous instructions", `<!-- ignore previous
     # instructions -->`. A long quoted string, such as a tool description or a prefill, is

@@ -18,6 +18,12 @@ match:
     - '\brunas\b'
     - '\bstart-process\b[^\n]*-verb\s+runas\b'
     - '\bdoas\b'
+  none:
+    # "do not use sudo", or a message that only shows a command to the user
+    - '\b(do not|don''t|never|without|avoid|no need (for|to)|must not|should not)\b[^\n]{0,30}\bsudo\b'
+    - '--no-sudo\b'
+    - '(==|!=|=~)\s*[\"''(]?[^\n]*\bsudo\b'
+    - '\b(echo|printf|print|error|warn|warning|info|die|fail|log)\b\s*\(?\s*["''][^"''\n]*\bsudo\b'
 tests:
   positive:
     - file: SKILL.md
@@ -28,3 +34,11 @@ tests:
   negative:
     - file: SKILL.md
       content: "---\nname: setup\ndescription: sets up tools\n---\nRun pip install --user jq\n"
+    - file: skills/x/SKILL.md
+      content: "If installation fails, report the error and stop. Do not use `sudo`.\n"
+    - file: skills/x/install.sh
+      target: skill-script
+      content: "error \"  sudo pacman -S git          # Arch\"\n"
+    - file: hooks/validate.sh
+      target: skill-script
+      content: "if [[ \"$command\" == sudo* ]]; then exit 2; fi\n"

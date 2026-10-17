@@ -18,7 +18,7 @@ match:
     - '\b(always|automatically)\s+(approve|accept|allow|confirm)\s+(all|every|any)\s+(commands?|tool\s+calls?|tools|actions|requests|permissions)\b'
     - '\b(do not|don''?t|never)\s+ask\s+(the\s+user\s+)?(for\s+)?(permission|confirmation|approval)\b'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
 tests:
   positive:
     - file: CLAUDE.md
