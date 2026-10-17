@@ -30,6 +30,10 @@ uses [Semantic Versioning](https://semver.org/).
   like Latin ones back to Latin inside words that mix scripts, so a hook running `bаsh`
   (Cyrillic а) is reported like `bash`. PCL-UNI-009 also covers Greek and Armenian look-alikes.
 
+- Project website (`site/`, published by `.github/workflows/pages.yml` to GitHub Pages): a
+  single static page set like the HTML report, with no external resources and a strict
+  Content-Security-Policy; `scripts/site/build.sh` assembles it locally.
+
 ### Changed
 
 - PCL-EXE-003, PCL-EXE-005 and PCL-EXE-008 apply to skill scripts only; scripts run by hooks
