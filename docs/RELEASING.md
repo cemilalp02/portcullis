@@ -73,6 +73,13 @@ cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
 sha256sum --ignore-missing -c checksums.txt
 ```
 
+The release also carries `portcullis-vscode_X.Y.Z.vsix`, the VS Code extension built by the
+release workflow at that tag (`npm version` sets its version from the tag). It is listed in
+`checksums.txt`, so the signature and the provenance cover it. The archive is not byte-for-byte
+reproducible (a ZIP with build times). Publishing to the Visual Studio Marketplace needs a
+publisher account and token of the project owner (`npx @vscode/vsce publish`); it is not part
+of the workflow.
+
 ## Website
 
 The project website is the static page in `site/`. `scripts/site/build.sh` assembles it with

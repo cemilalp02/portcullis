@@ -83,6 +83,11 @@ job summary, and each run keeps a self-contained HTML report as an artifact. In 
 the configuration, baseline and lock are read from the base commit, so a pull request cannot
 weaken the check that reviews it.
 
+In VS Code, the [Portcullis extension](editors/vscode/README.md) shows the findings as problems
+while you edit, and works in Restricted Mode, before you trust a repository. Until it is on the
+Marketplace, install the `portcullis-vscode_*.vsix` attached to each release with
+**Extensions: Install from VSIX…**.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/report-dark.png">

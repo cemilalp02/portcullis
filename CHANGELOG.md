@@ -30,6 +30,11 @@ uses [Semantic Versioning](https://semver.org/).
   like Latin ones back to Latin inside words that mix scripts, so a hook running `bаsh`
   (Cyrillic а) is reported like `bash`. PCL-UNI-009 also covers Greek and Armenian look-alikes.
 
+- VS Code extension (`editors/vscode/`): findings as problems with exact ranges (code-point
+  columns converted to the editor's UTF-16), rule links and fixes, rescans on save, a status-bar
+  count. It runs in Restricted Mode, and the executable comes from user or machine settings
+  only, so a workspace cannot choose what it runs. The `.vsix` is attached to each release and
+  covered by the signed checksums; an end-to-end test runs it in an isolated VS Code.
 - Project website (`site/`, published by `.github/workflows/pages.yml` to GitHub Pages): a
   single static page set like the HTML report, with no external resources and a strict
   Content-Security-Policy; `scripts/site/build.sh` assembles it locally.

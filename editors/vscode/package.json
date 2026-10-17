@@ -1,0 +1,111 @@
+{
+  "name": "portcullis",
+  "displayName": "Portcullis",
+  "description": "Shows hidden instructions, auto-executed commands and invisible text in AI agent context files (CLAUDE.md, AGENTS.md, skills, hooks, MCP servers) as problems in the editor.",
+  "version": "0.2.0",
+  "publisher": "cemilalp02",
+  "license": "Apache-2.0",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cemilalp02/portcullis",
+    "directory": "editors/vscode"
+  },
+  "homepage": "https://github.com/cemilalp02/portcullis",
+  "bugs": "https://github.com/cemilalp02/portcullis/issues",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "security",
+    "ai agents",
+    "prompt injection",
+    "mcp",
+    "claude"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "workspaceContains:**/CLAUDE.md",
+    "workspaceContains:**/CLAUDE.local.md",
+    "workspaceContains:**/AGENTS.md",
+    "workspaceContains:**/GEMINI.md",
+    "workspaceContains:**/SKILL.md",
+    "workspaceContains:**/.claude/**",
+    "workspaceContains:**/.cursorrules",
+    "workspaceContains:**/.cursor/rules/**",
+    "workspaceContains:**/.github/copilot-instructions.md",
+    "workspaceContains:**/.gemini/**",
+    "workspaceContains:**/.mcp.json",
+    "workspaceContains:**/.vscode/tasks.json",
+    "workspaceContains:**/.devcontainer/**",
+    "workspaceContains:**/.windsurfrules",
+    "workspaceContains:**/.clinerules"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "Portcullis is meant for repositories you do not trust yet: it reads files and never executes them. Its executable comes from user settings only."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "The scanner reads files from the local disk."
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "portcullis.scan",
+        "title": "Scan workspace",
+        "category": "Portcullis"
+      },
+      {
+        "command": "portcullis.showOutput",
+        "title": "Show output",
+        "category": "Portcullis"
+      }
+    ],
+    "configuration": {
+      "title": "Portcullis",
+      "properties": {
+        "portcullis.path": {
+          "type": "string",
+          "default": "portcullis",
+          "scope": "machine",
+          "markdownDescription": "The `portcullis` executable. Read from user settings only: a workspace cannot choose which program the extension runs."
+        },
+        "portcullis.scanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scan the workspace folder again when a file is saved."
+        },
+        "portcullis.minimumSeverity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "default": "info",
+          "description": "Lowest severity shown as a problem. Info findings list the commands that run without asking."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "tsc -p . && node --test test/report.test.mjs",
+    "package": "node scripts/copy-license.mjs && vsce package --no-dependencies -o portcullis.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/vscode": "1.90.0",
+    "@vscode/vsce": "4.0.0",
+    "typescript": "6.0.3"
+  }
+}
