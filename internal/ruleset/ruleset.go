@@ -6,6 +6,7 @@ package ruleset
 
 import (
 	"bytes"
+	"cmp"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -172,8 +173,16 @@ func (c *Compiled) MatchUnit(s string) [][]int {
 	if len(locs) == 0 {
 		return nil
 	}
-	slices.SortFunc(locs, func(a, b []int) int { return a[0] - b[0] })
-	return slices.CompactFunc(locs, func(a, b []int) bool { return a[0] == b[0] })
+	// Two patterns of one rule matching the same text are one finding: keep
+	// the earliest (and then longest) match and drop those overlapping it.
+	slices.SortFunc(locs, func(a, b []int) int { return cmp.Or(a[0]-b[0], b[1]-a[1]) })
+	out := locs[:1]
+	for _, l := range locs[1:] {
+		if last := out[len(out)-1]; l[0] >= last[1] && l[0] > last[0] {
+			out = append(out, l)
+		}
+	}
+	return out
 }
 
 // Placeholders allowed in messages.

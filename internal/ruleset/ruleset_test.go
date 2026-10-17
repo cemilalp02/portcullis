@@ -1,6 +1,7 @@
 package ruleset
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -100,6 +101,12 @@ func TestParseValidAndMatchUnit(t *testing.T) {
 	}
 	if got := c.MatchUnit("nothing here"); got != nil {
 		t.Errorf("MatchUnit = %v, want nil", got)
+	}
+
+	// Patterns that match overlapping text report it once.
+	overlap := &Compiled{Any: []*regexp.Regexp{regexp.MustCompile(`curl[^|]*\| *sh`), regexp.MustCompile(`https?://[^|]*\| *sh`), regexp.MustCompile(`sh$`)}}
+	if got := overlap.MatchUnit("curl -s https://x.invalid/i | sh; curl y | sh"); !slices.EqualFunc(got, [][]int{{0, 32}, {34, 45}}, slices.Equal) {
+		t.Errorf("overlapping matches = %v, want [[0 32] [34 45]]", got)
 	}
 }
 
