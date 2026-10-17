@@ -8,6 +8,8 @@
 | `heldout1-triage.tsv` | Triage of that scan, same format. |
 | `heldout2-repos.tsv` | 500 further repositories, selected on 2026-10-16 with `--exclude` for both lists above after the rules were frozen at commit `e6ffee8`. |
 | `heldout2-triage.tsv` | Triage of that scan, same format. |
+| `heldout3-repos.tsv` | 500 further repositories, selected on 2026-10-17 with `--exclude` for all three lists above; scanned with the v0.1.0 rules, frozen at commit `d4471f8`. |
+| `heldout3-triage.tsv` | Triage of that scan, same format. |
 
 `repos.tsv` is the development set: rules were changed after reading its findings, so its
 false-positive rate is optimistic. A held-out set gives an independent rate exactly once:
