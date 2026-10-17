@@ -56,6 +56,11 @@ archives:
 checksum:
   name_template: checksums.txt
   algorithm: sha256
+  # The VS Code extension, built by the release workflow before GoReleaser
+  # runs, is covered by the signed checksums and the provenance too.
+  extra_files:
+    - glob: ./editors/vscode/portcullis.vsix
+      name_template: "portcullis-vscode_{{ .Version }}.vsix"
 
 # One SPDX software bill of materials per archive, made by syft.
 sboms:
@@ -91,6 +96,9 @@ release:
   # Published by the workflow once the provenance attestation exists.
   draft: true
   prerelease: auto
+  extra_files:
+    - glob: ./editors/vscode/portcullis.vsix
+      name_template: "portcullis-vscode_{{ .Version }}.vsix"
   footer: |
     ## Verify the download
 

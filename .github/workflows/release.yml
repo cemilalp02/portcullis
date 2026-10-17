@@ -36,6 +36,18 @@ jobs:
       - name: Test
         run: go test ./...
 
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+
+      - name: VS Code extension
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm version --no-git-tag-version "${GITHUB_REF_NAME#v}"
+          npm test
+          npm run package
+
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         with:
           cosign-release: v3.1.3
