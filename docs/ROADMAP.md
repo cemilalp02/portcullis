@@ -22,7 +22,7 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 | **9** | Deeper analysis | Confusable (homoglyph) detection; analysis of the repository scripts that hooks and tasks run | ✅ Done (2026-10-17) — look-alike letters folded before rules run; scripts run by hooks, tasks and lifecycle commands analysed (`run-script`, `run-program`, PCL-EXE-015/016); 77 rules; on the development set 450 more scripts analysed and three new findings, all real installer downloads in dev container scripts |
 | **10** | Precision and website | Precision of findings below `high`; project website ready for GitHub Pages | ✅ Done (2026-10-17) — estimated precision below `high` 76% → 84% (wrong findings about 1,290 → 740), no change at or above `high`; static website and Pages workflow, live once Pages and Actions are enabled |
 | **11** | Editor | VS Code extension showing findings in the editor | ✅ Done (2026-10-17) — `editors/vscode/`: problems with exact ranges, rule links, rescans on save, Restricted Mode; unit tests and an end-to-end test in an isolated VS Code; the `.vsix` ships with releases under the signed checksums. Marketplace publishing needs a publisher account |
-| **12** | Release | Fourth held-out set with the v0.2 rules, `v0.2.0` | |
+| **12** | Release | Fourth held-out set with the v0.2 rules, `v0.2.0` | ✅ Measured (2026-10-17) — 1.20% (6 of 500) with the v0.2.0 rules frozen at `1a31198`; release prepared, tagged with the owner's approval |
 
 ## Working agreement
 

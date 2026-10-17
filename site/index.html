@@ -79,7 +79,7 @@
   <section class="facts" aria-label="Facts">
     <div class="wrap facts__grid">
       <div><b>77</b><span>rules, each with positive and negative tests</span></div>
-      <div><b>0.8%</b><span>false positives on 500 repositories it was not tuned on</span></div>
+      <div><b>1.2%</b><span>false positives on 500 repositories it was not tuned on</span></div>
       <div><b>1.5 s</b><span>to scan a repository of 100,000 files</span></div>
       <div><b>0</b><span>network requests: nothing leaves your machine</span></div>
     </div>
@@ -156,7 +156,7 @@
         <h3>Pull requests</h3>
         <p>Findings on the diff and in code scanning. Settings come from the base commit, so a pull request cannot weaken its own check.</p>
 <pre class="snippet"><code><span class="k">- uses:</span> actions/checkout@v7
-<span class="k">- uses:</span> cemilalp02/portcullis@v0.1.0</code></pre>
+<span class="k">- uses:</span> cemilalp02/portcullis@v0.2.0</code></pre>
       </div>
       <div>
         <h3>VS Code</h3>
@@ -193,7 +193,7 @@
     </header>
     <table class="measure">
       <tbody>
-        <tr><th scope="row">False positives at or above <code>high</code></th><td>0.8%, 1.4% and 1.6% of repositories in three held-out sets of 500 popular repositories, each scanned with rules frozen before the set was drawn</td></tr>
+        <tr><th scope="row">False positives at or above <code>high</code></th><td>1.2% with the v0.2 rules; 0.8%, 1.4% and 1.6% before. Each a held-out set of 500 popular repositories, scanned with rules frozen before the set was drawn</td></tr>
         <tr><th scope="row">Known attacks</th><td>63 of 63 expected detections in a defanged corpus of 33 attacks</td></tr>
         <tr><th scope="row">Findings below <code>high</code></th><td>84% correct, estimated from a random sample of the development set</td></tr>
         <tr><th scope="row">Speed</th><td>65 ms for 5,000 files, 1.5 s for 100,000</td></tr>
@@ -211,7 +211,7 @@
       <div>
         <h3>Release binaries</h3>
         <p>Linux, macOS and Windows, amd64 and arm64, on the <a href="https://github.com/cemilalp02/portcullis/releases">releases page</a>. Every archive has SLSA build provenance, and the checksums are signed with Sigstore.</p>
-        <div class="cmd"><code>gh attestation verify portcullis_0.1.0_linux_amd64.tar.gz --repo cemilalp02/portcullis</code><button type="button" class="copy" aria-label="Copy command">Copy</button></div>
+        <div class="cmd"><code>gh attestation verify portcullis_0.2.0_linux_amd64.tar.gz --repo cemilalp02/portcullis</code><button type="button" class="copy" aria-label="Copy command">Copy</button></div>
       </div>
       <div>
         <h3>From source</h3>

@@ -25,7 +25,7 @@ approved agent context with `context.lock` so silent changes fail CI.
   <img alt="Terminal: portcullis scan finds a hook that pipes a download into bash and 30 invisible Unicode Tag characters hiding a command, exits 1; a scan of a clean repository finds nothing and exits 0" src="docs/assets/demo.gif" width="880">
 </p>
 
-> **First release, v0.1.0.** Reports of missed detections and false alarms are very welcome —
+> **v0.2.0.** Reports of missed detections and false alarms are very welcome —
 > see the issue templates and [SECURITY.md](SECURITY.md).
 
 ## Why
@@ -44,7 +44,7 @@ provenance and the checksums are signed with Sigstore, so you can check that a d
 built by this repository's release workflow before you run it:
 
 ```bash
-gh attestation verify portcullis_0.1.0_linux_amd64.tar.gz --repo cemilalp02/portcullis
+gh attestation verify portcullis_0.2.0_linux_amd64.tar.gz --repo cemilalp02/portcullis
 ```
 
 ([verifying with cosign instead](docs/RELEASING.md#verifying-a-release)). Or build it with Go
@@ -74,7 +74,7 @@ In CI, add the GitHub Action ([full guide](docs/GITHUB_ACTION.md)):
 
 ```yaml
       - uses: actions/checkout@v7
-      - uses: cemilalp02/portcullis@v0.1.0
+      - uses: cemilalp02/portcullis@v0.2.0
 ```
 
 At a release tag the action downloads the release binary and runs it only after verifying its
@@ -138,7 +138,7 @@ Portcullis is a pattern and structure scanner. A malicious instruction written i
 polite language without known markers can get past it; it reduces risk, it does not remove it.
 The [threat model](docs/THREAT_MODEL.md) lists these limits explicitly, and
 [validation](docs/VALIDATION.md) publishes how often it is wrong: on 1,000 popular repositories
-it was tuned on and three held-out sets of 500 it was not, 0.2%, 1.6%, 1.4% and 0.8% of
+it was tuned on and four held-out sets of 500 it was not, 0.2%, 1.6%, 1.4%, 0.8% and 1.2% of
 repositories had a false finding at or above `high`.
 
 ## Documentation
