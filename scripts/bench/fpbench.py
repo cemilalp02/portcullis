@@ -19,6 +19,8 @@ import argparse
 import concurrent.futures
 import json
 import os
+import posixpath
+import re
 import subprocess
 import sys
 import time
@@ -32,7 +34,8 @@ AGENT_PATHS = {
 }
 
 # Sparse-checkout patterns: every file a Portcullis target can match
-# (rules/targets.yaml). Skill companions are added in a second pass.
+# (rules/targets.yaml). Skill companions are added in a second pass, the
+# scripts that hooks and tasks run in a third (run_scripts).
 SPARSE = [
     "**/CLAUDE.md", "**/CLAUDE.local.md", "**/AGENTS.md", "**/GEMINI.md", "**/SKILL.md",
     "**/.claude/", "**/.cursorrules", "**/.cursor/rules/", "**/.github/copilot-instructions.md",
@@ -152,6 +155,43 @@ def cmd_select(a):
     print(f"wrote {len(picked)} repositories to {a.out}", file=sys.stderr)
 
 
+# Third fetch pass: repository scripts that hooks, tasks and lifecycle
+# commands run (the run-script target). A loose superset of what the scanner
+# resolves (internal/engine/scripts.go): it only decides what to download.
+CONFIG_NAMES = {"settings.json", "settings.local.json", "tasks.json", "devcontainer.json",
+                ".devcontainer.json", "package.json", "mcp.json", ".mcp.json"}
+SCRIPT_RE = re.compile(r"[A-Za-z0-9_${}./@-]+[.](?:sh|bash|zsh|py|js|mjs|cjs|ts|ps1|psm1|bat|cmd|rb|pl)(?![A-Za-z0-9_])")
+PROJECT_VAR_RE = re.compile(r"^[$][{]?(?:CLAUDE_PROJECT_DIR|GEMINI_PROJECT_DIR|workspaceFolder|workspaceRoot|"
+                            r"localWorkspaceFolder|containerWorkspaceFolder|PWD|INIT_CWD)[}]?/")
+
+
+def run_scripts(d):
+    out = set()
+    for root, dirs, files in os.walk(d):
+        dirs[:] = [x for x in dirs if x != ".git"]
+        for name in files:
+            if name not in CONFIG_NAMES:
+                continue
+            path = os.path.join(root, name)
+            try:
+                text = open(path, encoding="utf-8", errors="replace").read(1 << 20)
+            except OSError:
+                continue
+            rel = os.path.relpath(root, d).replace(os.sep, "/")
+            bases = [rel]
+            if rel != "." and posixpath.basename(rel).startswith("."):
+                bases = [posixpath.dirname(rel) or ".", rel]
+            for tok in SCRIPT_RE.findall(text.replace(chr(92) + chr(92), "/").replace(chr(92), "/")):
+                tok = PROJECT_VAR_RE.sub("", tok)
+                if tok.startswith("/") or "$" in tok or "{" in tok:
+                    continue
+                for b in bases:
+                    q = posixpath.normpath(posixpath.join(b, tok))
+                    if not q.startswith(".."):
+                        out.add("/" + q)
+    return sorted(out)
+
+
 def read_repos(path):
     with open(path, encoding="utf-8") as f:
         return [line.rstrip("\n").split("\t")[:2] for line in f if line.strip() and not line.startswith("#")]
@@ -185,6 +225,11 @@ def fetch_one(cache, repo, sha):
     if skills:
         with open(os.path.join(d, ".git", "info", "sparse-checkout"), "a", encoding="utf-8") as f:
             f.write("\n".join(f"/{s}/" for s in skills) + "\n")
+        git(d, "checkout", "-q", "FETCH_HEAD")
+    scripts = run_scripts(d)
+    if scripts:
+        with open(os.path.join(d, ".git", "info", "sparse-checkout"), "a", encoding="utf-8") as f:
+            f.write("\n".join(scripts) + "\n")
         git(d, "checkout", "-q", "FETCH_HEAD")
     open(done, "w").close()
     return repo, "ok"
