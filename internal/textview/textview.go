@@ -1,6 +1,7 @@
 // Package textview builds the normalised view of a document used by pattern
-// rules (ADR-0005): invisible characters removed, NFKC, case-folded and
-// horizontal whitespace collapsed, with an offset map back to the raw text.
+// rules (ADR-0005): invisible characters removed, NFKC, case-folded,
+// horizontal whitespace collapsed and look-alike letters inside Latin words
+// replaced, with an offset map back to the raw text.
 package textview
 
 import (
@@ -70,7 +71,7 @@ func Normalize(s string) *View {
 		}
 		v = w
 	}
-	return v
+	return foldConfusables(v)
 }
 
 // caseless reports whether r belongs to a category without case (other

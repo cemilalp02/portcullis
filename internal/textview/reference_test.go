@@ -28,7 +28,7 @@ func normalizeReference(s string) *View {
 		}
 		v = w
 	}
-	return v
+	return foldConfusables(v)
 }
 
 func referenceOnce(s string) *View {
