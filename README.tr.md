@@ -84,6 +84,11 @@ sekmesinde ve iş özetinde görünür; her çalışma tek dosyalık bir HTML ra
 saklar. Pull request'lerde yapılandırma, baseline ve kilit dosyası taban commit'ten okunur;
 yani bir pull request kendisini inceleyen kontrolü gevşetemez.
 
+VS Code'da [Portcullis eklentisi](editors/vscode/README.md) bulguları düzenleme sırasında
+"Problems" olarak gösterir ve bir depoya güvenmeden önce, kısıtlı modda da çalışır. Marketplace'e
+çıkana kadar her sürüme eklenen `portcullis-vscode_*.vsix` dosyasını **Extensions: Install from
+VSIX…** komutuyla kurabilirsiniz.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/report-dark.png">
