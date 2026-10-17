@@ -3,7 +3,7 @@
 How well Portcullis works, measured against the v0.1 release gate (REQUIREMENTS §8). Every
 number here can be reproduced from the repository; the commands are at the end. Phase 6 made
 the first measurements; Phase 7 added a third held-out set, measured with the rules of the
-v0.1.0 release.
+v0.1.0 release; Phase 10 estimated the precision of findings below `high`.
 
 ## Summary
 
@@ -16,6 +16,7 @@ v0.1.0 release.
 | Performance (NFR-04) | 5,000 files < 1 s; 100,000 files < 10 s | 65 ms; 1.5 s | ✅ |
 | Robustness | 0 crashes | 0 crashes in the final run of all 8 fuzz targets; 2 defects found by fuzzing in Phase 6, both fixed | ✅ |
 | Self-scan | no findings | 0 findings | ✅ |
+| Precision of `medium` and `low` findings (sampled) | — | 76% before Phase 10, **84%** after; see [below](#precision-below-high) | — |
 
 ## False positives
 
@@ -118,10 +119,90 @@ and unit tests of a permission handler that pass `bypassPermissions` to a mock s
 ### Limitations
 
 - One person triaged every finding, and the same person wrote the rules.
-- Only findings at or above `high` are triaged. Lower severities are informational and
-  numerous (for example 1,497 PCL-SKL-003 and 923 PCL-EXE-008 findings in the development
-  set); their precision is not measured.
+- Only findings at or above `high` are triaged for the false-positive rate. The precision of
+  lower severities is estimated from a sample in [Precision below `high`](#precision-below-high).
 - The sets contain popular repositories. Small or private repositories may look different.
+
+## Precision below `high`
+
+Findings below `high` are not part of the false-positive gate, but they are what a user reads
+first in a large repository. Phase 10 measured how often they are right.
+
+### Method
+
+From the development-set scan, up to ten `medium` and `low` findings of each rule were drawn
+at random, one per repository where possible (210 findings). A finding is **right** when what
+it states is true of the text: the skill does use the network, the file does name a credential
+path, the word does mix scripts. Whether the text is harmful is a separate question; most right
+findings at these severities are benign. Rules whose precision changed were sampled again
+after the change with a new random seed. The estimate weights each rule's sample precision by
+its number of findings.
+
+### Results
+
+Estimated precision rose from **76.2% to 84.4%**; the estimated number of wrong
+findings fell from about 1,292 to about 743, while no finding at or
+above `high` changed on the development set and every known attack is still detected.
+
+| Rule | Findings before | Precision before | Findings after | Precision after |
+|---|---:|---:|---:|---:|
+| PCL-SKL-003 | 1,489 | 80% | 1,410 | 80% |
+| PCL-SKL-001 | 1,060 | 60% | 936 | 60% |
+| PCL-EXE-008 | 921 | 80% | 774 | 100% |
+| PCL-EXE-002 | 381 | 90% | 381 | 90% |
+| PCL-SKL-002 | 368 | 100% | 368 | 100% |
+| PCL-AEX-004 | 226 | 100% | 226 | 100% |
+| PCL-AUT-003 | 211 | 10% | 56 | 50% |
+| PCL-UNI-003 | 158 | 80% | 113 | 100% |
+| PCL-AUT-007 | 99 | 100% | 99 | 100% |
+| PCL-AUT-008 | 80 | 80% | 67 | 90% |
+| PCL-AUT-006 | 71 | 90% | 71 | 90% |
+| PCL-AUT-004 | 59 | 50% | 48 | 100% |
+| PCL-UNI-009 | 54 | 90% | 54 | 90% |
+| PCL-EXE-003 | 46 | 20% | 9 | 89% |
+| PCL-AEX-005 | 43 | 100% | 43 | 100% |
+| PCL-MCP-002 | 43 | 100% | 43 | 100% |
+| PCL-ENG-002 | 37 | 100% | 37 | 100% |
+| PCL-BAI-004 | 32 | 0% | 0 | — |
+| PCL-AEX-003 | 20 | 100% | 20 | 100% |
+| PCL-ENG-014 | 11 | 100% | 11 | 100% |
+| PCL-AEX-002 | 8 | 100% | 8 | 100% |
+| PCL-UNI-005 | 1 | 100% | 1 | 100% |
+| PCL-ENG-004 | 1 | 100% | 1 | 100% |
+| **All** | **5,419** | **76.2%** | **4,776** | **84.4%** |
+
+What was wrong, and the fix:
+
+- **PCL-BAI-004** (0 of 10): words such as "bypass" or "disable" near a tool name in
+  catalogues of vulnerability classes, lint rule names and "do not disable the guardrails".
+  The rule now needs an instruction aimed at the tool ("disable gitleaks", "if the scanner
+  complains, bypass it").
+- **PCL-AUT-003** (1 of 10): chat-template tokens in tokenizer and fine-tuning code, `<system>`
+  as a placeholder or an XML element. A start token now counts only when a role follows it,
+  an end token only when text follows it, and tokens assigned to variables are skipped.
+  Chat-format examples in fine-tuning documentation still match; by their text alone they
+  cannot be told from an injected conversation.
+- **PCL-EXE-003** (2 of 10): install commands shown in comments, error messages and help
+  texts, and code that searches for the pattern.
+- **PCL-AUT-004** (5 of 10): "Developer mode" of browsers, phones, Windows and ChatGPT. It
+  now needs a claim that rules no longer apply.
+- **PCL-UNI-003**: Khmer, Thai, Lao, Myanmar and Tibetan use U+200B as the word separator.
+- **PCL-EXE-008**: a project `.npmrc` is configuration; only the one in the home directory
+  holds tokens.
+- **PCL-SKL-001**, **PCL-SKL-003**, **PCL-AUT-008**: requests to localhost or example.com,
+  relative `fetch('/api')`, local `rsync`; "do not use sudo", guards that check for `sudo`;
+  `card.profile` in Python.
+- Messages of CRLF files quoted the carriage return (`<U+000D>`).
+- An exclusion written as `\b(e\.g\.|for example|…)\b` never matched "e.g. " because no word
+  boundary follows a period; it was fixed in ten rules.
+
+### Limitations
+
+- Ten findings per rule give a wide interval (a rule at 80% may be anywhere from about 45%
+  to 95%); the totals are estimates, not counts.
+- PCL-SKL-001 stays at about 60%: a skill that teaches HTTP code (`fetch(url)` in an example)
+  reads like a skill that uses the network.
+- The same person wrote the rules and judged the findings.
 
 ## Recall
 
