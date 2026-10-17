@@ -112,6 +112,7 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S25 | **Memory exhaustion** — many agent files near the size limit, analysed in parallel (64 files of 10 MB took 9.5 GB on 32 threads) | Workers share a 32 MiB budget of bytes under analysis; the same input peaks at 1.7 GB (`docs/VALIDATION.md`) |
 | S26 | Hidden text in an emoji tag sequence, which UNI-001 exempts so that the flags of Scotland or Wales are not reported | Only U+1F3F4 followed by three to six lowercase tag letters or digits and CANCEL TAG is exempt; longer runs or any other tag character are reported |
 | S27 | The GitHub Action runs a replaced or tampered release archive (compromised release asset, download redirect) | The action runs a downloaded binary only if `gh attestation verify` proves it was built by `release.yml` for that exact tag on a GitHub-hosted runner and its SHA-256 matches `checksums.txt`; any failure stops the job instead of falling back. Without a release archive it builds from its own source at the pinned ref (tested offline by `scripts/action/install_test.sh`) |
+| S28 | A forged git-crypt header makes Portcullis skip a file as encrypted | A file counts as encrypted only when no 16 readable characters (any script) follow the header; readable text behind a forged header is analysed like any other file (tested) |
 
 ## 8. Review cadence
 
