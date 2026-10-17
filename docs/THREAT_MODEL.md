@@ -72,9 +72,12 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
   comments). v0.1 scans the files agents load *automatically* or that execute automatically.
 - **L4 — Runtime content.** Web pages, MCP tool *responses* and files fetched at runtime are invisible to a static scan.
 - **L5 — Approval quality.** `context.lock` proves *no change since approval*, not that the approved content was safe.
-- **L6 — Indirection.** Scripts bundled with a skill are analysed (companion targets), but a
-  benign-looking hook that runs another repository script (`./scripts/setup.sh`)
-  is reported as `medium`, but the script's own content is not deeply analysed in v0.1.
+- **L6 — Indirection.** Scripts bundled with a skill are analysed (companion targets), and
+  so are the repository scripts that hooks, tasks and lifecycle commands name (`run-script`,
+  `run-program`).
+  Only one level is followed: a script that the hook's script runs in turn, a path assembled
+  at run time (`$DIR/$NAME.sh`) or a script outside the repository is not analysed; the hook
+  itself is still reported by PCL-AEX-004.
 - **L7 — Wording with a harmless twin.** To keep false positives under 2%, rules skip text
   that reads as documentation: short quoted phrases, descriptions of an attack class,
   negations, options tables, "do not tell the user that …" (which usually forbids a false
@@ -112,6 +115,8 @@ Portcullis itself could be attacked.** A security tool that over-promises is its
 | S25 | **Memory exhaustion** — many agent files near the size limit, analysed in parallel (64 files of 10 MB took 9.5 GB on 32 threads) | Workers share a 32 MiB budget of bytes under analysis; the same input peaks at 1.7 GB (`docs/VALIDATION.md`) |
 | S26 | Hidden text in an emoji tag sequence, which UNI-001 exempts so that the flags of Scotland or Wales are not reported | Only U+1F3F4 followed by three to six lowercase tag letters or digits and CANCEL TAG is exempt; longer runs or any other tag character are reported |
 | S27 | The GitHub Action runs a replaced or tampered release archive (compromised release asset, download redirect) | The action runs a downloaded binary only if `gh attestation verify` proves it was built by `release.yml` for that exact tag on a GitHub-hosted runner and its SHA-256 matches `checksums.txt`; any failure stops the job instead of falling back. Without a release archive it builds from its own source at the pinned ref (tested offline by `scripts/action/install_test.sh`) |
+| S29 | A hook runs a harmless-looking repository script that does the damage (`bash .claude/hooks/setup.sh`) | The script is read through `os.Root` (no path can leave the scan root) and analysed; PCL-EXE-015 (shell scripts) and PCL-EXE-016 (programs) report downloads or encoded commands it executes. At most 256 such scripts are read, sorted by path; the hook command itself is always reported by PCL-AEX-004 |
+| S30 | Look-alike letters from another script hide a word from pattern rules (`bаsh`, `ignоre`) | The normalised view folds them to Latin inside mixed words before rules run; PCL-UNI-009 reports the mixed word itself (tested, fuzzed against a reference implementation) |
 | S28 | A forged git-crypt header makes Portcullis skip a file as encrypted | A file counts as encrypted only when no 16 readable characters (any script) follow the header; readable text behind a forged header is analysed like any other file (tested) |
 
 ## 8. Review cadence

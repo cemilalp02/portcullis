@@ -195,6 +195,15 @@ Rules are compiled once (RE2). Per document:
   extensions below a directory that contains a `SKILL.md`: code becomes `skill-script`
   (family `script`), documents become `skill-doc` (family `instruction`). `discover` adds them
   after the main walk, without following links.
+- **Scripts run by configuration** — the targets with `run_by_config: true` (`run-script` for
+  shell scripts, `run-program` for programs, chosen by extension) have extensions instead of
+  patterns. After the configuration files are analysed, `engine.Scan`
+  takes the script paths named by their execution points (`engine/scripts.go`), resolves them
+  inside the scan root with `os.Root`, skips those already analysed and analyses the rest as
+  scripts. One level deep, at most 256 per scan.
+- **Look-alike letters** — the normalised view folds Cyrillic, Greek and Armenian letters that
+  look like Latin ones (the table in `textview/prose.go`) inside words that also contain Latin
+  letters (`textview/confusable.go`). Words in one script are unchanged.
 - **Unicode Tag runs** are decoded back to the ASCII text an LLM reads and shown through the
   `{decoded}` placeholder (PCL-UNI-001).
 

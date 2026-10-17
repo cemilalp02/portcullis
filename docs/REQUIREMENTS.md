@@ -78,7 +78,7 @@ the approved state so that silent changes are caught.
 
 ## 5. Scanned surface
 
-Portcullis recognises **16 target types** in two families (13 in v0.1; v0.2 added Gemini CLI commands and settings and VS Code workspace settings). File-name matching **MUST** be
+Portcullis recognises **16 target types** in two families (13 in v0.1; v0.2 added Gemini CLI commands and settings and VS Code workspace settings), plus the repository scripts that their commands run (§5.3). File-name matching **MUST** be
 case-insensitive, because agents on Windows and macOS read `claude.md` as `CLAUDE.md`.
 Every path matches **at any depth** (`apps/web/.vscode/tasks.json` counts like
 `.vscode/tasks.json`), because an agent or editor opened on a subfolder treats that folder
@@ -109,6 +109,15 @@ as the project root.
 | 14 | MCP configuration | `.mcp.json`, `**/mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | server `command`, `args`, `env`, `url` |
 | 15 | Gemini CLI settings | `.gemini/settings.json` | `mcpServers`, `hooks`, `tools.discoveryCommand` / `callCommand` |
 | 16 | VS Code workspace settings | `.vscode/settings.json` | settings that approve agent tools or terminal commands without asking, automatic tasks, MCP servers under `mcp` |
+
+### 5.3 Scripts run by configuration files
+
+Repository scripts named by the commands of §5.2 (`bash .claude/hooks/check.sh`,
+`"$CLAUDE_PROJECT_DIR"/.claude/hooks/x.py`, `node scripts/postinstall.js`) are analysed as the
+`run-script` target (shell scripts: `.sh`, `.bash`, `.zsh`, `.ps1`, `.psm1`, `.bat`, `.cmd`) or the
+`run-program` target (`.py`, `.js`, `.mjs`, `.cjs`, `.ts`, `.rb`, `.pl`), both of family `script`. Paths are resolved inside the scan root against the
+project directory and the configuration file's directory; only one level is followed and at
+most 256 scripts are read per scan.
 
 Target definitions are **data**, not code, so new agents can be supported by adding a
 definition and fixtures.

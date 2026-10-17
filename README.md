@@ -93,14 +93,14 @@ weaken the check that reviews it.
 
 ## What it finds
 
-75 rules: 60 detection rules in seven groups plus 15 input-integrity rules
+77 rules: 62 detection rules in seven groups plus 15 input-integrity rules
 ([catalogue](docs/RULES.md)).
 
 | Group | Examples |
 |---|---|
-| Invisible Unicode | Tag-character smuggling (hidden text is decoded in the report), Trojan Source bidi controls, zero-width splitting, terminal escapes |
+| Invisible Unicode | Tag-character smuggling (hidden text is decoded in the report), Trojan Source bidi controls, zero-width splitting, look-alike letters from other scripts, terminal escapes |
 | Authority | "ignore previous instructions", "do not tell the user", fake `<\|im_start\|>system` markers, `--dangerously-skip-permissions` |
-| Execution | `curl \| sh` in hooks and install scripts, encoded commands, reverse shells, credential-file access, secret exfiltration |
+| Execution | `curl \| sh` in hooks, install scripts and the repository scripts they run, encoded commands, reverse shells, credential-file access, secret exfiltration |
 | Scanner bait | text telling AI reviewers to stop, declare the file safe or refuse |
 | Auto-execution | Claude and Gemini CLI hooks, VS Code folder-open tasks and tool auto-approval, host-side dev container commands, `bypassPermissions`, auto-enabled MCP servers |
 | MCP | servers launched through a shell, unpinned packages, plain HTTP, literal secrets |

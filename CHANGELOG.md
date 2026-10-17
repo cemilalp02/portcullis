@@ -18,6 +18,24 @@ uses [Semantic Versioning](https://semver.org/).
   custom commands (`.gemini/commands/*.toml`) are scanned as instructions.
 - PCL-ENG-015: a git-crypt encrypted agent file is reported as not analysed instead of being
   matched as text. A forged header in front of readable text is analysed as usual.
+- Repository scripts that hooks, tasks, lifecycle commands and MCP servers run
+  (`bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/check.sh`, `node scripts/postinstall.js`) are read
+  and analysed as the new `run-script` (shell) and `run-program` (Python, JavaScript, Ruby,
+  Perl) targets, one level deep and at most 256 per scan, and are covered by `context.lock`.
+  PCL-EXE-015 (critical) reports such a shell script that downloads or decodes code and
+  executes it; PCL-EXE-016 (critical) a program that passes such a command to a shell or
+  executes decoded content. A message that only shows the command to the user is not
+  reported.
+- Look-alike letters: the normalised view folds Cyrillic, Greek and Armenian letters that look
+  like Latin ones back to Latin inside words that mix scripts, so a hook running `bаsh`
+  (Cyrillic а) is reported like `bash`. PCL-UNI-009 also covers Greek and Armenian look-alikes.
+
+### Changed
+
+- PCL-EXE-003, PCL-EXE-005 and PCL-EXE-008 apply to skill scripts only; scripts run by hooks
+  are covered by PCL-EXE-015, PCL-EXE-016 and the network rules.
+- `context.lock` written by v0.1 does not list the scripts that hooks run; `portcullis verify`
+  reports them as new files until the lock is written again.
 
 ### Fixed
 
@@ -27,6 +45,8 @@ uses [Semantic Versioning](https://semver.org/).
 - PCL-AUT-001 no longer reports a catalogue of injection kinds that names the phrase next to a
   variant of itself ("이전 지시를 무시 / ignore previous instructions") or a short quoted mention
   in Korean or Japanese (false findings of the third held-out set).
+- Two patterns of one rule matching the same text are reported once (a `curl … | sh` line was
+  reported twice by PCL-EXE-001's sibling patterns).
 
 ## [0.1.0] - 2026-10-17
 

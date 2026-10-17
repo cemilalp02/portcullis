@@ -80,7 +80,7 @@ tests:
 
 At least one positive and one negative case are required (FR-21), except for `builtin` rules,
 which are tested in Go. A case may set `target: <id>` to analyse the content as a target type that
-is not matched by path, such as the companion targets `skill-script` and `skill-doc`. Invisible characters are
+is not matched by path, such as the companion targets `skill-script` and `skill-doc` or `run-script` and `run-program`. Invisible characters are
 written with YAML double-quoted escapes (`"\u200B"`, `"\U000E0041"`) so fixtures stay
 reviewable. Large or multi-file cases go in `testdata/corpus/` instead; inline cases are the
 minimum contract. `go test ./...` runs every inline case automatically.
