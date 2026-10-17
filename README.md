@@ -15,8 +15,9 @@
 <p align="center"><b>English</b> · <a href="README.tr.md">Türkçe</a></p>
 
 **Portcullis** scans the files an AI coding agent reads or runs automatically — `CLAUDE.md`,
-`AGENTS.md`, `SKILL.md`, `.cursorrules`, Copilot instructions, `.claude/settings.json` hooks,
-`.mcp.json`, `.vscode/tasks.json`, dev-container and npm lifecycle commands — **before** the agent
+`AGENTS.md`, `SKILL.md`, `.cursorrules`, Copilot instructions and agents, `.claude/settings.json` hooks,
+Gemini CLI settings, `.mcp.json`, VS Code tasks and settings, dev-container and npm lifecycle
+commands — **before** the agent
 sees them. It runs fully offline, annotates pull requests, feeds GitHub code scanning, and pins
 approved agent context with `context.lock` so silent changes fail CI.
 
@@ -92,7 +93,7 @@ weaken the check that reviews it.
 
 ## What it finds
 
-70 rules: 56 detection rules in seven groups plus 14 input-integrity rules
+75 rules: 60 detection rules in seven groups plus 15 input-integrity rules
 ([catalogue](docs/RULES.md)).
 
 | Group | Examples |
@@ -101,10 +102,10 @@ weaken the check that reviews it.
 | Authority | "ignore previous instructions", "do not tell the user", fake `<\|im_start\|>system` markers, `--dangerously-skip-permissions` |
 | Execution | `curl \| sh` in hooks and install scripts, encoded commands, reverse shells, credential-file access, secret exfiltration |
 | Scanner bait | text telling AI reviewers to stop, declare the file safe or refuse |
-| Auto-execution | Claude hooks, VS Code folder-open tasks, host-side dev container commands, `bypassPermissions`, auto-enabled MCP servers |
+| Auto-execution | Claude and Gemini CLI hooks, VS Code folder-open tasks and tool auto-approval, host-side dev container commands, `bypassPermissions`, auto-enabled MCP servers |
 | MCP | servers launched through a shell, unpinned packages, plain HTTP, literal secrets |
 | Skills | network use the description does not mention, unrestricted `allowed-tools: Bash`, `sudo` |
-| Input integrity | padded files, UTF-16 encoding, duplicate JSON keys, links leaving the repository |
+| Input integrity | padded files, UTF-16 encoding, encrypted agent files, duplicate JSON keys, links leaving the repository |
 
 Every rule ships positive and negative examples, and a defanged corpus of 33 known attacks
 (100% detected) and 10 clean repositories (no false alarms) runs in the test suite.

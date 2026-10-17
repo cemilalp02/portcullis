@@ -16,8 +16,8 @@
 
 **Portcullis**, bir yapay zekâ kodlama ajanının okuduğu ya da kendiliğinden çalıştırdığı
 dosyaları — `CLAUDE.md`, `AGENTS.md`, `SKILL.md`, `.cursorrules`, Copilot talimatları,
-`.claude/settings.json` hook'ları, `.mcp.json`, `.vscode/tasks.json`, dev container ve npm yaşam
-döngüsü komutları — ajan onları görmeden **önce** tarar. Tamamen çevrimdışı çalışır, pull
+`.claude/settings.json` hook'ları, Gemini CLI ayarları, `.mcp.json`, VS Code görevleri ve ayarları,
+dev container ve npm yaşam döngüsü komutları — ajan onları görmeden **önce** tarar. Tamamen çevrimdışı çalışır, pull
 request'lere not düşer, GitHub code scanning'e sonuç gönderir ve onaylanan ajan bağlamını
 `context.lock` ile sabitler; böylece sessiz değişiklikler CI'ı durdurur.
 
@@ -94,7 +94,7 @@ yani bir pull request kendisini inceleyen kontrolü gevşetemez.
 
 ## Neleri bulur?
 
-70 kural: yedi grupta 56 tespit kuralı ve 14 girdi bütünlüğü kuralı
+75 kural: yedi grupta 60 tespit kuralı ve 15 girdi bütünlüğü kuralı
 ([katalog](docs/RULES.md), İngilizce).
 
 | Grup | Örnekler |
@@ -103,10 +103,10 @@ yani bir pull request kendisini inceleyen kontrolü gevşetemez.
 | Yetki | "önceki talimatları yok say", "kullanıcıya söyleme", sahte `<\|im_start\|>system` işaretleri, `--dangerously-skip-permissions` |
 | Çalıştırma | hook'larda ve kurulum betiklerinde `curl \| sh`, kodlanmış komutlar, ters kabuklar, kimlik bilgisi dosyalarına erişim, sır sızdırma |
 | Tarayıcı yemi | yapay zekâ incelemecilerine durmasını, dosyayı güvenli ilan etmesini ya da reddetmesini söyleyen metinler |
-| Kendiliğinden çalışma | Claude hook'ları, klasör açılınca çalışan VS Code görevleri, ana makinede çalışan dev container komutları, `bypassPermissions`, kendiliğinden açılan MCP sunucuları |
+| Kendiliğinden çalışma | Claude ve Gemini CLI hook'ları, klasör açılınca çalışan VS Code görevleri ve araçların onaysız çalıştırılması, ana makinede çalışan dev container komutları, `bypassPermissions`, kendiliğinden açılan MCP sunucuları |
 | MCP | kabuk üzerinden başlatılan sunucular, sürümü sabitlenmemiş paketler, düz HTTP, açık yazılmış sırlar |
 | Skill'ler | açıklamada geçmeyen ağ kullanımı, sınırsız `allowed-tools: Bash`, `sudo` |
-| Girdi bütünlüğü | şişirilmiş dosyalar, UTF-16 kodlama, yinelenen JSON anahtarları, depodan çıkan bağlantılar |
+| Girdi bütünlüğü | şişirilmiş dosyalar, UTF-16 kodlama, şifreli ajan dosyaları, yinelenen JSON anahtarları, depodan çıkan bağlantılar |
 
 Her kural olumlu ve olumsuz örneklerle gelir; 33 bilinen saldırının zararsızlaştırılmış
 örnekleri (%100 yakalanır) ve 10 temiz depo (yanlış alarm yok) test paketinde çalışır.
