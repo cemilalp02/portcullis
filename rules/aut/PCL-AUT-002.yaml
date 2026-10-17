@@ -42,7 +42,7 @@ match:
     - '(不要|别|不准|切勿)让用户(知道|发现|察觉|看到)'
     - '(瞒着|背着)用户'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
     # rules that forbid acting behind the user's back
     - '\b(never|do not|don''?t|must not|should not|avoid|not)\b[^.!?\n]{0,80}\bwithout\s+(telling|informing|notifying|alerting|asking)\s+the\s+user\b'
     - '\b(do not|don''?t|never|must not|should not|not)\s+(silently|quietly|secretly|covertly)\b'

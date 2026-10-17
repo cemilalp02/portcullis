@@ -1,6 +1,7 @@
 # Build output
 /bin/
 /dist/
+/_site/
 
 # Test and coverage artefacts
 coverage.out

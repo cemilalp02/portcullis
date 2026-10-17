@@ -30,6 +30,10 @@ uses [Semantic Versioning](https://semver.org/).
   like Latin ones back to Latin inside words that mix scripts, so a hook running `bаsh`
   (Cyrillic а) is reported like `bash`. PCL-UNI-009 also covers Greek and Armenian look-alikes.
 
+- Project website (`site/`, published by `.github/workflows/pages.yml` to GitHub Pages): a
+  single static page set like the HTML report, with no external resources and a strict
+  Content-Security-Policy; `scripts/site/build.sh` assembles it locally.
+
 ### Changed
 
 - PCL-EXE-003, PCL-EXE-005 and PCL-EXE-008 apply to skill scripts only; scripts run by hooks
@@ -45,6 +49,16 @@ uses [Semantic Versioning](https://semver.org/).
 - PCL-AUT-001 no longer reports a catalogue of injection kinds that names the phrase next to a
   variant of itself ("이전 지시를 무시 / ignore previous instructions") or a short quoted mention
   in Korean or Japanese (false findings of the third held-out set).
+- Precision of findings below `high` rose from about 76% to 84% on a sample of the
+  development set (docs/VALIDATION.md): PCL-BAI-004 needs an instruction aimed at a security
+  tool; PCL-AUT-003 skips chat-template tokens in tokenizer and training code and XML
+  elements; PCL-EXE-003 skips commands shown in comments and messages; PCL-AUT-004 no longer
+  treats the "Developer mode" of browsers and operating systems as a jailbreak; PCL-UNI-003
+  accepts U+200B as the word separator of Khmer, Thai, Lao, Myanmar and Tibetan; PCL-EXE-008
+  reports only the home-directory `.npmrc`; PCL-SKL-001 ignores localhost, example.com,
+  relative URLs and local `rsync`; PCL-SKL-003 ignores "do not use sudo" and checks for it.
+- Messages no longer quote the carriage return of CRLF files.
+- The "e.g." exclusion of ten rules never matched (no word boundary after a period).
 - Two patterns of one rule matching the same text are reported once (a `curl … | sh` line was
   reported twice by PCL-EXE-001's sibling patterns).
 

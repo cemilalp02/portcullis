@@ -20,7 +20,7 @@ match:
     - '\b(follow|execute|run|obey|carry out)\s+(the\s+)?(decoded|encoded|base64|hex-encoded|hidden)\s+(instructions?|text|string|content|payload|commands?|steps?)\b'
   none:
     - '\b(never|do not|don''?t|must not|should not)\s+(follow|execute|run|obey)\b'
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|attacks?|injection)\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|attacks?|injection)\b'
 tests:
   positive:
     - file: AGENTS.md

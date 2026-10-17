@@ -15,9 +15,11 @@ remediation: >
 message: "Shell start-up file change \"{match}\""
 match:
   any:
-    - '\b(write|add|append|insert|modify|edit|overwrite|update|put)\b.{0,60}(\.bashrc|\.zshrc|\.bash_profile|\.zprofile|\.profile\b|powershell_profile|\$profile\b)'
+    - '\b(write|add|append|insert|modify|edit|overwrite|update|put)\b.{0,60}(\.bashrc|\.zshrc|\.bash_profile|\.zprofile|[\s"''`/~]\.profile\b|powershell_profile|\$profile\b)'
   none:
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|prevent|protect(s|ion)? against|attacks?|injection|never (follow|obey))\b'
+    # reloading the file is not changing it
+    - '\bupdate\s+(the|your)\s+(shell|session|environment)\b'
 tests:
   positive:
     - file: CLAUDE.md
@@ -25,3 +27,8 @@ tests:
   negative:
     - file: CLAUDE.md
       content: "Shell completion docs live in docs/shell.md.\n"
+    - file: scripts/report.py
+      target: skill-script
+      content: "lines.append(f\"Profile: {card.profile}\")\n"
+    - file: CLAUDE.md
+      content: "Update the shell with the new variables using `source ~/.zshrc`\n"

@@ -72,3 +72,12 @@ cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 sha256sum --ignore-missing -c checksums.txt
 ```
+
+## Website
+
+The project website is the static page in `site/`. `scripts/site/build.sh` assembles it with
+the fonts of the HTML report and the images in `docs/assets/` into `_site/`; serve that
+directory with any static file server to preview it. `.github/workflows/pages.yml` publishes it
+on every change to `main`. It needs, once, **Settings → Pages → Source: GitHub Actions**, and
+GitHub Actions able to start jobs. The page loads nothing from other hosts;
+`internal/archtest` checks that every file it refers to is published.

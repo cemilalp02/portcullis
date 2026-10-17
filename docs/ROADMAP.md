@@ -20,7 +20,7 @@ phase starts. Skipping gates is how security tools end up noisy and unused.
 |---|---|---|---|
 | **8** | Coverage | Gemini CLI and VS Code settings, Copilot agents, Gemini commands; encrypted files; fixes for the third held-out set | ✅ Done (2026-10-17) — 5 new rules (75 in total), 3 new target types; no new finding at or above `high` on the 1,000-repository development set |
 | **9** | Deeper analysis | Confusable (homoglyph) detection; analysis of the repository scripts that hooks and tasks run | ✅ Done (2026-10-17) — look-alike letters folded before rules run; scripts run by hooks, tasks and lifecycle commands analysed (`run-script`, `run-program`, PCL-EXE-015/016); 77 rules; on the development set 450 more scripts analysed and three new findings, all real installer downloads in dev container scripts |
-| **10** | Precision and website | Precision of findings below `high`; project website ready for GitHub Pages | |
+| **10** | Precision and website | Precision of findings below `high`; project website ready for GitHub Pages | ✅ Done (2026-10-17) — estimated precision below `high` 76% → 84% (wrong findings about 1,290 → 740), no change at or above `high`; static website and Pages workflow, live once Pages and Actions are enabled |
 | **11** | Editor | VS Code extension showing findings in the editor | |
 | **12** | Release | Fourth held-out set with the v0.2 rules, `v0.2.0` | |
 

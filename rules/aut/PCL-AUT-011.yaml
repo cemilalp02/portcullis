@@ -19,7 +19,7 @@ match:
     - '\b(always|whenever|every time|each time|in (every|each|all))\b[^.\n]{0,100}\b(add|insert|include|prepend|append|put|inject|place)\b[^.\n]{0,120}(\bcurl\b[^\n]{0,80}\|\s*(sudo\s+)?(ba|z|da)?sh\b|\bwget\b[^\n]{0,80}\|\s*(sudo\s+)?(ba|z|da)?sh\b|\beval\s*\(|\bexec\s*\(|\batob\s*\(|\bbase64\s+(-d|--decode)\b|frombase64string|\b(iex|invoke-expression)\b|child_process|\bnew\s+function\s*\()'
   none:
     - '\b(never|do not|don''?t|must not|should not|avoid)\s+(add|insert|include|use|put)\b'
-    - '\b(e\.g\.|for example|such as|example of|detect(s|ed|ion)?|attacks?|injection)\b'
+    - '\be\.g\.|\b(for example|such as|example of|detect(s|ed|ion)?|attacks?|injection)\b'
 tests:
   positive:
     - file: .cursor/rules/docker.mdc
