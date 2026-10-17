@@ -58,6 +58,13 @@ targets:
       - "**/.github/copilot-instructions.md"
       - "**/.github/instructions/**/*.instructions.md"
       - "**/.github/prompts/**/*.prompt.md"
+      - "**/.github/agents/**/*.md"
+      - "**/.github/chatmodes/**/*.chatmode.md"
+
+  - id: gemini-commands
+    title: Gemini CLI custom command
+    family: instruction
+    patterns: ["**/.gemini/commands/**/*.toml"]
 
   - id: other-agent-rules
     title: Windsurf / Cline rules
@@ -71,6 +78,20 @@ targets:
     format: jsonc
     extractor: claude_settings
     patterns: ["**/.claude/settings.json", "**/.claude/settings.local.json"]
+
+  - id: gemini-settings
+    title: Gemini CLI settings
+    family: config
+    format: jsonc
+    extractor: gemini_settings
+    patterns: ["**/.gemini/settings.json"]
+
+  - id: vscode-settings
+    title: VS Code workspace settings
+    family: config
+    format: jsonc
+    extractor: vscode_settings
+    patterns: ["**/.vscode/settings.json"]
 
   - id: vscode-tasks
     title: VS Code tasks

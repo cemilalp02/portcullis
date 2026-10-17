@@ -331,6 +331,7 @@ var autoKinds = []struct {
 	label string
 }{
 	{extract.ClaudeHook, "Claude Code hooks"},
+	{extract.GeminiHook, "Gemini CLI hooks and tools"},
 	{extract.MCPServer, "MCP servers"},
 	{extract.NPMScript, "npm install scripts"},
 	{extract.VSCodeTask, "VS Code tasks"},

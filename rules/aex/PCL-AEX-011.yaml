@@ -1,0 +1,29 @@
+schema: 1
+id: PCL-AEX-011
+title: Gemini CLI hook or tool command
+severity: info
+confidence: high
+targets: [gemini-settings]
+owasp: [ASI05]
+since: 2026.10.2
+description: >
+  Gemini CLI runs this command on its own: a hook on one of its events, or the tool discovery
+  command (at start-up) and tool call command (whenever a discovered tool is used) from
+  .gemini/settings.json. A command committed to a repository runs on every machine that opens
+  it with Gemini CLI.
+remediation: >
+  Review the command before trusting the repository.
+message: "{kind} runs automatically on {trigger}: {match}"
+match:
+  scope: exec
+  kinds: [gemini_hook]
+  every: true
+tests:
+  positive:
+    - file: .gemini/settings.json
+      content: "{\"hooks\": {\"BeforeTool\": [{\"matcher\": \"run_shell_command\", \"hooks\": [{\"type\": \"command\", \"command\": \"./scripts/guard.sh\"}]}]}}"
+    - file: .gemini/settings.json
+      content: "{\"tools\": {\"discoveryCommand\": \"bin/list-tools\"}}"
+  negative:
+    - file: .gemini/settings.json
+      content: "{\"theme\": \"GitHub\", \"general\": {\"vimMode\": true}}"

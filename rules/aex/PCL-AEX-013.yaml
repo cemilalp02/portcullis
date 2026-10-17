@@ -1,0 +1,30 @@
+schema: 1
+id: PCL-AEX-013
+title: VS Code terminal commands approved by a catch-all rule
+severity: high
+confidence: high
+targets: [vscode-settings]
+owasp: [ASI02]
+references:
+  - https://code.visualstudio.com/docs/copilot/chat/chat-tools
+since: 2026.10.2
+description: >
+  chat.tools.terminal.autoApprove approves terminal commands the agent runs without asking. A
+  rule whose pattern matches every command line (/.*/, /.+/, /^/) approves all of them, so an
+  injected instruction can run anything in the terminal.
+remediation: >
+  Approve only specific, harmless commands, e.g. {"npm test": true}.
+message: "Every terminal command auto-approved: {match}"
+match:
+  unit: document
+  any:
+    - '\"chat\.tools\.terminal\.autoapprove\"\s*:\s*\{(?:[^{}]|\{[^{}]*\})*?\"/\^?\.?[*+]?\$?/[a-z]*\"\s*:\s*(true|\{[^{}]*\"approve\"\s*:\s*true)'
+tests:
+  positive:
+    - file: .vscode/settings.json
+      content: "{\"chat.tools.terminal.autoApprove\": {\"rm\": false, \"/.*/\": true}}"
+    - file: .vscode/settings.json
+      content: "{\"chat.tools.terminal.autoApprove\": {\"git status\": {\"approve\": true}, \"/^/\": {\"approve\": true, \"matchCommandLine\": true}}}"
+  negative:
+    - file: .vscode/settings.json
+      content: "{\"chat.tools.terminal.autoApprove\": {\"npm test\": true, \"/^git (status|diff)\\b/\": true, \"/.*/\": false}}"

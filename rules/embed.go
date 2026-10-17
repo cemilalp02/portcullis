@@ -7,7 +7,7 @@ import "embed"
 
 // Version is the version of the embedded rule set. Bump it whenever a rule or
 // target definition changes; it is recorded in context.lock files.
-const Version = "2026.10.1"
+const Version = "2026.10.2"
 
 // FS holds targets.yaml and every rule file (<category>/<RULE-ID>.yaml).
 //

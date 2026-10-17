@@ -1,6 +1,6 @@
 // Package extract finds the commands a configuration file makes run without
-// asking: Claude Code hooks, VS Code folder-open tasks, dev container
-// lifecycle commands, npm install scripts and MCP server launchers
+// asking: Claude Code and Gemini CLI hooks, VS Code folder-open tasks, dev
+// container lifecycle commands, npm install scripts and MCP server launchers
 // (ARCHITECTURE §5.5).
 package extract
 
@@ -21,10 +21,11 @@ const (
 	DevContainer Kind = "devcontainer"
 	NPMScript    Kind = "npm_script"
 	MCPServer    Kind = "mcp_server"
+	GeminiHook   Kind = "gemini_hook"
 )
 
 // Kinds lists all execution point kinds.
-var Kinds = []Kind{ClaudeHook, VSCodeTask, DevContainer, NPMScript, MCPServer}
+var Kinds = []Kind{ClaudeHook, VSCodeTask, DevContainer, NPMScript, MCPServer, GeminiHook}
 
 // ExecPoint is one command that runs automatically.
 type ExecPoint struct {
@@ -45,6 +46,8 @@ var registry = map[string]Func{
 	"devcontainer":    devcontainer,
 	"npm_package":     npmPackage,
 	"mcp_config":      mcpConfig,
+	"gemini_settings": geminiSettings,
+	"vscode_settings": vscodeSettings,
 }
 
 // Lookup returns the extractor registered under name.
@@ -93,28 +96,7 @@ func commandLine(n *jsonc.Node) (string, bool) {
 // claudeSettings: hooks.<Event>[].hooks[].command plus top-level settings
 // whose value is a command Claude Code runs on its own.
 func claudeSettings(root *jsonc.Node) []ExecPoint {
-	var out []ExecPoint
-	if hooks := root.Get("hooks"); hooks != nil && hooks.Kind == jsonc.Object {
-		for _, ev := range hooks.Members {
-			if ev.Value.Kind != jsonc.Array {
-				continue
-			}
-			for _, group := range ev.Value.Elems {
-				matcher, _ := group.Get("matcher").StringValue()
-				list := group.Get("hooks")
-				if list == nil || list.Kind != jsonc.Array {
-					continue
-				}
-				for _, h := range list.Elems {
-					if c := h.Get("command"); c != nil {
-						if cmd, ok := c.StringValue(); ok {
-							out = append(out, point(ClaudeHook, ev.Key, matcher, c, cmd))
-						}
-					}
-				}
-			}
-		}
-	}
+	out := hooks(root.Get("hooks"), ClaudeHook)
 	if sl := root.Get("statusLine"); sl != nil {
 		if c := sl.Get("command"); c != nil {
 			if cmd, ok := c.StringValue(); ok {
@@ -130,6 +112,65 @@ func claudeSettings(root *jsonc.Node) []ExecPoint {
 		}
 	}
 	return out
+}
+
+// hooks reads the hook format Claude Code and Gemini CLI share:
+// {"<Event>": [{"matcher": "...", "hooks": [{"type": "command", "command": "..."}]}]}.
+func hooks(n *jsonc.Node, k Kind) []ExecPoint {
+	if n == nil || n.Kind != jsonc.Object {
+		return nil
+	}
+	var out []ExecPoint
+	for _, ev := range n.Members {
+		if ev.Value.Kind != jsonc.Array {
+			continue
+		}
+		for _, group := range ev.Value.Elems {
+			matcher, _ := group.Get("matcher").StringValue()
+			list := group.Get("hooks")
+			if list == nil || list.Kind != jsonc.Array {
+				continue
+			}
+			for _, h := range list.Elems {
+				if c := h.Get("command"); c != nil {
+					if cmd, ok := c.StringValue(); ok {
+						out = append(out, point(k, ev.Key, matcher, c, cmd))
+					}
+				}
+			}
+		}
+	}
+	return out
+}
+
+// geminiSettings: Gemini CLI's .gemini/settings.json. Its MCP servers start
+// with the CLI, hooks run on its events, the tool discovery command runs at
+// start-up and the tool call command whenever a discovered tool is used
+// (tools.* in the current format, top-level keys in the old one).
+func geminiSettings(root *jsonc.Node) []ExecPoint {
+	out := mcpConfig(root)
+	out = append(out, hooks(root.Get("hooks"), GeminiHook)...)
+	for _, c := range []struct {
+		node    *jsonc.Node
+		trigger string
+	}{
+		{root.Get("tools").Get("discoveryCommand"), "tool discovery (start)"},
+		{root.Get("tools").Get("callCommand"), "tool call"},
+		{root.Get("toolDiscoveryCommand"), "tool discovery (start)"},
+		{root.Get("toolCallCommand"), "tool call"},
+	} {
+		if cmd, ok := c.node.StringValue(); ok {
+			out = append(out, point(GeminiHook, c.trigger, "", c.node, cmd))
+		}
+	}
+	return out
+}
+
+// vscodeSettings: MCP servers declared in workspace settings ("mcp":
+// {"servers": ...}), which VS Code supported before .vscode/mcp.json. The
+// settings that approve tools without asking are matched by rules.
+func vscodeSettings(root *jsonc.Node) []ExecPoint {
+	return mcpConfig(root.Get("mcp"))
 }
 
 // vscodeTasks: tasks with runOptions.runOn == "folderOpen", including the
@@ -256,7 +297,7 @@ func npmPackage(root *jsonc.Node) []ExecPoint {
 	return out
 }
 
-// mcpConfig: "mcpServers" (Claude, Cursor) or "servers" (VS Code). Local
+// mcpConfig: "mcpServers" (Claude, Cursor, Gemini CLI) or "servers" (VS Code). Local
 // servers are launched as command + args; remote ones are reported by URL.
 func mcpConfig(root *jsonc.Node) []ExecPoint {
 	var out []ExecPoint
@@ -276,9 +317,12 @@ func mcpConfig(root *jsonc.Node) []ExecPoint {
 					continue
 				}
 			}
-			if u := s.Get("url"); u != nil {
-				if url, ok := u.StringValue(); ok {
-					out = append(out, point(MCPServer, "remote server", m.Key, u, url))
+			for _, key := range []string{"url", "httpUrl"} { // httpUrl: Gemini CLI
+				if u := s.Get(key); u != nil {
+					if url, ok := u.StringValue(); ok {
+						out = append(out, point(MCPServer, "remote server", m.Key, u, url))
+						break
+					}
 				}
 			}
 		}
