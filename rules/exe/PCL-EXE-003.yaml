@@ -3,7 +3,7 @@ id: PCL-EXE-003
 title: Skill script pipes a download into a shell
 severity: medium
 confidence: high
-targets: [script]
+targets: [skill-script]
 owasp: [ASI04, ASI05]
 since: 2026.10.0
 description: >

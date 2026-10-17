@@ -38,7 +38,12 @@ type Def struct {
 	// patterns, it covers the files with one of Extensions that live in the
 	// directory (and subdirectories) of a file of the named target, e.g. the
 	// scripts bundled next to a SKILL.md.
-	CompanionOf string   `yaml:"companion_of"`
+	CompanionOf string `yaml:"companion_of"`
+	// RunByConfig makes this a target of the repository scripts that the
+	// commands of config targets run ("bash .claude/hooks/check.sh"), chosen
+	// by extension. Like a companion it has Extensions instead of Patterns;
+	// the scan finds these files by reading the commands (see engine.Scan).
+	RunByConfig bool     `yaml:"run_by_config"`
 	Extensions  []string `yaml:"extensions"`
 }
 
@@ -89,11 +94,21 @@ func Load(data []byte) (*Set, error) {
 		s.byID[d.ID] = d
 		s.defs = append(s.defs, d)
 	}
+	runBy := map[string]string{} // extension -> target ID
 	for _, d := range s.defs {
+		if d.RunByConfig {
+			for _, e := range d.Extensions {
+				e = strings.ToLower(e)
+				if other, dup := runBy[e]; dup {
+					errs = append(errs, fmt.Errorf("targets %q: extension %s is already run_by_config in %q", d.ID, e, other))
+				}
+				runBy[e] = d.ID
+			}
+		}
 		if d.CompanionOf == "" {
 			continue
 		}
-		if p := s.byID[d.CompanionOf]; p == nil || p.CompanionOf != "" {
+		if p := s.byID[d.CompanionOf]; p == nil || len(p.Patterns) == 0 {
 			errs = append(errs, fmt.Errorf("targets %q: companion_of %q is not a pattern-based target", d.ID, d.CompanionOf))
 		}
 	}
@@ -125,9 +140,12 @@ func validate(d *Def) error {
 	default:
 		return fmt.Errorf("unknown family %q", d.Family)
 	}
-	if d.CompanionOf != "" {
+	if d.CompanionOf != "" || d.RunByConfig {
+		if d.CompanionOf != "" && d.RunByConfig {
+			return errors.New("companion_of and run_by_config are exclusive")
+		}
 		if len(d.Patterns) > 0 || len(d.Extensions) == 0 {
-			return errors.New("companion targets have extensions instead of patterns")
+			return errors.New("companion and run_by_config targets have extensions instead of patterns")
 		}
 		for _, e := range d.Extensions {
 			if !strings.HasPrefix(e, ".") || strings.ContainsAny(e, "/*?[") {
@@ -137,7 +155,7 @@ func validate(d *Def) error {
 		return nil
 	}
 	if len(d.Extensions) > 0 {
-		return errors.New("extensions are only valid with companion_of")
+		return errors.New("extensions are only valid with companion_of or run_by_config")
 	}
 	if len(d.Patterns) == 0 {
 		return errors.New("at least one pattern is required")
@@ -165,6 +183,17 @@ func (s *Set) Companions(id string) []*Def {
 		}
 	}
 	return out
+}
+
+// RunByConfig returns the target of a script with the given name that a
+// config command runs, or nil if the name has none of their extensions.
+func (s *Set) RunByConfig(name string) *Def {
+	for _, d := range s.defs {
+		if d.RunByConfig && d.HasExtension(name) {
+			return d
+		}
+	}
+	return nil
 }
 
 // Match returns the first definition matching the '/'-separated relative

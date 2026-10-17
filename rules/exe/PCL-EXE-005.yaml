@@ -3,7 +3,7 @@ id: PCL-EXE-005
 title: Encoded command in instructions or skill scripts
 severity: high
 confidence: medium
-targets: [instruction, script]
+targets: [instruction, skill-script]
 owasp: [ASI05]
 since: 2026.10.0
 description: >

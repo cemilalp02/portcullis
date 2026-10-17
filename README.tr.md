@@ -94,14 +94,14 @@ yani bir pull request kendisini inceleyen kontrolü gevşetemez.
 
 ## Neleri bulur?
 
-75 kural: yedi grupta 60 tespit kuralı ve 15 girdi bütünlüğü kuralı
+77 kural: yedi grupta 62 tespit kuralı ve 15 girdi bütünlüğü kuralı
 ([katalog](docs/RULES.md), İngilizce).
 
 | Grup | Örnekler |
 |---|---|
-| Görünmez Unicode | Tag karakteriyle kaçakçılık (gizli metin raporda çözülerek gösterilir), Trojan Source yön karakterleri, sıfır genişlikli bölme, terminal kaçış dizileri |
+| Görünmez Unicode | Tag karakteriyle kaçakçılık (gizli metin raporda çözülerek gösterilir), Trojan Source yön karakterleri, sıfır genişlikli bölme, başka alfabelerden benzer görünen harfler, terminal kaçış dizileri |
 | Yetki | "önceki talimatları yok say", "kullanıcıya söyleme", sahte `<\|im_start\|>system` işaretleri, `--dangerously-skip-permissions` |
-| Çalıştırma | hook'larda ve kurulum betiklerinde `curl \| sh`, kodlanmış komutlar, ters kabuklar, kimlik bilgisi dosyalarına erişim, sır sızdırma |
+| Çalıştırma | hook'larda, kurulum betiklerinde ve bunların çalıştırdığı depo betiklerinde `curl \| sh`, kodlanmış komutlar, ters kabuklar, kimlik bilgisi dosyalarına erişim, sır sızdırma |
 | Tarayıcı yemi | yapay zekâ incelemecilerine durmasını, dosyayı güvenli ilan etmesini ya da reddetmesini söyleyen metinler |
 | Kendiliğinden çalışma | Claude ve Gemini CLI hook'ları, klasör açılınca çalışan VS Code görevleri ve araçların onaysız çalıştırılması, ana makinede çalışan dev container komutları, `bypassPermissions`, kendiliğinden açılan MCP sunucuları |
 | MCP | kabuk üzerinden başlatılan sunucular, sürümü sabitlenmemiş paketler, düz HTTP, açık yazılmış sırlar |

@@ -22,8 +22,17 @@ func loadDefault(t *testing.T) *Set {
 
 func TestDefaultTargets(t *testing.T) {
 	s := loadDefault(t)
-	if n := len(s.Defs()); n != 18 {
-		t.Errorf("got %d target types, want 18 (REQUIREMENTS §5: 16, plus the two skill companions)", n)
+	if n := len(s.Defs()); n != 20 {
+		t.Errorf("got %d target types, want 20 (REQUIREMENTS §5: 16, the two skill companions and two run_by_config)", n)
+	}
+	for name, want := range map[string]string{".claude/hooks/check.sh": "run-script", "x/SETUP.PS1": "run-script", "scripts/post.mjs": "run-program", "hook.py": "run-program", "README.md": ""} {
+		d := s.RunByConfig(name)
+		if (d == nil && want != "") || (d != nil && (d.ID != want || d.Family != Script)) {
+			t.Errorf("RunByConfig(%q) = %+v, want %q", name, d, want)
+		}
+	}
+	if s.Match(".claude/hooks/check.sh") != nil {
+		t.Error("run_by_config targets must not match by pattern")
 	}
 	comp := s.Companions("skill")
 	if len(comp) != 2 || comp[0].ID != "skill-script" || comp[0].Family != Script || comp[1].ID != "skill-doc" || comp[1].Family != Instruction {
@@ -139,6 +148,10 @@ func TestLoadErrors(t *testing.T) {
 		{"companion without extensions", "schema: 1\ntargets:\n  - {id: a, title: A, family: instruction, patterns: [a]}\n  - {id: b, title: B, family: script, companion_of: a}\n", "extensions instead of patterns"},
 		{"bad extension", "schema: 1\ntargets:\n  - {id: a, title: A, family: instruction, patterns: [a]}\n  - {id: b, title: B, family: script, companion_of: a, extensions: [py]}\n", "invalid extension"},
 		{"unknown companion parent", "schema: 1\ntargets:\n  - {id: b, title: B, family: script, companion_of: nope, extensions: [.py]}\n", "not a pattern-based target"},
+		{"run_by_config with patterns", "schema: 1\ntargets:\n  - {id: b, title: B, family: script, run_by_config: true, extensions: [.py], patterns: [x]}\n", "extensions instead of patterns"},
+		{"run_by_config and companion", "schema: 1\ntargets:\n  - {id: a, title: A, family: instruction, patterns: [a]}\n  - {id: b, title: B, family: script, companion_of: a, run_by_config: true, extensions: [.py]}\n", "exclusive"},
+		{"run_by_config extension twice", "schema: 1\ntargets:\n  - {id: a, title: A, family: script, run_by_config: true, extensions: [.py]}\n  - {id: b, title: B, family: script, run_by_config: true, extensions: [.sh, .PY]}\n", "already run_by_config"},
+		{"companion of run_by_config", "schema: 1\ntargets:\n  - {id: a, title: A, family: script, run_by_config: true, extensions: [.py]}\n  - {id: b, title: B, family: script, companion_of: a, extensions: [.sh]}\n", "not a pattern-based target"},
 		{"extensions without companion", "schema: 1\ntargets:\n  - {id: a, title: A, family: instruction, patterns: [a], extensions: [.py]}\n", "only valid with companion_of"},
 	}
 	for _, tt := range tests {

@@ -221,7 +221,6 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 			res.TargetFiles = append(res.TargetFiles, TargetFile{Path: ev.Path, ReadPath: ev.ReadPath, Kind: kind})
 		}
 	}
-	slices.SortFunc(res.TargetFiles, func(a, b TargetFile) int { return strings.Compare(a.Path, b.Path) })
 
 	r, err := os.OpenRoot(dr.Root)
 	if err != nil {
@@ -255,13 +254,17 @@ func (e *Engine) Scan(root string, opts Options) (*Result, error) {
 		wg.Wait()
 		close(results)
 	}()
+	var scripts [][]string
 	for fr := range results {
 		res.Findings = append(res.Findings, fr.findings...)
 		res.Inventory = append(res.Inventory, fr.inventory...)
+		scripts = append(scripts, fr.scripts...)
 		if fr.err != "" {
 			res.fail(fr.path, fr.err)
 		}
 	}
+	e.runScripts(r, res, scripts, maxSize)
+	slices.SortFunc(res.TargetFiles, func(a, b TargetFile) int { return strings.Compare(a.Path, b.Path) })
 
 	if len(opts.Disabled) > 0 || len(opts.Severity) > 0 {
 		kept := res.Findings[:0]
@@ -329,6 +332,7 @@ type fileResult struct {
 	path      string
 	findings  []finding.Finding
 	inventory []InventoryItem
+	scripts   [][]string // scripts its commands run, see commandScripts
 	err       string
 }
 
@@ -352,20 +356,25 @@ func (e *Engine) scanCandidate(r *os.Root, c discover.Candidate, maxSize int64) 
 		f := e.fileFinding(RuleOversize, c.Path, map[string]string{"name": fmt.Sprintf("more than %d bytes", maxSize)})
 		return fileResult{path: c.Path, findings: []finding.Finding{f}}
 	}
-	findings, inv := e.Analyze(c.Path, c.Target, data)
-	return fileResult{path: c.Path, findings: findings, inventory: inv}
+	findings, inv, points := e.analyze(c.Path, c.Target, data)
+	return fileResult{path: c.Path, findings: findings, inventory: inv, scripts: commandScripts(e.Targets, c.Path, points)}
 }
 
 // Analyze evaluates every applicable rule against one file's content. path is
 // the '/'-separated path reported in findings; def is its target type.
 func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Finding, []InventoryItem) {
+	findings, inv, _ := e.analyze(path, def, raw)
+	return findings, inv
+}
+
+func (e *Engine) analyze(path string, def *target.Def, raw []byte) ([]finding.Finding, []InventoryItem, []extract.ExecPoint) {
 	doc := source.NewDocument(path, raw)
 	col := &collector{e: e, doc: doc, perRule: map[string]int{}, seen: map[string]int{}}
 
 	if encrypted(raw) {
 		col.add(e.Rules.Get(RuleEncrypted), 0, 0, "git-crypt", map[string]string{"name": "git-crypt"})
 		col.flush()
-		return col.findings, nil
+		return col.findings, nil, nil
 	}
 
 	if doc.Encoding.Unusual() {
@@ -428,7 +437,7 @@ func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Fi
 			Command: escape.String(p.Command, excerptLimit),
 		})
 	}
-	return col.findings, inv
+	return col.findings, inv, points
 }
 
 // eventFinding turns a discovery event into a finding on that path.
