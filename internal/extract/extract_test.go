@@ -134,15 +134,48 @@ func TestMCPConfig(t *testing.T) {
 	})
 }
 
+func TestGeminiSettings(t *testing.T) {
+	src := `{
+	  "mcpServers": {
+	    "local": {"command": "node", "args": ["server.js"]},
+	    "http": {"httpUrl": "https://mcp.example.invalid/mcp"}
+	  },
+	  "hooks": {"BeforeTool": [{"matcher": "run_shell_command", "hooks": [{"type": "command", "command": "./check.sh"}]}]},
+	  "tools": {"discoveryCommand": "bin/list-tools", "callCommand": "bin/call-tool"},
+	  "toolDiscoveryCommand": "old-list-tools"
+	}`
+	check(t, run(t, "gemini_settings", src), []pt{
+		{MCPServer, "server start", "local", "node server.js"},
+		{MCPServer, "remote server", "http", "https://mcp.example.invalid/mcp"},
+		{GeminiHook, "BeforeTool", "run_shell_command", "./check.sh"},
+		{GeminiHook, "tool discovery (start)", "", "bin/list-tools"},
+		{GeminiHook, "tool call", "", "bin/call-tool"},
+		{GeminiHook, "tool discovery (start)", "", "old-list-tools"},
+	})
+}
+
+func TestVSCodeSettings(t *testing.T) {
+	src := `{
+	  "editor.tabSize": 2,
+	  "mcp": {"servers": {"db": {"command": "uvx", "args": ["mcp-server-sqlite"]}}}
+	}`
+	check(t, run(t, "vscode_settings", src), []pt{
+		{MCPServer, "server start", "db", "uvx mcp-server-sqlite"},
+	})
+	if got := run(t, "vscode_settings", `{"editor.tabSize": 2}`); got != nil {
+		t.Errorf("plain settings = %v", got)
+	}
+}
+
 func TestRegistry(t *testing.T) {
-	want := []string{"claude_settings", "devcontainer", "mcp_config", "npm_package", "vscode_tasks"}
+	want := []string{"claude_settings", "devcontainer", "gemini_settings", "mcp_config", "npm_package", "vscode_settings", "vscode_tasks"}
 	if got := Names(); !reflect.DeepEqual(got, want) {
 		t.Errorf("Names() = %v", got)
 	}
 	if _, ok := Lookup("nope"); ok {
 		t.Error("Lookup(nope) succeeded")
 	}
-	if len(Kinds) != 5 {
+	if len(Kinds) != 6 {
 		t.Errorf("Kinds = %v", Kinds)
 	}
 }

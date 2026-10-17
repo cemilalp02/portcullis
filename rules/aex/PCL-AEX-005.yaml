@@ -14,7 +14,7 @@ remediation: >
 message: "{kind} '{name}' ({trigger}) runs inline code: {match}"
 match:
   scope: exec
-  kinds: [claude_hook, vscode_task, devcontainer, npm_script]
+  kinds: [claude_hook, gemini_hook, vscode_task, devcontainer, npm_script]
   any:
     - '\b(node|deno|bun)\s+(-e|--eval|-p|--print)\b'
     - '\bpython[0-9.]*\s+-c\b'

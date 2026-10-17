@@ -22,8 +22,8 @@ func loadDefault(t *testing.T) *Set {
 
 func TestDefaultTargets(t *testing.T) {
 	s := loadDefault(t)
-	if n := len(s.Defs()); n != 15 {
-		t.Errorf("got %d target types, want 15 (REQUIREMENTS §5)", n)
+	if n := len(s.Defs()); n != 18 {
+		t.Errorf("got %d target types, want 18 (REQUIREMENTS §5: 16, plus the two skill companions)", n)
 	}
 	comp := s.Companions("skill")
 	if len(comp) != 2 || comp[0].ID != "skill-script" || comp[0].Family != Script || comp[1].ID != "skill-doc" || comp[1].Family != Instruction {
@@ -69,7 +69,13 @@ func TestDefaultTargets(t *testing.T) {
 		{"package.json", "npm-manifest"},
 		{"web/package.json", "npm-manifest"},
 		{"README.md", ""},
-		{".vscode/settings.json", ""},
+		{".vscode/settings.json", "vscode-settings"},
+		{".vscode/launch.json", ""},
+		{".gemini/settings.json", "gemini-settings"},
+		{"tools/.gemini/commands/git/review.toml", "gemini-commands"},
+		{".gemini/config.toml", ""},
+		{".github/agents/reviewer.md", "copilot-instructions"},
+		{".github/chatmodes/plan.chatmode.md", "copilot-instructions"},
 		{"CLAUDE.md.bak", ""},
 		{"src/claude.go", ""},
 		{".github/workflows/ci.yml", ""},

@@ -78,7 +78,7 @@ the approved state so that silent changes are caught.
 
 ## 5. Scanned surface
 
-v0.1 recognises **13 target types** in two families. File-name matching **MUST** be
+Portcullis recognises **16 target types** in two families (13 in v0.1; v0.2 added Gemini CLI commands and settings and VS Code workspace settings). File-name matching **MUST** be
 case-insensitive, because agents on Windows and macOS read `claude.md` as `CLAUDE.md`.
 Every path matches **at any depth** (`apps/web/.vscode/tasks.json` counts like
 `.vscode/tasks.json`), because an agent or editor opened on a subfolder treats that folder
@@ -94,18 +94,21 @@ as the project root.
 | 4 | Skills | `**/SKILL.md`; every file next to it (any depth) is a companion target: code as `skill-script`, documents as `skill-doc` |
 | 5 | Claude commands & sub-agents | `.claude/commands/**/*.md`, `.claude/agents/**/*.md` |
 | 6 | Cursor rules | `.cursorrules`, `.cursor/rules/**` |
-| 7 | Copilot instructions & prompts | `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, `.github/prompts/**/*.prompt.md` |
-| 8 | Other agent rules | `.windsurfrules`, `.clinerules` (file or folder) |
+| 7 | Copilot instructions, prompts, custom agents & chat modes | `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, `.github/prompts/**/*.prompt.md`, `.github/agents/**/*.md`, `.github/chatmodes/**/*.chatmode.md` |
+| 8 | Gemini CLI custom commands | `.gemini/commands/**/*.toml` |
+| 9 | Other agent rules | `.windsurfrules`, `.clinerules` (file or folder) |
 
 ### 5.2 Configuration files (structured, may cause automatic execution)
 
 | # | Target type | Paths | What is inspected |
 |---|---|---|---|
-| 9 | Claude settings | `.claude/settings.json`, `.claude/settings.local.json` | `hooks`, `permissions`, `env`, MCP enablement |
-| 10 | VS Code tasks | `.vscode/tasks.json` | tasks with `runOptions.runOn: "folderOpen"` |
-| 11 | Dev containers | `.devcontainer/devcontainer.json`, `.devcontainer.json`, `.devcontainer/*/devcontainer.json` | `initializeCommand` (runs on the **host**), `onCreate`/`updateContent`/`postCreate`/`postStart`/`postAttach` commands |
-| 12 | npm manifests | `**/package.json` | `preinstall`, `install`, `postinstall`, `prepare` scripts |
-| 13 | MCP configuration | `.mcp.json`, `**/mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | server `command`, `args`, `env`, `url` |
+| 10 | Claude settings | `.claude/settings.json`, `.claude/settings.local.json` | `hooks`, `permissions`, `env`, MCP enablement |
+| 11 | VS Code tasks | `.vscode/tasks.json` | tasks with `runOptions.runOn: "folderOpen"` |
+| 12 | Dev containers | `.devcontainer/devcontainer.json`, `.devcontainer.json`, `.devcontainer/*/devcontainer.json` | `initializeCommand` (runs on the **host**), `onCreate`/`updateContent`/`postCreate`/`postStart`/`postAttach` commands |
+| 13 | npm manifests | `**/package.json` | `preinstall`, `install`, `postinstall`, `prepare` scripts |
+| 14 | MCP configuration | `.mcp.json`, `**/mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json` | server `command`, `args`, `env`, `url` |
+| 15 | Gemini CLI settings | `.gemini/settings.json` | `mcpServers`, `hooks`, `tools.discoveryCommand` / `callCommand` |
+| 16 | VS Code workspace settings | `.vscode/settings.json` | settings that approve agent tools or terminal commands without asking, automatic tasks, MCP servers under `mcp` |
 
 Target definitions are **data**, not code, so new agents can be supported by adding a
 definition and fixtures.

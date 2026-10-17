@@ -55,12 +55,13 @@ const (
 	RuleUnresolvedLink = "PCL-ENG-012"
 	RuleStaleBaseline  = "PCL-ENG-013"
 	RuleDuplicateInert = "PCL-ENG-014"
+	RuleEncrypted      = "PCL-ENG-015"
 )
 
 var engineRules = []string{
 	RuleOversize, RuleUnparseable, RuleDuplicateKey, RuleEncoding, RuleLinkEscape, RuleReadError,
 	RuleInTreeConfig, RuleSkippedTargets, RuleProtected, RuleFindingCap, RuleDirLinkEscape, RuleUnresolvedLink,
-	RuleStaleBaseline, RuleDuplicateInert,
+	RuleStaleBaseline, RuleDuplicateInert, RuleEncrypted,
 }
 
 const builtinEngine = "engine"
@@ -360,6 +361,12 @@ func (e *Engine) scanCandidate(r *os.Root, c discover.Candidate, maxSize int64) 
 func (e *Engine) Analyze(path string, def *target.Def, raw []byte) ([]finding.Finding, []InventoryItem) {
 	doc := source.NewDocument(path, raw)
 	col := &collector{e: e, doc: doc, perRule: map[string]int{}, seen: map[string]int{}}
+
+	if encrypted(raw) {
+		col.add(e.Rules.Get(RuleEncrypted), 0, 0, "git-crypt", map[string]string{"name": "git-crypt"})
+		col.flush()
+		return col.findings, nil
+	}
 
 	if doc.Encoding.Unusual() {
 		col.add(e.Rules.Get(RuleEncoding), 0, 0, string(doc.Encoding), map[string]string{"name": string(doc.Encoding)})

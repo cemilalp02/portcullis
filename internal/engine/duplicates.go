@@ -18,7 +18,11 @@ var executingKeys = map[string]map[string]bool{
 		"windows", "linux", "osx"),
 	"devcontainer": keySet("initializecommand", "oncreatecommand", "updatecontentcommand", "postcreatecommand",
 		"poststartcommand", "postattachcommand"),
-	"mcp_config": keySet("mcpservers", "servers", "command", "args", "env", "url"),
+	"mcp_config": keySet("mcpservers", "servers", "command", "args", "env", "url", "httpurl"),
+	"gemini_settings": keySet("mcpservers", "command", "args", "env", "url", "httpurl", "hooks", "tools",
+		"discoverycommand", "callcommand", "tooldiscoverycommand", "toolcallcommand"),
+	"vscode_settings": keySet("mcp", "servers", "command", "args", "env", "url", "chat.tools.autoapprove",
+		"chat.tools.global.autoapprove", "chat.tools.terminal.autoapprove", "task.allowautomatictasks"),
 	"npm_package": keySet("scripts", "dependencies", "devdependencies", "optionaldependencies", "overrides",
 		"resolutions", "bin", "main", "exports"),
 }

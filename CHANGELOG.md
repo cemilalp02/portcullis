@@ -6,6 +6,28 @@ uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Gemini CLI settings (`.gemini/settings.json`): its MCP servers, hooks and tool discovery and
+  call commands are part of the auto-execution inventory and the execution rules
+  (`gemini_hook`, PCL-AEX-011).
+- VS Code workspace settings (`.vscode/settings.json`): PCL-AEX-012 (every agent tool approved
+  without asking, `chat.tools.autoApprove`), PCL-AEX-013 (a catch-all terminal auto-approve
+  rule), PCL-AEX-014 (automatic tasks allowed); MCP servers declared under `mcp`.
+- Copilot custom agents and chat modes (`.github/agents/`, `.github/chatmodes/`) and Gemini CLI
+  custom commands (`.gemini/commands/*.toml`) are scanned as instructions.
+- PCL-ENG-015: a git-crypt encrypted agent file is reported as not analysed instead of being
+  matched as text. A forged header in front of readable text is analysed as usual.
+
+### Fixed
+
+- PCL-AEX-004 missed hooks that run a repository script through a variable, the usual form
+  `"$CLAUDE_PROJECT_DIR"/.claude/hooks/check.sh`; on the development set it now reports 226
+  such commands instead of 112.
+- PCL-AUT-001 no longer reports a catalogue of injection kinds that names the phrase next to a
+  variant of itself ("이전 지시를 무시 / ignore previous instructions") or a short quoted mention
+  in Korean or Japanese (false findings of the third held-out set).
+
 ## [0.1.0] - 2026-10-17
 
 The first release.

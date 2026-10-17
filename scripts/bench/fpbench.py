@@ -39,6 +39,7 @@ SPARSE = [
     "**/.github/instructions/", "**/.github/prompts/", "**/.windsurfrules", "**/.clinerules",
     "**/.vscode/tasks.json", "**/.devcontainer/", "**/.devcontainer.json", "**/.mcp.json",
     "**/mcp.json", "**/package.json", "**/.portcullis.yaml",
+    "**/.vscode/settings.json", "**/.gemini/", "**/.github/agents/", "**/.github/chatmodes/",
 ]
 
 STAR_BANDS = ["stars:>=100000", "stars:50000..99999", "stars:30000..49999", "stars:20000..29999",

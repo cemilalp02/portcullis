@@ -1,0 +1,18 @@
+schema: 1
+id: PCL-ENG-015
+title: Encrypted agent file
+severity: medium
+confidence: high
+targets: [instruction, config, script]
+owasp: [ASI06]
+since: 2026.10.2
+description: >
+  The file is encrypted with git-crypt, so its content cannot be inspected. Anyone with the
+  key, and any agent working in an unlocked checkout, reads the decrypted text, which this
+  scan has not seen. A forged git-crypt header in front of readable text is not treated as
+  encrypted: that text is analysed as usual.
+remediation: >
+  Scan an unlocked checkout (git-crypt unlock), or review the decrypted file.
+message: "File is encrypted ({name}); its content was not analysed"
+match:
+  builtin: engine

@@ -47,7 +47,7 @@ Exactly one of `codepoints`, (`any` / `all`), `every`, `builtin` must be used.
 | `scope` | all | `text` (default) or `exec` |
 | `view` | `text` | `raw`, `normalized` (default) or `prose` (natural-language rules, ADR-0010) |
 | `unit` | `text` | `line` (default) or `document` |
-| `kinds` | `exec` | Subset of `claude_hook`, `vscode_task`, `devcontainer`, `npm_script`, `mcp_server`; default all |
+| `kinds` | `exec` | Subset of `claude_hook`, `gemini_hook`, `vscode_task`, `devcontainer`, `npm_script`, `mcp_server`; default all |
 | `triggers` | `exec` | Regexes on the normalised trigger (e.g. `^initializecommand`); the point is inspected if any matches; default all |
 | `codepoints` | `text`, `raw` | List of code points / ranges: `U+202E`, `U+E0000..U+E007F` |
 | `min_run` | `codepoints` | Report a run only when it has at least this many characters (default 1) |
