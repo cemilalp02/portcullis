@@ -1,5 +1,5 @@
 # Tools to regenerate docs/assets/brand (not needed to build Portcullis).
 skia-pathops==0.9.2
 fonttools==4.65.0
-brotli==1.2.0
+brotli==1.2.1
 uharfbuzz==0.56.3
