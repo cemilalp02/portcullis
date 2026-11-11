@@ -8,9 +8,9 @@
     "build": "node build.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/node": "4.3.3",
-    "@tailwindcss/oxide": "4.3.3",
-    "lucide-static": "1.58.0",
-    "tailwindcss": "4.3.3"
+    "@tailwindcss/node": "4.3.5",
+    "@tailwindcss/oxide": "4.3.5",
+    "lucide-static": "1.70.0",
+    "tailwindcss": "4.3.5"
   }
 }
